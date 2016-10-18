@@ -5,6 +5,7 @@
 ### Integrations
 Implement the business logic for reliable transfers, while integrating with the following modules:
 * Anti Money Laundering module (ut-aml)
+* Alerts and notifications module (ut-alert)
 * Rules module (ut-rule)
 * Core Banking System
 * ATM module (ut-atm)
