@@ -49,18 +49,18 @@ module.exports = {
         if ($meta.mtid === 'error') {
             switch (msg[39]) {
                 case '14':
-                case '114':
                 case '39':
+                case '114':
                     return {
                         type: 'transfer.invalidAccount'
                     };
-                case '116':
                 case '51':
+                case '116':
                     return {
                         type: 'transfer.insufficientFunds'
                     };
-                case '117':
                 case '55':
+                case '117':
                     return {
                         type: 'transfer.incorrectPin'
                     };
