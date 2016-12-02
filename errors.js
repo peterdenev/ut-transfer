@@ -1,6 +1,7 @@
 var create = require('ut-error').define;
 
 var Transfer = create('transfer');
+var System = create('system', System);
 var Generic = create('generic', Transfer);
 var InsufficientFunds = create('insufficientFunds', Transfer);
 var InvalidAccount = create('invalidAccount', Transfer);
@@ -11,6 +12,9 @@ var Unknown = create('unknown', Transfer);
 module.exports = {
     transfer: function(cause) {
         return new Transfer(cause);
+    },
+    system: function(cause) {
+        return new System(cause);
     },
     generic: function(cause) {
         return new Generic(cause);

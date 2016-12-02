@@ -19,9 +19,9 @@
 * holderId - customer ordering the transfer
 * holderType
 * merchantId
+* merchantInvoice
 * merchantType
 * cardId
-* phone
 * sourceAccount
 * destinationAccount
 

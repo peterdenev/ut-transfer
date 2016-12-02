@@ -1,0 +1,15 @@
+{
+    "1": "requested",
+    "2": "confirmed",
+    "3": "denied",
+    "4": "timed out",
+    "5": "aborted",
+    "6": "error",
+    "7": "store requested",
+    "8": "store confirmed",
+    "9": "store timed out",
+    "11": "forward requested",
+    "12": "forward confirmed",
+    "13": "forward denied",
+    "14": "forward timed out"
+}

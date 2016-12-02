@@ -41,7 +41,7 @@ module.exports = {
                 '102': msg.sourceAccount,
                 '103': msg.destinationAccount,
                 '122': msg.merchantId,
-                '123': msg.phone
+                '123': msg.merchantInvoice
             };
         }
     },
