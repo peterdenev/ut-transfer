@@ -53,11 +53,11 @@ BEGIN TRY
     )
     OUTPUT  INSERTED.*
     SELECT
-        GETDATE(),
+        transferDateTime,
         transferType,
         transferIdAcquirer,
         transferIdIssuer,
-        REPLACE(REPLACE(REPLACE(CONVERT(varchar, GETDATE(), 120),'-',''),':',''),' ',''),
+        REPLACE(REPLACE(REPLACE(CONVERT(varchar, transferDateTime, 120),'-',''),':',''),' ',''),
         settlementDate,
         channelId,
         channelType,

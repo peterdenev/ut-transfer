@@ -25,18 +25,21 @@ module.exports = {
         };
 
         var ruleValidate = (result) => {
-            debugger;
             return this.bus.importMethod('db/rule.decision.lookup')({
                 channelId: msg.channelId,
                 operation: msg.transferType,
-                // operationDate: msg.transferDateTime,
                 sourceAccount: msg.sourceAccount,
                 destinationAccount: msg.destinationAccount,
                 amount: msg.amount && msg.amount.transfer && msg.amount.transfer.amount,
                 currency: msg.amount && msg.amount.transfer && msg.amount.transfer.currency,
                 isSourceAmount: false
             }).then(decision => {
-                return result;
+                if (decision.fee && decision.fee.amount != null) {
+                    // TODO distinguish between issuer and acquirer fee
+                    msg.transferFee = decision.fee.amount;
+                }
+                msg.transferDateTime = decision.fee && decision.fee.transferDateTime;
+                return decision;
             });
         };
 
@@ -44,16 +47,14 @@ module.exports = {
         var merchantExecute = result => result;
         var destinationExecute = result => result;
 
-        return this.bus.importMethod('db/transfer.push.execute')({
-            transfer: msg
-        })
+        return ruleValidate(msg)
+        .then(result => this.bus.importMethod('db/transfer.push.execute')({transfer: msg}))
         .then(result => {
             result = result && result[0] && result[0][0];
             if (result) {
                 msg.transferId = result.transferId;
                 msg.merchantPort = result.merchantPort;
                 msg.destinationPort = result.destinationPort;
-                msg.transferDateTime = result.transferDateTime;
                 if (msg.destinatoinPort) {
                     destinationExecute = result => this.bus.importMethod(msg.destinationPort + '/transfer.push.execute')(msg)
                             .then(result => {
@@ -78,7 +79,6 @@ module.exports = {
                 throw errors.system('transfer.push.execute');
             }
         })
-        .then(result => ruleValidate(result))
         .then(result => merchantValidate(result))
         .then(result => destinationExecute(result))
         .then(this.bus.importMethod('db/transfer.push.confirmIssuer'))
