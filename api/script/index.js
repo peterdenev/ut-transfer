@@ -34,6 +34,7 @@ module.exports = {
                 transfer.transferFee = decision.amount.fee;
             }
             transfer.transferDateTime = decision.amount && decision.amount.transferDateTime;
+            transfer.transferTypeId = decision.amount && decision.amount.transferTypeId;
             transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
             transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
             return transfer;

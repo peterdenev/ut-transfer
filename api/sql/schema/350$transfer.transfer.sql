@@ -1,6 +1,6 @@
 CREATE TABLE [transfer].[transfer](
     transferId bigint IDENTITY(1000,1) NOT NULL,
-    transferType varchar(50) NOT NULL,
+    transferTypeId bigint NOT NULL,
     transferIdAcquirer varchar(50),
     transferIdIssuer varchar(50),
     transferIdMerchant varchar(50),
@@ -9,8 +9,7 @@ CREATE TABLE [transfer].[transfer](
     settlementDate date,
     channelId bigint NOT NULL,
     channelType varchar(50) NOT NULL,
-    holderId bigint,
-    holderType varchar(50),
+    ordererId bigint,
     merchantId varchar(50),
     merchantInvoice varchar(50),
     merchantPort varchar(50),
@@ -44,5 +43,6 @@ CREATE TABLE [transfer].[transfer](
     udfAcquirer XML,
     udfIssuer XML,
     udfTransfer XML,
-    CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC)
+    CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
+    CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])
 )

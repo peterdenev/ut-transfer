@@ -8,15 +8,14 @@ BEGIN TRY
     -- todo check permission
     INSERT INTO [transfer].[transfer](
         transferDateTime,
-        transferType,
+        transferTypeId,
         transferIdAcquirer,
         transferIdIssuer,
         localDateTime,
         settlementDate,
         channelId,
         channelType,
-        holderId,
-        holderType,
+        ordererId,
         merchantId,
         merchantInvoice,
         merchantPort,
@@ -54,15 +53,14 @@ BEGIN TRY
     OUTPUT  INSERTED.*
     SELECT
         transferDateTime,
-        transferType,
+        transferTypeId,
         transferIdAcquirer,
         transferIdIssuer,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, transferDateTime, 120),'-',''),':',''),' ',''),
         settlementDate,
         channelId,
         channelType,
-        holderId,
-        holderType,
+        ordererId,
         merchantId,
         merchantInvoice,
         merchantId,
@@ -96,7 +94,8 @@ BEGIN TRY
         udfAcquirer,
         udfIssuer,
         udfTransfer
-    FROM @transfer
+    FROM
+        @transfer
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
