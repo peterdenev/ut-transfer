@@ -13,12 +13,18 @@ module.exports = {
             } else {
                 method = this.bus.importMethod('db/transfer.push.reverse' + where);
             }
-            return method(transfer)
-                .then(x => Promise.reject(error))
-                .catch(x => {
-                    this.log.error && this.log.error(error);
-                    return Promise.reject(error);
-                });
+            return method({
+                transferId: transfer.transferId,
+                source: where,
+                type: error.type || (where + '.error'),
+                message: error.message,
+                details: error
+            })
+            .then(x => Promise.reject(error))
+            .catch(x => {
+                this.log.error && this.log.error(error);
+                return Promise.reject(error);
+            });
         };
         var ruleValidate = (transfer) => this.bus.importMethod('db/rule.decision.lookup')({
             channelId: transfer.channelId,
@@ -39,19 +45,18 @@ module.exports = {
             transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
             return transfer;
         });
-        var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.execute')({
-            transfer: transfer
-        }).then(pushResult => {
-            pushResult = pushResult && pushResult[0] && pushResult[0][0];
-            if (pushResult) {
-                transfer.transferId = pushResult.transferId;
-                transfer.merchantPort = pushResult.merchantPort;
-                transfer.destinationPort = pushResult.destinationPort;
-                return transfer;
-            } else {
-                throw errors.system('transfer.push.execute');
-            }
-        });
+        var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.execute')(transfer)
+            .then(pushResult => {
+                pushResult = pushResult && pushResult[0] && pushResult[0][0];
+                if (pushResult) {
+                    transfer.transferId = pushResult.transferId;
+                    transfer.merchantPort = pushResult.merchantPort;
+                    transfer.destinationPort = pushResult.destinationPort;
+                    return transfer;
+                } else {
+                    throw errors.system('transfer.push.execute');
+                }
+            });
         var merchantTransferValidate = (transfer) => {
             if (transfer.merchantPort) {
                 return this.bus.importMethod([transfer.merchantPort, transfer.transferType, 'validate'].join('.'))(transfer)
@@ -105,8 +110,6 @@ module.exports = {
             .then(merchantTransferExecute);
     }
 };
-// todo optimize when issuerTxState is set to 1
 // todo handle bad response from db/transfer.push.execute
 // todo handle timeout from destination port
-// todo set merchantTxState before requesting merchant
 // todo set merchantPort properly

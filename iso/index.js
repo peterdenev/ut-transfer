@@ -1,4 +1,5 @@
 var currency = require('./currency');
+var errors = require('../errors');
 
 function getBalance(field, balanceType) {
     var balance = field.match(/.{20}/g).find(value => value.substr(2, 2) === balanceType);
@@ -50,31 +51,16 @@ module.exports = {
             switch (msg[39]) {
                 case '14':
                 case '39':
-                case '114':
-                    return {
-                        type: 'transfer.invalidAccount'
-                    };
+                case '114': throw errors.invalidAccount();
                 case '51':
-                case '116':
-                    return {
-                        type: 'transfer.insufficientFunds'
-                    };
+                case '116': throw errors.insufficientFunds();
                 case '55':
-                case '117':
-                    return {
-                        type: 'transfer.incorrectPin'
-                    };
+                case '117': throw errors.incorrectPin();
                 case '68':
                 case '96':
                 case '909':
-                case '911':
-                    return {
-                        type: 'transfer.unknown'
-                    };
-                default:
-                    return {
-                        type: 'transfer.genericDecline'
-                    };
+                case '911': throw errors.unknown();
+                default: throw errors.genericDecline();
             }
         }
         switch (msg.mtid) {

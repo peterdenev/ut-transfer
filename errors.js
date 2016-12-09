@@ -1,37 +1,21 @@
 var create = require('ut-error').define;
 
 var Transfer = create('transfer');
-var System = create('system', System);
-var Generic = create('generic', Transfer);
-var InsufficientFunds = create('insufficientFunds', Transfer);
-var InvalidAccount = create('invalidAccount', Transfer);
-var GenericDecline = create('genericDecline', Transfer);
-var IncorrectPin = create('incorrectPin', Transfer);
-var Unknown = create('unknown', Transfer);
+var System = create('system', System, 'System error');
+var Generic = create('generic', Transfer, 'Generic error');
+var InsufficientFunds = create('insufficientFunds', Transfer, 'Insufficient funds');
+var InvalidAccount = create('invalidAccount', Transfer, 'Invalid account');
+var GenericDecline = create('genericDecline', Transfer, 'Transfer declined');
+var IncorrectPin = create('incorrectPin', Transfer, 'Incorrect PIN');
+var Unknown = create('unknown', Transfer, 'Unknown error');
 
 module.exports = {
-    transfer: function(cause) {
-        return new Transfer(cause);
-    },
-    system: function(cause) {
-        return new System(cause);
-    },
-    generic: function(cause) {
-        return new Generic(cause);
-    },
-    insufficientFunds: function(cause) {
-        return new InsufficientFunds(cause);
-    },
-    invalidAccount: function(cause) {
-        return new InvalidAccount(cause);
-    },
-    genericDecline: function(cause) {
-        return new GenericDecline(cause);
-    },
-    incorrectPin: function(cause) {
-        return new IncorrectPin(cause);
-    },
-    unknown: function(cause) {
-        return new Unknown(cause);
-    }
+    transfer: cause => new Transfer(cause),
+    system: cause => new System(cause),
+    generic: cause => new Generic(cause),
+    insufficientFunds: cause => new InsufficientFunds(cause),
+    invalidAccount: cause => new InvalidAccount(cause),
+    genericDecline: cause => new GenericDecline(cause),
+    incorrectPin: cause => new IncorrectPin(cause),
+    unknown: cause => new Unknown(cause)
 };

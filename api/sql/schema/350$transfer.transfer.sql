@@ -31,18 +31,7 @@ CREATE TABLE [transfer].[transfer](
     acquirerFee money,
     issuerFee money,
     transferFee money,
-    issuerErrorType varchar(50),
-    issuerErrorMessage varchar(250),
-    reversalErrorType varchar(50),
-    reversalErrorMessage varchar(250),
-    acquirerErrorType varchar(50),
-    acquirerErrorMessage varchar(250),
-    merchantErrorType varchar(50),
-    merchantErrorMessage varchar(250),
     description varchar(250),
-    udfAcquirer XML,
-    udfIssuer XML,
-    udfTransfer XML,
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
     CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])
 )

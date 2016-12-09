@@ -1,5 +1,8 @@
 ALTER PROCEDURE [transfer].[push.failMerchant]
-    @transferId bigint
+    @transferId bigint,
+    @type varchar(50),
+    @message varchar(250),
+    @details XML
 AS
 SET NOCOUNT ON
 
@@ -11,4 +14,12 @@ WHERE
     transferId = @transferId AND
     merchantTxState = 1
 
-IF @@ROWCOUNT <> 1 RAISERROR('transfer.failMerchant', 16, 1);
+DECLARE @COUNT int = @@ROWCOUNT
+EXEC [transfer].[push.event]
+    @transferId = @transferId,
+    @type = @type,
+    @source = 'merchant',
+    @message = @message,
+    @udfDetails = @details
+
+IF @COUNT <> 1 RAISERROR('transfer.failMerchant', 16, 1);

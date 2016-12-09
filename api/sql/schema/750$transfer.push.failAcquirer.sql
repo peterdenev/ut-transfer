@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[push.reverseIssuer]
+ALTER PROCEDURE [transfer].[push.failAcquirer]
     @transferId bigint,
     @type varchar(50),
     @message varchar(250),
@@ -9,17 +9,17 @@ SET NOCOUNT ON
 UPDATE
     [transfer].[transfer]
 SET
-    issuerTxState = 3
+    acquirerTxState = 4
 WHERE
     transferId = @transferId AND
-    issuerTxState = 1
+    acquirerTxState = 1
 
 DECLARE @COUNT int = @@ROWCOUNT
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
-    @source = 'issuer',
+    @source = 'acquirer',
     @message = @message,
     @udfDetails = @details
 
-IF @COUNT <> 1 RAISERROR('transfer.reverseIssuer', 16, 1);
+IF @COUNT <> 1 RAISERROR('transfer.failAcquirer', 16, 1);
