@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[push.requestAcquirer]
+ALTER PROCEDURE [transfer].[push.reverseAcquirer]
     @transferId bigint,
     @type varchar(50),
     @message varchar(250),
@@ -9,10 +9,10 @@ SET NOCOUNT ON
 UPDATE
     [transfer].[transfer]
 SET
-    acquirerTxState = 1
+    acquirerTxState = 3
 WHERE
     transferId = @transferId AND
-    acquirerTxState is NULL
+    acquirerTxState = 1
 
 DECLARE @COUNT int = @@ROWCOUNT
 EXEC [transfer].[push.event]
@@ -22,4 +22,4 @@ EXEC [transfer].[push.event]
     @message = @message,
     @udfDetails = @details
 
-IF @COUNT <> 1 RAISERROR('transfer.requestAcquirer', 16, 1);
+IF @COUNT <> 1 RAISERROR('transfer.reverseAcquirer', 16, 1);

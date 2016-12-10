@@ -1,6 +1,7 @@
 ALTER PROCEDURE [transfer].[push.execute]
     @transferTypeId bigint,
     @transferDateTime datetime,
+    @transferIdAcquirer varchar(50),
     @settlementDate date,
     @channelId bigint,
     @channelType varchar(50),
@@ -32,6 +33,7 @@ BEGIN TRY
     INSERT INTO [transfer].[transfer](
         transferDateTime,
         transferTypeId,
+        transferIdAcquirer,
         localDateTime,
         settlementDate,
         channelId,
@@ -59,6 +61,7 @@ BEGIN TRY
     VALUES (
         @transferDateTime,
         @transferTypeId,
+        @transferIdAcquirer,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''),
         @settlementDate,
         @channelId,

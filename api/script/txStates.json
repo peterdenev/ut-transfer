@@ -1,15 +1,15 @@
 {
-    "1": "requested",
-    "2": "confirmed",
-    "3": "denied",
-    "4": "timed out",
-    "5": "aborted",
-    "6": "error",
-    "7": "store requested",
-    "8": "store confirmed",
-    "9": "store timed out",
-    "11": "forward requested",
-    "12": "forward confirmed",
-    "13": "forward denied",
-    "14": "forward timed out"
+    "1": "Request was sent",
+    "2": "Request was confirmed",
+    "3": "Request was denied",
+    "4": "Request timed out or ended with unknown error",
+    "5": "Request was aborted before any response was received",
+    "6": "Unexpected error condition",
+    "7": "Store was requested",
+    "8": "Store was confirmed",
+    "9": "Store timed out or returned unknown error",
+    "11": "Forward was requested",
+    "12": "Forward was confirmed",
+    "13": "Forward was denied",
+    "14": "Forward timed out or returned unknown error"
 }
