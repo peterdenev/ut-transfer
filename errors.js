@@ -1,7 +1,7 @@
 var create = require('ut-error').define;
 
 var Transfer = create('transfer');
-var System = create('system', System, 'System error');
+var System = create('system', Transfer, 'System error');
 var Generic = create('generic', Transfer, 'Generic error');
 var InsufficientFunds = create('insufficientFunds', Transfer, 'Insufficient funds');
 var InvalidAccount = create('invalidAccount', Transfer, 'Invalid account');

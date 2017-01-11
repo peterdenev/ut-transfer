@@ -24,8 +24,8 @@ The following minimum set of transfer types should be supported:
 * cash in / deposit
 * cash out / withdrawal
 * funds transfer / push transfer to own account
-* funds transfer / push transfer to account to account in the same ledger
-* funds transfer / push transfer to account to account in foreign ledger
+* funds transfer / push transfer to account in the same ledger
+* funds transfer / push transfer to account in foreign ledger
 * mobile airtime top up
 * bill payment
 * cheque deposit / payment / etc.
@@ -76,7 +76,7 @@ Definitions
 
 ### transfer.push.execute(params)
 
-* **params.transferTypeId** - type of the transfer. Transfer types are items in the **core.itemName** table, with itemTypeId pointing to table **core.itemType** and row with alias='operation'. The follwing values for **core.itemName.itemTypeCode** are predefined:
+* **params.transferType** - type of the transfer. Transfer types are items in the **core.itemName** table, with itemTypeId pointing to table **core.itemType** and row with alias='operation'. The follwing values for **core.itemName.itemTypeCode** are predefined:
   * **deposit** - Deposit / cash in
   * **withdraw** - Withdraw / cash out
   * **withdrawOtp** - Withdraw with OTP
