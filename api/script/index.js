@@ -35,14 +35,17 @@ module.exports = {
             currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
             isSourceAmount: false
         }).then(decision => {
-            if (decision.amount && decision.amount.fee != null) {
+            if (decision.amount) {
                 // TODO distinguish between issuer and acquirer fee
-                transfer.transferFee = decision.amount.fee;
+                transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
+                transfer.acquirerFee = decision.amount.acquirerFee;
+                transfer.issuerFee = decision.amount.issuerFee;
             }
             transfer.transferDateTime = decision.amount && decision.amount.transferDateTime;
             transfer.transferTypeId = decision.amount && decision.amount.transferTypeId;
             transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
             transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
+            transfer.split = decision.split;
             return transfer;
         });
         var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.execute')(transfer)

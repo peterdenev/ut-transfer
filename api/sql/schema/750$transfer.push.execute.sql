@@ -22,6 +22,7 @@ ALTER PROCEDURE [transfer].[push.execute]
     @transferFee money,
     @description varchar(250),
     @udfAcquirer XML,
+    @split transfer.splitTT READONLY,
     @meta core.metaDataTT READONLY
 AS
 DECLARE @callParams XML
@@ -85,12 +86,37 @@ BEGIN TRY
         0
     )
 
+    DECLARE @transferId BIGINT = @@IDENTITY
+
     EXEC [transfer].[push.event]
-        @transferId = @@IDENTITY,
+        @transferId = @transferId,
         @type = 'transfer.push',
         @source = 'acquirer',
         @udfDetails = @udfAcquirer,
         @message = 'Transfer created'
+
+    INSERT INTO
+        [transfer].[split](
+            transferId,
+            debit,
+            credit,
+            amount,
+            conditionId,
+            splitNameId,
+            [description],
+            tag
+        )
+    SELECT
+        @transferId,
+        debit,
+        credit,
+        amount,
+        conditionId,
+        splitNameId,
+        [description],
+        tag
+    FROM
+        @split
 
     COMMIT TRANSACTION
 
