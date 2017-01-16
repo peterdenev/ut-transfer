@@ -51,10 +51,11 @@ module.exports = {
         var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.execute')(transfer)
             .then(pushResult => {
                 pushResult = pushResult && pushResult[0] && pushResult[0][0];
-                if (pushResult) {
+                if (pushResult && pushResult.transferId) {
                     transfer.transferId = pushResult.transferId;
                     transfer.merchantPort = pushResult.merchantPort;
                     transfer.destinationPort = pushResult.destinationPort;
+                    transfer.destinationSettlementDate = pushResult.destinationSettlementDate;
                     return transfer;
                 } else {
                     throw errors.system('transfer.push.execute');
@@ -113,6 +114,5 @@ module.exports = {
             .then(merchantTransferExecute);
     }
 };
-// todo handle bad response from db/transfer.push.execute
 // todo handle timeout from destination port
 // todo set merchantPort properly

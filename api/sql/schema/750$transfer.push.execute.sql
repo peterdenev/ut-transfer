@@ -2,13 +2,11 @@ ALTER PROCEDURE [transfer].[push.execute]
     @transferTypeId bigint,
     @transferDateTime datetime,
     @transferIdAcquirer varchar(50),
-    @settlementDate date,
     @channelId bigint,
     @channelType varchar(50),
     @ordererId bigint,
     @merchantId varchar(50),
     @merchantInvoice varchar(50),
-    @merchantPort varchar(50),
     @merchantType varchar(50),
     @cardId bigint,
     @sourceAccount varchar(50),
@@ -16,7 +14,7 @@ ALTER PROCEDURE [transfer].[push.execute]
     @expireTime datetime,
     @transferCurrency varchar(3),
     @transferAmount money,
-    @destinationPort varchar(50),
+    @destinationId varchar(50),
     @acquirerFee money,
     @issuerFee money,
     @transferFee money,
@@ -26,10 +24,42 @@ ALTER PROCEDURE [transfer].[push.execute]
     @meta core.metaDataTT READONLY
 AS
 DECLARE @callParams XML
+DECLARE @merchantPort varchar(50),
+    @merchantMode varchar(20),
+    @merchantSettlementDate datetime,
+    @merchantSerialNumber bigint,
+    @merchantSettings XML,
+    @destinationPort varchar(50),
+    @destinationMode varchar(20),
+    @destinationSettlementDate datetime,
+    @destinationSerialNumber bigint,
+    @destinationSettings XML
 
 BEGIN TRY
     -- todo check permission
     BEGIN TRANSACTION
+
+    UPDATE
+        [transfer].[partner]
+    SET
+        @merchantPort = port,
+        @merchantMode = mode,
+        @merchantSettlementDate = settlementDate,
+        @merchantSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1,
+        @merchantSettings = settings
+    WHERE
+        partnerId = @merchantId
+
+    UPDATE
+        [transfer].[partner]
+    SET
+        @destinationPort = port,
+        @destinationMode = mode,
+        @destinationSettlementDate = settlementDate,
+        @destinationSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1,
+        @destinationSettings = settings
+    WHERE
+        partnerId = ISNULL(@destinationId, 'cbs')
 
     INSERT INTO [transfer].[transfer](
         transferDateTime,
@@ -58,19 +88,27 @@ BEGIN TRY
         reversed
     )
     OUTPUT
-        INSERTED.*
-    VALUES (
+        INSERTED.*,
+        @merchantMode merchantMode,
+        REPLACE(REPLACE(REPLACE(CONVERT(varchar, @merchantSettlementDate, 120),'-',''),':',''),' ','') merchantSettlementDate,
+        @merchantSerialNumber merchantSerialNumber,
+        @merchantSettings merchantSettings,
+        @destinationMode destinationMode,
+        REPLACE(REPLACE(REPLACE(CONVERT(varchar, @destinationSettlementDate, 120),'-',''),':',''),' ','') destinationSettlementDate,
+        @destinationSerialNumber destinationSerialNumber,
+        @destinationSettings destinationSettings
+    SELECT
         @transferDateTime,
         @transferTypeId,
         @transferIdAcquirer,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''),
-        @settlementDate,
+        @destinationSettlementDate,
         @channelId,
         @channelType,
         @ordererId,
         @merchantId,
         @merchantInvoice,
-        @merchantId,-- todo lookup merchantPort,
+        @merchantPort,
         @merchantType,
         @cardId,
         @sourceAccount,
@@ -84,7 +122,6 @@ BEGIN TRY
         @transferFee,
         @description,
         0
-    )
 
     DECLARE @transferId BIGINT = @@IDENTITY
 

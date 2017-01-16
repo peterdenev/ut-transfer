@@ -29,7 +29,7 @@ module.exports = {
                 '7': msg.localDateTime && msg.localDateTime.slice(-10),
                 '12': msg.localDateTime && msg.localDateTime.slice(-6),
                 '13': msg.localDateTime && msg.localDateTime.slice(-10).substring(0, 4),
-                // todo 15
+                '15': msg.destinationSettlementDate && msg.destinationSettlementDate.slice(-10).substring(0, 4),
                 '18': msg.udfAcquirer && msg.udfAcquirer.merchantType,
                 '32': msg.udfAcquirer && msg.udfAcquirer.institutionCode,
                 '35': msg.udfAcquirer && msg.udfAcquirer.track2,
@@ -38,7 +38,7 @@ module.exports = {
                 '42': msg.udfAcquirer && msg.udfAcquirer.identificationCode,
                 '43': msg.udfAcquirer && msg.udfAcquirer.terminalName,
                 '49': currency.numeric(msg.transferCurrency),
-                // todo 52
+                '52': msg.pinBlock,
                 '102': msg.sourceAccount,
                 '103': msg.destinationAccount,
                 '122': msg.merchantId,

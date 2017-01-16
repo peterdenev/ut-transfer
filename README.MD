@@ -94,18 +94,16 @@ Definitions
   * **forex** - Foreign currency exchange
 * **params.transferIdAcquirer** - id assigned to the transfer by the acquirer
 * **params.transferDateTime** - the time transfer was recorded in the database
-* **params.settlementDate** - the settlement date for the transfer
 * **params.channelId** - actor id of the channel
 * **params.channelType** - type of the channel: atm, pos, teller, agent,
 * **params.ordererId** - id of the actor ordering the transaction. In case of card transaction this is the card holder.
-* **params.merchantId** - actor id of the merchant
+* **params.merchantId** - identifier of the merchant (partnerId from the transfer.partner table)
 * **params.merchantInvoice** - identifier suitable to be sent to the merchant for processing the operation. In addition to invoice number, can also be phone number, contract numner, etc.
-* **params.merchantPort** - port to which to send the transfer for fulfilling the merchant operation
 * **params.merchantType** - type of merchant (for ISO use)
 * **params.cardId** - card id of the card (in case of card transaction)
 * **params.sourceAccount** - account number of the source account
 * **params.destinationAccount** - account number of the destination account
-* **params.destinationPort** - port to which to send the transfer for fulfilling the issuer operation
+* **params.destinationId** - identifier of the issuer (partnerId from the transfer.partner table)
 * **params.transferCurrency** - alphabetic currency code
 * **params.transferAmount** - amount of the transfer
 * **params.acquirerFee** - fee to be paid to the acquirer, debited from the source account in addition to the transfer amount
