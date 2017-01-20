@@ -36,7 +36,6 @@ module.exports = {
             isSourceAmount: false
         }).then(decision => {
             if (decision.amount) {
-                // TODO distinguish between issuer and acquirer fee
                 transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
                 transfer.acquirerFee = decision.amount.acquirerFee;
                 transfer.issuerFee = decision.amount.issuerFee;
@@ -56,6 +55,7 @@ module.exports = {
                     transfer.merchantPort = pushResult.merchantPort;
                     transfer.destinationPort = pushResult.destinationPort;
                     transfer.destinationSettlementDate = pushResult.destinationSettlementDate;
+                    transfer.localDateTime = pushResult.localDateTime;
                     return transfer;
                 } else {
                     throw errors.system('transfer.push.execute');
@@ -115,4 +115,3 @@ module.exports = {
     }
 };
 // todo handle timeout from destination port
-// todo set merchantPort properly
