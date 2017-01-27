@@ -1,3 +1,13 @@
+<a name="5.5.1"></a>
+## [5.5.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.5.0...v5.5.1) (2017-01-27)
+
+
+### Bug Fixes
+
+* improve ISO ([c5e8491](https://github.com/softwaregroup-bg/ut-transfer/commit/c5e8491))
+
+
+
 <a name="5.5.0"></a>
 # 5.5.0 (2017-01-24)
 
