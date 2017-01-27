@@ -8,6 +8,7 @@ CREATE TABLE [transfer].[split](
     amount MONEY,
     [description] VARCHAR(50) NOT NULL,
     tag VARCHAR(MAX),
+    actorId BIGINT NULL,
     CONSTRAINT [pkTransferSplit] PRIMARY KEY CLUSTERED ([splitId] ASC),
     CONSTRAINT [fkTransferSplit_TransferId] FOREIGN KEY([transferId]) REFERENCES [transfer].[transfer] ([transferId])
 )
