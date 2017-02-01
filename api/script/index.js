@@ -33,7 +33,7 @@ module.exports = {
             destinationAccount: transfer.destinationAccount,
             amount: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount,
             currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
-            isSourceAmount: false
+            isSourceAmount: transfer.isSourceAmount || false
         }).then(decision => {
             if (decision.amount) {
                 transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
