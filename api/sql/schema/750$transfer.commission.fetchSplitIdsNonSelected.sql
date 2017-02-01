@@ -14,10 +14,10 @@ SET NOCOUNT ON
 
     SELECT 'commission' as resultSetName
     SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
-        s.amount, t.transferCurrency, s.debit, s.credit
+        s.amount AS commission, t.transferCurrency, t.amount AS transferAmount
     FROM [transfer].split s
         JOIN [transfer].[transfer] t ON t.transferId = s.transferId AND t.channelID = s.ActorId 
         JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
     WHERE t.transferIdIssuer IS NOT NULL AND t.reversed = 0 AND t.channelID = @actorID AND t.channelType ='agent'
-    AND s.[state] IS NULL
+    AND s.[state] IS NULL AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
     ORDER BY i.itemName
