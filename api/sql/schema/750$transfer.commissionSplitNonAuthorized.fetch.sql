@@ -1,4 +1,4 @@
-CREATE PROCEDURE [transfer].[commission.fetchSplitIdsNonSelected]-- fetch non payed commission for actorId
+CREATE PROCEDURE [transfer].[commissionSplitNonAuthorized.fetch]-- fetch commission non authorised for actorId
     @actorId BIGINT,-- actorId of the agent
 	@meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
