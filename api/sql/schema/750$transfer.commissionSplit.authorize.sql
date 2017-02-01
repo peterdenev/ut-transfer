@@ -34,7 +34,7 @@ BEGIN TRY
 
     COMMIT TRANSACTION
 
-    SELECT 'selectSplitIds' AS resultSetName
+    SELECT 'authorizeSplit' AS resultSetName
     SELECT 'Successfully'
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
