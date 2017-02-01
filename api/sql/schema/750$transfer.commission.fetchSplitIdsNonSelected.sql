@@ -14,7 +14,7 @@ SET NOCOUNT ON
 
     SELECT 'commission' as resultSetName
     SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
-        s.amount AS commission, t.transferCurrency, t.amount AS transferAmount
+        s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount
     FROM [transfer].split s
         JOIN [transfer].[transfer] t ON t.transferId = s.transferId AND t.channelID = s.ActorId 
         JOIN core.itemName i ON i.itemNameId = t.transferTypeId 

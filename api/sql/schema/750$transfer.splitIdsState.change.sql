@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[commission.selectSplitIds] -- update selected splitIds
+ALTER PROCEDURE [transfer].[splitIdsState.change] -- update state of splitIds
     @splitIds core.arrayNumberList READONLY, -- the list of items
 	@meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
