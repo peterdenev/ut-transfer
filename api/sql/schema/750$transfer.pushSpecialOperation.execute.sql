@@ -149,15 +149,15 @@ BEGIN TRY
             @debitAccount= @sourceAccount, --debit Account of transaction
             @creditAccount= @destinationAccount, --credit Account of transaction
 	        @meta = @meta -- information for the user that makes the operation
-        
+
         IF EXISTS ( SELECT 1 FROM @splitTT WHERE tag LIKE '%|realtime|%' AND (tag LIKE '%|issuer|%' OR tag LIKE '%|acquirer|%') )
         BEGIN
 
-            DECLARE @transferTypeFeeId BIGINT = 
-            ( 
-                SELECT i.itemNameId 
+            DECLARE @transferTypeFeeId BIGINT =
+            (
+                SELECT i.itemNameId
                 FROM core.itemName i
-                JOIN core.itemType t on t.itemTypeId = i.itemTypeId AND t.alias='operation' 
+                JOIN core.itemType t on t.itemTypeId = i.itemTypeId AND t.alias='operation'
                 WHERE i.itemCode = 'fee'
             )
 
@@ -171,32 +171,32 @@ BEGIN TRY
             --      transferAmount MONEY
             --      )
             -- 1 -->authorized
-        
-            INSERT INTO [transfer].[transfer] (sourceAccount, destinationAccount, transferCurrency, transferAmount, 
-                channelId, channelType, transferTypeId, transferDateTime, localDateTime, settlementDate, reversed, issuerTxState, 
+            INSERT INTO [transfer].[transfer] (sourceAccount, destinationAccount, transferCurrency, transferAmount,
+                channelId, channelType, transferTypeId, transferDateTime, localDateTime, settlementDate, reversed, issuerTxState,
                 destinationPort, [acquirerFee], [issuerFee], [transferFee], [description])
             OUTPUT inserted.transferId, inserted.sourceAccount, inserted.destinationAccount, inserted.transferAmount INTO @transfer
-            SELECT s.credit, s.debit, 'GHS' /*transferCurrency*/,  sum(s.amount), s.actorId, 'agent', @transferTypeFeeId,
-                @transferDateTime, REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''), 
-                @destinationSettlementDate, 0, 1, 'cbs',  0.00, 0.00, 0.00, 'FEE'
+            SELECT s.credit, s.debit, 'GHS' /*transferCurrency*/,  sum(s.amount), @channelId, 'agent', @transferTypeFeeId,
+                @transferDateTime, REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''),
+                @destinationSettlementDate, 0, NULL, 'cbs',  0.00, 0.00, 0.00, 'FEE'
             FROM @splitTT s
-            GROUP BY s.credit, s.debit, s.actorId
+			WHERE s.tag LIKE '%|realtime|%' AND (tag LIKE '%|issuer|%' OR tag LIKE '%|acquirer|%')
+            GROUP BY s.credit, s.debit--, s.actorId
 
             UPDATE s
             SET [state] = 2,
                 txtId = t.transferId
             FROM @splitTT s
             JOIN @transfer t ON t.sourceAccount = s.credit AND t.destinationAccount = s.debit
-            WHERE s.tag LIKE '%|realtime|%' AND (tag LIKE '%|issuer|%' OR tag LIKE '%|acquirer|%') 
-       
+            WHERE s.tag LIKE '%|realtime|%' AND (tag LIKE '%|issuer|%' OR tag LIKE '%|acquirer|%')
+
             --INSERT INTO [transfer].[splitAudit] (splitId, field, oldValue, createdBy, createdOn)
             --SELECT s.splitId, 'state', s.[state], @userId, @today
             --FROM [transfer].split s
-            --JOIN @splitIds si on si.value = s.splitId              
-            
+            --JOIN @splitIds si on si.value = s.splitId
+
         END
 
-       
+
         INSERT INTO
             [transfer].[split](
                 transferId,
@@ -207,7 +207,7 @@ BEGIN TRY
                 splitNameId,
                 [description],
                 tag,
-                actorId, 
+                actorId,
                 [state],
                 txtId
             )
@@ -220,17 +220,17 @@ BEGIN TRY
             splitNameId,
             [description],
             tag,
-            actorId,
+            @channelId,
             [state],
             txtId
         FROM
             @splitTT
 
         SELECT 'Fee' AS resultSetName
-        
+
         SELECT * FROM @transfer
-        --DROP TABLE #transfer        
-            
+        --DROP TABLE #transfer
+
     END
     COMMIT TRANSACTION
 
