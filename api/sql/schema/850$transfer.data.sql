@@ -20,7 +20,8 @@ USING
         ('agentMinistatement', 'Agent Ministatement'),
         ('agentFloatRequest', 'Agent Float Request'),
         ('agentBalance', 'Agent Balance'),
-        ('commission', 'Commission')
+        ('commission', 'Commission'),
+        ('fee', 'Fee')
     ) AS source (itemCode, itemName)
 JOIN
 	core.itemType t on t.alias='operation'

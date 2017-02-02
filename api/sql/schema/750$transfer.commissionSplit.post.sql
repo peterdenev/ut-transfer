@@ -15,6 +15,14 @@ BEGIN TRY
         RETURN 55555
     END
     
+    DECLARE @transferTypeId BIGINT = 
+    ( 
+        SELECT i.itemNameId 
+        FROM core.itemName i
+        JOIN core.itemType t on t.itemTypeId = i.itemTypeId AND t.alias='operation' 
+        WHERE i.itemCode = 'commission'
+    )
+
     IF OBJECT_ID('tempdb..#transfer') IS NOT NULL
         DROP TABLE #transfer
 
@@ -32,6 +40,8 @@ BEGIN TRY
         DECLARE @settlementDate DATE = CONVERT(DATE, @tranferDT)
         DECLARE @today DATETIMEOFFSET = SYSDATETIMEOFFSET()
 
+        
+
         -- 1 -->authorized
         
         INSERT INTO [transfer].[transfer] (sourceAccount, destinationAccount, transferCurrency, transferAmount, 
@@ -39,7 +49,7 @@ BEGIN TRY
             destinationPort, [acquirerFee], [issuerFee], [transferFee], [description])
         OUTPUT inserted.transferId, inserted.sourceAccount, inserted.destinationAccount, inserted.transferAmount INTO #transfer
         SELECT s.credit, s.debit, 'GHS' /*transferCurrency*/,  sum(s.amount), 
-            s.actorId, 'agent', 4, @tranferDT, @localDT, @settlementDate, 0, 1,
+            s.actorId, 'agent', @transferTypeId, @tranferDT, @localDT, @settlementDate, 0, 1,
             'cbs',  0.00, 0.00, 0.00, 'COMISSION'
         FROM [transfer].split s
         JOIN @splitIds si ON si.value = s.splitId
