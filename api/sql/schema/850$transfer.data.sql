@@ -16,7 +16,11 @@ USING
         ('changePin', 'PIN change'),
         ('loanDisburse', 'Loan disbursement'),
         ('loanRepay', 'Loan repayment'),
-        ('forex', 'Foreign currency exchange')
+        ('forex', 'Foreign currency exchange'),
+        ('agentMinistatement', 'Agent Ministatement'),
+        ('agentFloatRequest', 'Agent Float Request'),
+        ('agentBalance', 'Agent Balance'),
+        ('commission', 'Commission')
     ) AS source (itemCode, itemName)
 JOIN
 	core.itemType t on t.alias='operation'
