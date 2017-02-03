@@ -4,6 +4,7 @@ const DECLINED = {
 };
 var errors = require('../../errors');
 var bus;
+var self;
 
 var handleError = (transfer, where) => error => {
     var method;
@@ -21,7 +22,7 @@ var handleError = (transfer, where) => error => {
     })
     .then(x => Promise.reject(error))
     .catch(x => {
-        this.log.error && this.log.error(error);
+        self.log.error && self.log.error(error);
         return Promise.reject(error);
     });
 };
@@ -126,6 +127,7 @@ module.exports = {
         bus = b;
     },
     'push.execute': function(params) {
+        self = this;
         return ruleValidate(params)
             .then(dbPushExecute)
             .then(merchantTransferValidate)
@@ -134,6 +136,7 @@ module.exports = {
             .then(merchantTransferExecute);
     },
     'pull.execute': function(params) {
+        self = this;
         return dbGet(params)
             .then(merchantTransferValidate)
             .then(destinationPushExecute)
