@@ -1,3 +1,8 @@
+<a name="5.5.29"></a>
+## [5.5.29](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.5.28...v5.5.29) (2017-02-03)
+
+
+
 <a name="5.5.28"></a>
 ## [5.5.28](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.5.27...v5.5.28) (2017-02-03)
 
