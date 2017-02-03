@@ -175,7 +175,7 @@ BEGIN TRY
                 channelId, channelType, transferTypeId, transferDateTime, localDateTime, settlementDate, reversed, issuerTxState,
                 destinationPort, [acquirerFee], [issuerFee], [transferFee], [description])
             OUTPUT inserted.transferId, inserted.sourceAccount, inserted.destinationAccount, inserted.transferAmount INTO @transfer
-            SELECT s.credit, s.debit, 'GHS' /*transferCurrency*/,  sum(s.amount), @channelId, 'agent', @transferTypeFeeId,
+            SELECT s.credit, s.debit, 'GHS' /*transferCurrency*/,  sum(s.amount), /*s.actorId */ @channelId, 'agent', @transferTypeFeeId,
                 @transferDateTime, REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''),
                 @destinationSettlementDate, 0, NULL, 'cbs',  0.00, 0.00, 0.00, 'FEE'
             FROM @splitTT s
@@ -220,7 +220,8 @@ BEGIN TRY
             splitNameId,
             [description],
             tag,
-            @channelId,
+            actorId,
+            --@channelId,
             [state],
             txtId
         FROM
