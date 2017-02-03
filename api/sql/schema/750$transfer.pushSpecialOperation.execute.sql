@@ -1,5 +1,5 @@
 ALTER PROCEDURE [transfer].[pushSpecialOperation.execute]
-    @transferTypeId bigint,
+    @operationCode nvarchar(200),
     @transferDateTime datetime,
     @transferIdAcquirer varchar(50),
     @channelId bigint,
@@ -33,10 +33,19 @@ DECLARE @merchantPort varchar(50),
     @destinationMode varchar(20),
     @destinationSettlementDate datetime,
     @destinationSerialNumber bigint,
-    @destinationSettings XML
+    @destinationSettings XML,
+    @transferTypeId bigint
 
 BEGIN TRY
     -- todo check permission
+    SET @transferTypeId = 
+    (
+        SELECT i.itemNameId
+        FROM core.itemName i
+        JOIN core.itemType t on t.itemTypeId = i.itemTypeId AND t.alias='operation'
+        WHERE i.itemCode = @operationCode 
+    )
+
     BEGIN TRANSACTION
 
     UPDATE
@@ -175,7 +184,7 @@ BEGIN TRY
                 channelId, channelType, transferTypeId, transferDateTime, localDateTime, settlementDate, reversed, issuerTxState,
                 destinationPort, [acquirerFee], [issuerFee], [transferFee], [description])
             OUTPUT inserted.transferId, inserted.sourceAccount, inserted.destinationAccount, inserted.transferAmount INTO @transfer
-            SELECT s.credit, s.debit, 'GHS' /*transferCurrency*/,  sum(s.amount), @channelId, 'agent', @transferTypeFeeId,
+            SELECT s.credit, s.debit, 'GHS' /*transferCurrency*/,  sum(s.amount), /*s.actorId */ @channelId, 'agent', @transferTypeFeeId,
                 @transferDateTime, REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''),
                 @destinationSettlementDate, 0, NULL, 'cbs',  0.00, 0.00, 0.00, 'FEE'
             FROM @splitTT s
@@ -220,12 +229,14 @@ BEGIN TRY
             splitNameId,
             [description],
             tag,
-            @channelId,
+            actorId,
+            --@channelId,
             [state],
             txtId
         FROM
             @splitTT
 
+        
         SELECT 'Fee' AS resultSetName
 
         SELECT * FROM @transfer
@@ -233,6 +244,9 @@ BEGIN TRY
 
     END
     COMMIT TRANSACTION
+    
+    SELECT 'Transfer' AS resultSetName
+    SELECT @transferId AS transferId
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
