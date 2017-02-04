@@ -38,12 +38,12 @@ DECLARE @merchantPort varchar(50),
 
 BEGIN TRY
     -- todo check permission
-    SET @transferTypeId = 
+    SET @transferTypeId =
     (
         SELECT i.itemNameId
         FROM core.itemName i
         JOIN core.itemType t on t.itemTypeId = i.itemTypeId AND t.alias='operation'
-        WHERE i.itemCode = @operationCode 
+        WHERE i.itemCode = @operationCode
     )
 
     BEGIN TRANSACTION
@@ -184,7 +184,7 @@ BEGIN TRY
                 channelId, channelType, transferTypeId, transferDateTime, localDateTime, settlementDate, reversed, issuerTxState,
                 destinationPort, [acquirerFee], [issuerFee], [transferFee], [description])
             OUTPUT inserted.transferId, inserted.sourceAccount, inserted.destinationAccount, inserted.transferAmount INTO @transfer
-            SELECT s.credit, s.debit, 'GHS' /*transferCurrency*/,  sum(s.amount), /*s.actorId */ @channelId, 'agent', @transferTypeFeeId,
+            SELECT s.debit, s.credit, 'GHS' /*transferCurrency*/,  sum(s.amount), /*s.actorId */ @channelId, 'agent', @transferTypeFeeId,
                 @transferDateTime, REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''),
                 @destinationSettlementDate, 0, NULL, 'cbs',  0.00, 0.00, 0.00, 'FEE'
             FROM @splitTT s
@@ -236,7 +236,7 @@ BEGIN TRY
         FROM
             @splitTT
 
-        
+
         SELECT 'Fee' AS resultSetName
 
         SELECT * FROM @transfer
@@ -244,7 +244,7 @@ BEGIN TRY
 
     END
     COMMIT TRANSACTION
-    
+
     SELECT 'Transfer' AS resultSetName
     SELECT @transferId AS transferId
 

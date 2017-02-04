@@ -116,7 +116,7 @@ var dbGet = transfer => bus.importMethod('db/transfer.get')(transfer)
 .then(pullResult => {
     pullResult = pullResult && pullResult[0] && pullResult[0][0];
     if (pullResult && pullResult.transferId) {
-        return pullResult;
+        return Object.assign({}, transfer, pullResult);
     } else {
         throw errors.system('transfer.push.execute');
     }
