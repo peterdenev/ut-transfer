@@ -1,3 +1,13 @@
+<a name="5.7.0"></a>
+# [5.7.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.6.0...v5.7.0) (2017-02-04)
+
+
+### Features
+
+* **iso:** added transferType to parser ([a13777a](https://github.com/softwaregroup-bg/ut-transfer/commit/a13777a))
+
+
+
 <a name="5.6.0"></a>
 # [5.6.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.5.33...v5.6.0) (2017-02-04)
 
