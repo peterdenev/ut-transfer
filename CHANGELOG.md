@@ -1,3 +1,14 @@
+<a name="5.7.1"></a>
+## [5.7.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.7.0...v5.7.1) (2017-02-04)
+
+
+### Bug Fixes
+
+* remove catch ([67a0033](https://github.com/softwaregroup-bg/ut-transfer/commit/67a0033))
+* remove dependency ([1e0e41f](https://github.com/softwaregroup-bg/ut-transfer/commit/1e0e41f))
+
+
+
 <a name="5.7.0"></a>
 # [5.7.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.6.0...v5.7.0) (2017-02-04)
 
