@@ -60,7 +60,7 @@ module.exports = {
                 } else {
                     throw errors.system('transfer.push.execute');
                 }
-            }).catch(e => console.log(e));
+            });
         var merchantTransferValidate = (transfer) => {
             if (transfer.merchantPort) {
                 return this.bus.importMethod([transfer.merchantPort, transfer.transferType, 'validate'].join('.'))(transfer)
