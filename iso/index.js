@@ -1,5 +1,7 @@
+var assign = require('lodash.assign');
 var currency = require('./currency');
 var errors = require('../errors');
+var transferType = require('./transferType');
 
 function getBalance(field, balanceType) {
     var balance = field.match(/.{20}/g).find(value => value.substr(2, 2) === balanceType);
@@ -90,7 +92,9 @@ module.exports = {
         function base() {
             switch (msg.mtid.substr(0, 1)) {
                 case '0': return {
-                    amount: msg[4],
+                    amount: {
+                        transfer: currency.cents(msg[49], msg[4], 1)
+                    },
                     destinationSettlementDate: msg[15],
                     localdateTime: msg[13] + msg[12],
                     transferIdAcquirer: msg[37],
@@ -119,7 +123,9 @@ module.exports = {
         }
         switch (msg.mtid) {
             case '0200':
-                return base();
+                return assign(base(), {
+                    transferType: transferType[msg[3].substring(0, 2)]
+                });
             case '0210':
                 return {
                     balance: {
