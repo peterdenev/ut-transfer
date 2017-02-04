@@ -1,4 +1,3 @@
-var assign = require('lodash.assign');
 var currency = require('./currency');
 var errors = require('../errors');
 var transferType = require('./transferType');
@@ -123,7 +122,7 @@ module.exports = {
         }
         switch (msg.mtid) {
             case '0200':
-                return assign(base(), {
+                return Object.assign(base(), {
                     transferType: transferType[msg[3].substring(0, 2)]
                 });
             case '0210':
