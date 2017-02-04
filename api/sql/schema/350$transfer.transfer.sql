@@ -25,7 +25,7 @@ CREATE TABLE [transfer].[transfer](
     issuerTxState smallint,
     acquirerTxState smallint,
     merchantTxState smallint,
-    destinationPort varchar(50),
+    destinationId varchar(50),
     transferCurrency varchar(3) NOT NULL,
     transferAmount money NOT NULL,
     acquirerFee money,

@@ -112,6 +112,23 @@ module.exports = {
             .then(destinationPushExecute)
             .then(confirmIssuer)
             .then(merchantTransferExecute);
+    },
+    'idle.execute': function(params, $meta) {
+        $meta.mtid = 'discard';
+        this.bus.importMethod('db/transfer.idle.execute')(params)
+        .then(reversal => {
+            reversal = reversal && reversal[0] && reversal[0][0];
+            if (reversal) {
+                reversal.udfAcquirer && (reversal.udfAcquirer.mti = reversal.mti);
+                reversal.amount = {
+                    transfer: {
+                        amount: reversal.transferAmount,
+                        currency: reversal.transferCurrency
+                    }
+                };
+            }
+            return reversal && this.bus.importMethod(`${params.destinationPort}/transfer.${reversal.transferType}.${reversal.operation}`)(reversal);
+        });
     }
 };
 // todo handle timeout from destination port

@@ -7,6 +7,7 @@ var InsufficientFunds = create('insufficientFunds', Transfer, 'Insufficient fund
 var InvalidAccount = create('invalidAccount', Transfer, 'Invalid account');
 var GenericDecline = create('genericDecline', Transfer, 'Transfer declined');
 var IncorrectPin = create('incorrectPin', Transfer, 'Incorrect PIN');
+var InvalidMode = create('invalidMode', Transfer, 'Invalid mode');
 var Unknown = create('unknown', Transfer, 'Unknown error');
 
 module.exports = {
@@ -17,5 +18,6 @@ module.exports = {
     invalidAccount: cause => new InvalidAccount(cause),
     genericDecline: cause => new GenericDecline(cause),
     incorrectPin: cause => new IncorrectPin(cause),
+    invalidMode: cause => new InvalidMode(cause),
     unknown: cause => new Unknown(cause)
 };

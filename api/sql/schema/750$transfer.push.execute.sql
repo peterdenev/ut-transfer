@@ -78,7 +78,7 @@ BEGIN TRY
         sourceAccount,
         destinationAccount,
         expireTime,
-        destinationPort,
+        destinationId,
         transferCurrency,
         transferAmount,
         acquirerFee,
@@ -96,7 +96,8 @@ BEGIN TRY
         @destinationMode destinationMode,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @destinationSettlementDate, 120),'-',''),':',''),' ','') destinationSettlementDate,
         @destinationSerialNumber destinationSerialNumber,
-        @destinationSettings destinationSettings
+        @destinationSettings destinationSettings,
+        @destinationPort destinationPort
     SELECT
         @transferDateTime,
         @transferTypeId,
@@ -114,7 +115,7 @@ BEGIN TRY
         @sourceAccount,
         @destinationAccount,
         @expireTime,
-        @destinationPort,
+        @destinationId,
         @transferCurrency,
         @transferAmount,
         @acquirerFee,

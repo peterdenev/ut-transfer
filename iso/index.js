@@ -50,19 +50,19 @@ module.exports = {
 
         var result = base();
         result.mtid = '' + version + udfAcquirer.mti;
-        switch (udfAcquirer.mti) {
-            case 200:
+        switch ('' + udfAcquirer.mti) {
+            case '200':
                 break;
-            case 210:
+            case '210':
                 break;
-            case 420:
+            case '420':
                 result['90'] = '';
                 break;
-            case 430:
+            case '430':
                 break;
-            case 800:
+            case '800':
                 break;
-            case 810:
+            case '810':
                 break;
             default:
                 result['39'] = ['96', '909'][version];

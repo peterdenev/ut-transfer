@@ -35,7 +35,7 @@
 * issuerTxState
 * acquirerTxState
 * merchantTxState
-* destinationPort
+* destinationId
 
 ### Amounts
 
