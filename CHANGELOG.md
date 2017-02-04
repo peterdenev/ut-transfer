@@ -1,3 +1,13 @@
+<a name="5.6.0"></a>
+# [5.6.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.5.33...v5.6.0) (2017-02-04)
+
+
+### Features
+
+* reversals 1 ([0ecffe5](https://github.com/softwaregroup-bg/ut-transfer/commit/0ecffe5))
+
+
+
 <a name="5.5.33"></a>
 ## [5.5.33](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.5.32...v5.5.33) (2017-02-03)
 
