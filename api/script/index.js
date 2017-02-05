@@ -3,6 +3,7 @@ const DECLINED = {
     merchant: ['merchant.genericDecline']
 };
 var errors = require('../../errors');
+var currency = require('../../currency');
 
 module.exports = {
     'push.execute': function(params) {
@@ -115,20 +116,39 @@ module.exports = {
     },
     'idle.execute': function(params, $meta) {
         $meta.mtid = 'discard';
-        this.bus.importMethod('db/transfer.idle.execute')(params)
-        .then(reversal => {
+        var transferId;
+
+        var destinationReversal = reversal => {
             reversal = reversal && reversal[0] && reversal[0][0];
             if (reversal) {
+                transferId = reversal.transferId;
                 reversal.udfAcquirer && (reversal.udfAcquirer.mti = reversal.mti);
                 reversal.amount = {
-                    transfer: {
-                        amount: reversal.transferAmount,
-                        currency: reversal.transferCurrency
-                    }
+                    transfer: currency.amount(reversal.transferCurrency, reversal.transferAmount)
                 };
             }
             return reversal && this.bus.importMethod(`${params.destinationPort}/transfer.${reversal.transferType}.${reversal.operation}`)(reversal);
-        });
+        };
+
+        var confirmReversal = reversalResult => {
+            return transferId && this.bus.importMethod('db/transfer.push.confirmReversal')({
+                transferId
+            });
+        };
+
+        var failReversal = reversalError => {
+            return transferId && this.bus.importMethod('db/transfer.push.failReversal')({
+                transferId,
+                type: reversalError.type || ('issuer.error'),
+                message: reversalError.message,
+                details: reversalError
+            });
+        };
+
+        return this.bus.importMethod('db/transfer.idle.execute')(params)
+            .then(destinationReversal)
+            .then(confirmReversal)
+            .catch(failReversal);
     }
 };
 // todo handle timeout from destination port

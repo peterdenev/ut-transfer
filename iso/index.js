@@ -1,4 +1,4 @@
-var currency = require('./currency');
+var currency = require('../currency');
 var errors = require('../errors');
 var transferType = require('./transferType');
 

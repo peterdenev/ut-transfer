@@ -83,7 +83,7 @@ BEGIN TRY
             )
     END
 
-    IF @txid IS NULL -- reversals of expired cardless
+    IF @txid IS NULL -- reversals of expired pending
     BEGIN
         UPDATE
             [transfer].[transfer]
@@ -107,7 +107,7 @@ BEGIN TRY
                 SELECT TOP 1
                     d.transferId
                 FROM
-                    [transfer].[cardless] cc
+                    [transfer].[pending] cc
                 JOIN
                     [transfer].[transfer] d ON d.transferId = cc.firstTransferId
                 JOIN

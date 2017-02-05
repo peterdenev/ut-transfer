@@ -2,7 +2,7 @@ module.exports = () => ({
     ports: [],
     modules: {
         iso: require('./iso'),
-        currency: require('./iso/currency'),
+        currency: require('./currency'),
         transfer: require('./api/script'),
         'db/transfer': require('./api/sql')
     },

@@ -698,5 +698,14 @@ module.exports = {
             scale,
             cents: parseInt(cents) * sign
         };
+    },
+    amount: function(currency, amount) {
+        var scale = module.exports.scale(currency);
+        return {
+            currency: module.exports.alphabetic(currency),
+            amount: amount + Array(scale + 1).join('0'),
+            scale,
+            cents: parseInt(amount)
+        };
     }
 };
