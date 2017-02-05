@@ -19,9 +19,14 @@ function getBalance(field, balanceType) {
     }
 }
 
+function getISOBalance(accountType, ledgerBalance, availableBalance) {
+    return `${accountType}01${currency.numeric(ledgerBalance.currency)}${ledgerBalance.cents < 0 ? 'D' : 'C'}${('000000000000' + Math.abs(ledgerBalance.cents)).slice(-12)}` +
+        `${accountType}02${currency.numeric(availableBalance.currency)}${availableBalance.cents < 0 ? 'D' : 'C'}${('000000000000' + Math.abs(availableBalance.cents)).slice(-12)}`;
+}
+
 module.exports = {
     toISO: function(version, {udfAcquirer, amount, localDateTime, destinationSettlementDate, transferId, transferCurrency, pinBlock, sourceAccount,
-        destinationAccount, merchantId, merchantInvoice}) {
+        destinationAccount, merchantId, merchantInvoice, balance, accountType}) {
         function base() {
             if (version === 0) {
                 return {
@@ -41,6 +46,7 @@ module.exports = {
                     '43': udfAcquirer && udfAcquirer.terminalName,
                     '49': currency.numeric(transferCurrency),
                     '52': pinBlock,
+                    '54': getISOBalance(accountType, balance.ledger, balance.available),
                     '102': sourceAccount,
                     '103': destinationAccount,
                     '122': merchantId,
