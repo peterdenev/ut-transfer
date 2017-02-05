@@ -1,3 +1,13 @@
+<a name="5.9.0"></a>
+# [5.9.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.8.0...v5.9.0) (2017-02-05)
+
+
+### Features
+
+* **balance:** added field 54 in toISO result ([4266e9c](https://github.com/softwaregroup-bg/ut-transfer/commit/4266e9c))
+
+
+
 <a name="5.8.0"></a>
 # [5.8.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.7.3...v5.8.0) (2017-02-05)
 
