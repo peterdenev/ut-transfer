@@ -1,3 +1,13 @@
+<a name="5.10.0"></a>
+# [5.10.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.9.2...v5.10.0) (2017-02-07)
+
+
+### Features
+
+* add card.execute ([4559314](https://github.com/softwaregroup-bg/ut-transfer/commit/4559314))
+
+
+
 <a name="5.9.2"></a>
 ## [5.9.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.9.1...v5.9.2) (2017-02-07)
 
