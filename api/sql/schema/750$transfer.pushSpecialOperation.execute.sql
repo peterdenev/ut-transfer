@@ -195,7 +195,7 @@ BEGIN TRY
             SET [state] = 2,
                 txtId = t.transferId
             FROM @splitTT s
-            JOIN @transfer t ON t.sourceAccount = s.credit AND t.destinationAccount = s.debit
+            JOIN @transfer t ON t.sourceAccount = s.debit AND t.destinationAccount = s.credit
             WHERE s.tag LIKE '%|realtime|%' AND (tag LIKE '%|issuer|%' OR tag LIKE '%|acquirer|%')
 
             --INSERT INTO [transfer].[splitAudit] (splitId, field, oldValue, createdBy, createdOn)

@@ -48,7 +48,7 @@ BEGIN TRY
             channelId, channelType, transferTypeId, transferDateTime, localDateTime, settlementDate, reversed, issuerTxState,
             destinationPort, [acquirerFee], [issuerFee], [transferFee], [description])
         OUTPUT inserted.transferId, inserted.sourceAccount, inserted.destinationAccount, inserted.transferAmount INTO #transfer
-        SELECT s.credit, s.debit, 'GHS' /*transferCurrency*/,  sum(s.amount),
+        SELECT s.debit, s.credit, 'GHS' /*transferCurrency*/,  sum(s.amount),
             s.actorId, 'agent', @transferTypeId, @tranferDT, @localDT, @settlementDate, 0, NULL,
             'cbs',  0.00, 0.00, 0.00, 'COMISSION'
         FROM [transfer].split s
@@ -60,7 +60,7 @@ BEGIN TRY
             txtId = t.transferId
         FROM [transfer].split s
         JOIN @splitIds si ON si.value = s.splitId
-        JOIN #transfer t ON t.sourceAccount = s.credit AND t.destinationAccount = s.debit
+        JOIN #transfer t ON t.sourceAccount = s.debit AND t.destinationAccount = s.credit
 
         INSERT INTO [transfer].[splitAudit] (splitId, field, oldValue, createdBy, createdOn)
         SELECT s.splitId, 'state', s.[state], @userId, @today
