@@ -149,6 +149,40 @@ module.exports = {
             .then(destinationReversal)
             .then(confirmReversal)
             .catch(failReversal);
+    },
+    'push.reverse': function(params) {
+        return {};
+    },
+    'card.execute': function(params) {
+        return this.bus.importMethod('db/atm.card.check')({
+            cardId: params.cardId,
+            sourceAccount: params.sourceAccount,
+            destinationAccount: params.destinationAccount,
+            pinOffset: params.pinOffset,
+            mode: params.mode
+        })
+        .then(result => Object.assign(params, {
+            sourceAccount: result.sourceAccount,
+            sourceAccountName: result.sourceAccountName,
+            destinationAccount: result.destinationAccount,
+            destinationAccountName: result.destinationAccountName,
+            cardNumber: result.cardNumber,
+            ordererId: result.ordererId
+        }))
+        .then(result => !params.transferIdAcquirer && this.bus.importMethod(`db/${params.channelType}.terminal.nextId`)({
+            channelId: result.channelId
+        }))
+        .then(result => {
+            if (params.transferIdAcquirer) {
+                return params;
+            }
+            if (!result || !result[0] || !result[0][0] || !result[0][0].tsn) {
+                throw errors.nextId();
+            }
+            params.transferIdAcquirer = result[0][0].tsn;
+            return params;
+        })
+        .then(this.bus.importMethod('transfer.push.execute'));
     }
 };
 // todo handle timeout from destination port

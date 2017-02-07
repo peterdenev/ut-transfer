@@ -94,6 +94,10 @@ module.exports = {
             }
         }
 
+        function trim(s) {
+            return (typeof s === 'string') ? s.trim() : s;
+        }
+
         function base() {
             switch (msg.mtid.substr(0, 1)) {
                 case '0': return {
@@ -101,25 +105,29 @@ module.exports = {
                         transfer: currency.cents(msg[49], msg[4], 1)
                     },
                     destinationSettlementDate: msg[15],
-                    localdateTime: msg[13] + msg[12],
-                    transferIdAcquirer: msg[37],
-                    transferIdIssuer: msg[38],
-                    currency: currency.alphabetic(msg[49]),
-                    pinBlock: msg[52],
-                    sourceAccount: msg[102],
-                    destinationAccount: msg[103],
-                    merchantId: msg[122],
-                    merchantInvoice: msg[123],
+                    localdateTime: trim(msg[13]) + trim(msg[12]),
+                    transferIdAcquirer: trim(msg[37]),
+                    transferIdIssuer: trim(msg[38]),
+                    currency: currency.alphabetic(trim(msg[49])),
+                    pinBlock: trim(msg[52]),
+                    sourceAccount: trim(msg[102]) || 'selected:1',
+                    destinationAccount: trim(msg[103]) || 'selected:1',
+                    merchantId: trim(msg[122]),
+                    merchantInvoice: trim(msg[123]),
                     udfAcquirer: {
-                        card: msg[2],
-                        processingCode: msg[3],
-                        merchantType: msg[18],
-                        institutionCode: msg[32],
-                        track2: msg[35],
-                        terminalId: msg[41],
-                        identificationCode: msg[42],
-                        terminalName: msg[43]
-                    }
+                        card: trim(msg[2]),
+                        processingCode: trim(msg[3]),
+                        merchantType: trim(msg[18]),
+                        institutionCode: trim(msg[32]),
+                        track2: trim(msg[35]),
+                        terminalId: trim(msg[41]),
+                        identificationCode: trim(msg[42]),
+                        terminalName: trim(msg[43])
+                    },
+                    channelId: msg.channelId,
+                    channelType: msg.channelType,
+                    cardId: msg.cardId,
+                    pinOffset: msg.pinOffset
                 };
                 case '1': return {
 
