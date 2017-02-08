@@ -59,7 +59,7 @@ module.exports = {
                     transfer.localDateTime = pushResult.localDateTime;
                     return transfer;
                 } else {
-                    throw errors.system('transfer.push.execute');
+                    throw errors.systemDecline('transfer.push.execute');
                 }
             });
         var merchantTransferValidate = (transfer) => {

@@ -25,6 +25,24 @@ function getISOBalance(accountType, ledgerBalance, availableBalance) {
 }
 
 module.exports = {
+    error: function(version, type) {
+        return {
+            'card.unknown': ['14', '111'],
+            'card.hot': ['36', '210'],
+            'card.notActivated': ['62', '125'],
+            'card.expired': ['54', '101'],
+            'card.expiredHot': ['33', '201'],
+            'card.inactive': ['62', '125'],
+            'card.forDestruction': ['56', '118'],
+            'card.retryLimitExceeded': ['75', '106'],
+            'card.invalidPinData': ['01', '107'],
+            'transfer.systemDecline': ['91', '907'],
+            'transfer.insufficientFunds': ['51', '116'],
+            'transfer.invalidAccount': ['39', '114'],
+            'transfer.genericDecline': ['05', '100'],
+            'transfer.incorrectPin': ['55', '117']
+        }[type][version] || ['96', '909'][version];
+    },
     toISO: function(version, {udfAcquirer, amount, localDateTime, destinationSettlementDate, transferId, transferIdAcquirer, transferCurrency, pinBlock, sourceAccount,
         destinationAccount, merchantId, merchantInvoice, balance, accountType, tpk}) {
         function base() {
