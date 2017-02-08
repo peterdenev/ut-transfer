@@ -25,11 +25,13 @@ function getISOBalance(accountType, ledgerBalance, availableBalance) {
 }
 
 module.exports = {
-    toISO: function(version, {udfAcquirer, amount, localDateTime, destinationSettlementDate, transferId, transferCurrency, pinBlock, sourceAccount,
-        destinationAccount, merchantId, merchantInvoice, balance, accountType}) {
+    toISO: function(version, {udfAcquirer, amount, localDateTime, destinationSettlementDate, transferId, transferIdAcquirer, transferCurrency, pinBlock, sourceAccount,
+        destinationAccount, merchantId, merchantInvoice, balance, accountType, tpk}) {
         function base() {
             if (version === 0) {
                 return {
+                    pan: udfAcquirer && udfAcquirer.pan,
+                    tpk,
                     '2': udfAcquirer && udfAcquirer.card,
                     '3': udfAcquirer && udfAcquirer.processingCode,
                     '4': amount && amount.transfer && amount.transfer.cents,
@@ -40,13 +42,14 @@ module.exports = {
                     '18': udfAcquirer && udfAcquirer.merchantType,
                     '32': udfAcquirer && udfAcquirer.institutionCode,
                     '35': udfAcquirer && udfAcquirer.track2,
-                    '37': transferId,
+                    '37': {'200': transferId, '210': transferIdAcquirer}[udfAcquirer.mti],
+                    '38': {'210': transferId}[udfAcquirer.mti],
                     '41': udfAcquirer && udfAcquirer.terminalId,
                     '42': udfAcquirer && udfAcquirer.identificationCode,
                     '43': udfAcquirer && udfAcquirer.terminalName,
                     '49': currency.numeric(transferCurrency),
                     '52': pinBlock,
-                    '54': getISOBalance(accountType, balance.ledger, balance.available),
+                    '54': balance && getISOBalance(accountType, balance.ledger, balance.available),
                     '102': sourceAccount,
                     '103': destinationAccount,
                     '122': merchantId,
@@ -76,20 +79,23 @@ module.exports = {
         }
         return result;
     },
-    fromISO: function(msg, $meta) {
-        if ($meta.mtid === 'error') {
-            switch (msg[39]) {
-                case '14':
-                case '39':
-                case '114': throw errors.invalidAccount();
-                case '51':
-                case '116': throw errors.insufficientFunds();
-                case '55':
-                case '117': throw errors.incorrectPin();
-                case '68':
-                case '96':
-                case '909':
-                case '911': throw errors.unknown();
+    fromISO: function(msg) {
+        if (!msg || msg instanceof Error) {
+            if (!msg || !msg.type || !msg.type.startsWith || !msg.type.startsWith('iso8583')) {
+                throw errors.unknown();
+            }
+            switch (msg.type) {
+                case 'iso8583.14':
+                case 'iso8583.39':
+                case 'iso8583.114': throw errors.invalidAccount();
+                case 'iso8583.51':
+                case 'iso8583.116': throw errors.insufficientFunds();
+                case 'iso8583.55':
+                case 'iso8583.117': throw errors.incorrectPin();
+                case 'iso8583.68':
+                case 'iso8583.96':
+                case 'iso8583.909':
+                case 'iso8583.911': throw errors.unknown();
                 default: throw errors.genericDecline();
             }
         }
@@ -100,38 +106,41 @@ module.exports = {
 
         function base() {
             switch (msg.mtid.substr(0, 1)) {
-                case '0': return {
-                    amount: {
-                        transfer: currency.cents(msg[49], msg[4], 1)
-                    },
-                    destinationSettlementDate: msg[15],
-                    localdateTime: trim(msg[13]) + trim(msg[12]),
-                    transferIdAcquirer: trim(msg[37]),
-                    transferIdIssuer: trim(msg[38]),
-                    currency: currency.alphabetic(trim(msg[49])),
-                    pinBlock: trim(msg[52]),
-                    sourceAccount: trim(msg[102]) || 'selected:1',
-                    destinationAccount: trim(msg[103]) || 'selected:1',
-                    merchantId: trim(msg[122]),
-                    merchantInvoice: trim(msg[123]),
-                    udfAcquirer: {
-                        card: trim(msg[2]),
-                        processingCode: trim(msg[3]),
-                        merchantType: trim(msg[18]),
-                        institutionCode: trim(msg[32]),
-                        track2: trim(msg[35]),
-                        terminalId: trim(msg[41]),
-                        identificationCode: trim(msg[42]),
-                        terminalName: trim(msg[43])
-                    },
-                    channelId: msg.channelId,
-                    channelType: msg.channelType,
-                    cardId: msg.cardId,
-                    pinOffset: msg.pinOffset
-                };
-                case '1': return {
+                case '0':
+                    return {
+                        amount: {
+                            transfer: currency.cents(msg[49], msg[4], 1)
+                        },
+                        destinationSettlementDate: msg[15],
+                        localdateTime: trim(msg[13]) + trim(msg[12]),
+                        transferIdAcquirer: trim(msg[37]),
+                        transferIdIssuer: trim(msg[38]),
+                        currency: currency.alphabetic(trim(msg[49])),
+                        pinBlock: trim(msg[52]),
+                        sourceAccount: trim(msg[102]) || 'selected:1',
+                        destinationAccount: trim(msg[103]) || 'selected:1',
+                        merchantId: trim(msg[122]),
+                        merchantInvoice: trim(msg[123]),
+                        udfAcquirer: {
+                            mti: msg.mtid.substr(1, 3),
+                            pan: msg.pan,
+                            processingCode: trim(msg[3]),
+                            merchantType: trim(msg[18]),
+                            institutionCode: trim(msg[32]),
+                            track2: trim(msg[35]),
+                            terminalId: trim(msg[41]),
+                            identificationCode: trim(msg[42]),
+                            terminalName: trim(msg[43])
+                        },
+                        channelId: msg.channelId,
+                        channelType: msg.channelType,
+                        cardId: msg.cardId,
+                        pinOffset: msg.pinOffset
+                    };
+                case '1':
+                    return {
 
-                };
+                    };
             }
         }
         switch (msg.mtid) {
