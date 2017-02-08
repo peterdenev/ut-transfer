@@ -1,3 +1,23 @@
+<a name="5.10.3"></a>
+## [5.10.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.10.2...v5.10.3) (2017-02-08)
+
+
+
+<a name="5.10.2"></a>
+## [5.10.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.10.1...v5.10.2) (2017-02-08)
+
+
+
+<a name="5.10.1"></a>
+## [5.10.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.10.0...v5.10.1) (2017-02-08)
+
+
+### Bug Fixes
+
+* improve iso handling ([d38b09e](https://github.com/softwaregroup-bg/ut-transfer/commit/d38b09e))
+
+
+
 <a name="5.10.0"></a>
 # [5.10.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.9.2...v5.10.0) (2017-02-07)
 
