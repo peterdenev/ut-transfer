@@ -1,3 +1,13 @@
+<a name="5.11.0"></a>
+# [5.11.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.10.3...v5.11.0) (2017-02-08)
+
+
+### Features
+
+* add iso error mapping ([70421da](https://github.com/softwaregroup-bg/ut-transfer/commit/70421da))
+
+
+
 <a name="5.10.3"></a>
 ## [5.10.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.10.2...v5.10.3) (2017-02-08)
 
