@@ -1,3 +1,8 @@
+<a name="5.11.11"></a>
+## [5.11.11](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.10...v5.11.11) (2017-02-09)
+
+
+
 <a name="5.11.10"></a>
 ## [5.11.10](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.9...v5.11.10) (2017-02-09)
 
