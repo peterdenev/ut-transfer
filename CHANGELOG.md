@@ -1,3 +1,13 @@
+<a name="5.11.1"></a>
+## [5.11.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.0...v5.11.1) (2017-02-09)
+
+
+### Bug Fixes
+
+* define merchant errors ([b9ef761](https://github.com/softwaregroup-bg/ut-transfer/commit/b9ef761))
+
+
+
 <a name="5.11.0"></a>
 # [5.11.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.10.3...v5.11.0) (2017-02-08)
 
