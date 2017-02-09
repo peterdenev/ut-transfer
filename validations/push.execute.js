@@ -19,7 +19,8 @@ module.exports = {
                 'changePin',
                 'loanDisburse',
                 'loanRepay',
-                'forex'
+                'forex',
+                'agentFloatRequest'
             ]
         ),
         transferIdAcquirer: joi.string().allow(null),
