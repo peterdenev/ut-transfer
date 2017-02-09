@@ -1,5 +1,7 @@
 ALTER PROCEDURE [transfer].[commissionSplitAuthorized.fetch]-- fetch commission non authorised for actorId
     @actorId BIGINT,-- actorId of the agent
+    @filterBy [transfer].filterByTT READONLY,-- information for filters
+    @orderBy [transfer].orderByTT READONLY,-- information for ordering
 	@meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
 
@@ -12,12 +14,78 @@ SET NOCOUNT ON
          RETURN 55555
     END
 
+    DECLARE  
+        @transferDateTimeFrom DATE,
+        @transferDateTimeTo DATE,
+        @sortBy varchar(50) = 'itemName',
+        @sortOrder varchar(4) = 'ASC'
+
+    SELECT 
+        @sortBy = ISNULL([column],'itemName'), 
+        @sortOrder=ISNULL([direction],'ASC') 
+    FROM @orderBy
+
+    SELECT 
+        @transferDateTimeFrom = transferDateTimeFrom,
+        @transferDateTimeTo = DATEADD(day, 1, transferDateTimeTo)
+    FROM @filterBy
+
     SELECT 'commission' as resultSetName
-    SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
-        s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount
-    FROM [transfer].split s
-        JOIN [transfer].[transfer] t ON t.transferId = s.transferId AND t.channelID = s.ActorId 
-        JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
-    WHERE t.issuerTxState = 2 AND t.reversed = 0 AND t.channelID = @actorID AND t.channelType ='agent'
-    AND s.[state] = 4 AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
-    ORDER BY i.itemName
+    IF @sortBy = 'commission' --OR @sortBy = 'commission'
+    BEGIN
+        SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
+            s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount,
+            ROW_NUMBER() OVER(ORDER BY
+					         CASE WHEN @sortOrder = 'ASC' THEN
+						        CASE
+                                   WHEN @sortBy = 'commission' THEN s.amount
+                                   --WHEN @sortBy = 'transferAmount' THEN convert(nvarchar(20), t.transferAmount)
+							    END
+					        END,
+					        CASE WHEN @sortOrder = 'DESC' THEN
+						        CASE
+                                    WHEN @sortBy = 'commission' THEN s.amount
+                                    --WHEN @sortBy = 'transferAmount' THEN convert(nvarchar(20), t.transferAmount)
+                                END
+					        END DESC) AS rowNum
+        FROM [transfer].split s
+            JOIN [transfer].[transfer] t ON t.transferId = s.transferId AND t.channelID = s.ActorId 
+            JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
+        WHERE t.issuerTxState = 2 AND t.reversed = 0 AND t.channelID = @actorID AND t.channelType ='agent'
+        AND s.[state] = 4 AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
+        AND ( @transferDateTimeFrom IS NULL OR t.transferDateTime >= @transferDateTimeFrom )
+        AND ( @transferDateTimeTo IS NULL OR t.transferDateTime < @transferDateTimeTo )
+        ORDER BY rowNum
+    END
+    ELSE
+    BEGIN
+        SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
+            s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount,
+            ROW_NUMBER() OVER(ORDER BY
+					         CASE WHEN @sortOrder = 'ASC' THEN
+						        CASE
+						            WHEN @sortBy = 'splitId' THEN convert(nvarchar(20), s.splitId)
+                                    WHEN @sortBy = 'transferIdIssuer' THEN convert(nvarchar(20), t.transferIdIssuer)
+                                    WHEN @sortBy = 'transferDateTime' THEN convert(nvarchar(100), t.transferDateTime)
+                                    WHEN @sortBy = 'operation' THEN i.itemName 
+                                    WHEN @sortBy = 'transferCurrency' THEN t.transferCurrency
+							    END
+					        END,
+					        CASE WHEN @sortOrder = 'DESC' THEN
+						        CASE
+							       WHEN @sortBy = 'splitId' THEN convert(nvarchar(20), s.splitId)
+                                    WHEN @sortBy = 'transferIdIssuer' THEN convert(nvarchar(20), t.transferIdIssuer)
+                                    WHEN @sortBy = 'transferDateTime' THEN convert(nvarchar(100), t.transferDateTime)
+                                    WHEN @sortBy = 'operation' THEN i.itemName 
+                                    WHEN @sortBy = 'transferCurrency' THEN t.transferCurrency
+                                END
+					        END DESC) AS rowNum
+        FROM [transfer].split s
+            JOIN [transfer].[transfer] t ON t.transferId = s.transferId AND t.channelID = s.ActorId 
+            JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
+        WHERE t.issuerTxState = 2 AND t.reversed = 0 AND t.channelID = @actorID AND t.channelType ='agent'
+        AND s.[state] = 4 AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
+        AND ( @transferDateTimeFrom IS NULL OR t.transferDateTime >= @transferDateTimeFrom )
+        AND ( @transferDateTimeTo IS NULL OR t.transferDateTime < @transferDateTimeTo )
+        ORDER BY rowNum
+    END
