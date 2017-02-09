@@ -14,7 +14,12 @@ SET NOCOUNT ON
 
     SELECT 'commission' as resultSetName
     SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
-        s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount
+        s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount, 
+        CASE WHEN t.issuerTxState=2 THEN 'Successful' 
+        WHEN t.issuerTxState = 4 THEN 'Error'
+        WHEN t.issuerTxState = 1 THEN 'Requested'
+        ELSE 'Unknown' END AS [Status],
+        t.[reversed]
     FROM [transfer].split s
         JOIN [transfer].[transfer] t ON t.transferId = s.txtId 
         JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
