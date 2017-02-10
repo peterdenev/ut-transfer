@@ -162,9 +162,9 @@ module.exports = {
             mode: params.mode
         })
         .then(result => Object.assign(params, {
-            sourceAccount: result.sourceAccount,
+            sourceAccount: result.sourceAccountNumber,
             sourceAccountName: result.sourceAccountName,
-            destinationAccount: result.destinationAccount,
+            destinationAccount: result.destinationAccountNumber,
             destinationAccountName: result.destinationAccountName,
             cardNumber: result.cardNumber,
             ordererId: result.ordererId
