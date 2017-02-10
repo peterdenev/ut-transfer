@@ -1,3 +1,13 @@
+<a name="5.11.12"></a>
+## [5.11.12](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.11...v5.11.12) (2017-02-10)
+
+
+### Bug Fixes
+
+* use correct column names ([4e71ab2](https://github.com/softwaregroup-bg/ut-transfer/commit/4e71ab2))
+
+
+
 <a name="5.11.11"></a>
 ## [5.11.11](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.10...v5.11.11) (2017-02-09)
 
