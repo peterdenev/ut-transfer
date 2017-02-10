@@ -34,7 +34,8 @@ var ruleValidate = (transfer) => bus.importMethod('db/rule.decision.lookup')({
     destinationAccount: transfer.destinationAccount,
     amount: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount,
     currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
-    isSourceAmount: transfer.isSourceAmount || false
+    isSourceAmount: transfer.isSourceAmount || false,
+    isSourceAccount: transfer.isSourceAccount
 }).then(decision => {
     if (decision.amount) {
         transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
