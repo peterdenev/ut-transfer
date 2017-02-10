@@ -1,3 +1,13 @@
+<a name="5.11.13"></a>
+## [5.11.13](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.12...v5.11.13) (2017-02-10)
+
+
+### Bug Fixes
+
+* move code to ut-iso ([d7de979](https://github.com/softwaregroup-bg/ut-transfer/commit/d7de979))
+
+
+
 <a name="5.11.12"></a>
 ## [5.11.12](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.11...v5.11.12) (2017-02-10)
 
