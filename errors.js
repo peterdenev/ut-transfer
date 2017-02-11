@@ -15,6 +15,7 @@ const TimeOut = create('timeOut', Merchant, 'Merchant timeout');
 const InvalidPhone = create('invalidPhone', Merchant, 'Invalid phone');
 const InvalidInvoice = create('invalidInvoice', Merchant, 'Invalid invoice');
 const MerchantInsufficientFunds = create('insufficientFunds', Merchant, 'Balance not enough');
+const MerchantUnknown = create('unknown', Merchant, 'Unknown error');
 
 module.exports = {
     transfer: cause => new Transfer(cause),
@@ -29,5 +30,6 @@ module.exports = {
     merchantTimeOut: cause => new TimeOut(cause),
     merchantInvalidPhone: cause => new InvalidPhone(cause),
     merchantInvalidInvoice: cause => new InvalidInvoice(cause),
-    merchantInsufficientFunds: cause => new MerchantInsufficientFunds(cause)
+    merchantInsufficientFunds: cause => new MerchantInsufficientFunds(cause),
+    merchantUnknown: cause => new MerchantUnknown(cause)
 };
