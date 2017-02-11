@@ -21,11 +21,11 @@ module.exports = {
                 message: error.message,
                 details: error
             })
-            .then(x => Promise.reject(error))
             .catch(x => {
                 this.log.error && this.log.error(error);
                 return Promise.reject(error);
-            });
+            }) // .this is intentionally after catch as we do not want to this.log the original error
+            .then(x => Promise.reject(error));
         };
         var ruleValidate = (transfer) => this.bus.importMethod('db/rule.decision.lookup')({
             channelId: transfer.channelId,
