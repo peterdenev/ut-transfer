@@ -1,3 +1,13 @@
+<a name="5.11.14"></a>
+## [5.11.14](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.13...v5.11.14) (2017-02-11)
+
+
+### Bug Fixes
+
+* error handling ([4a6398b](https://github.com/softwaregroup-bg/ut-transfer/commit/4a6398b))
+
+
+
 <a name="5.11.13"></a>
 ## [5.11.13](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.12...v5.11.13) (2017-02-10)
 
