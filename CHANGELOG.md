@@ -1,3 +1,13 @@
+<a name="5.12.0"></a>
+# [5.12.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.14...v5.12.0) (2017-02-11)
+
+
+### Features
+
+* added merchant unknown error ([818203a](https://github.com/softwaregroup-bg/ut-transfer/commit/818203a))
+
+
+
 <a name="5.11.14"></a>
 ## [5.11.14](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.13...v5.11.14) (2017-02-11)
 
