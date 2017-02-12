@@ -52,7 +52,9 @@ module.exports = {
     'push.execute': function(params) {
         var handleError = (transfer, where) => error => {
             var method;
-            if (DECLINED[where.toLowerCase()].includes(error && error.type)) {
+            if (where === 'Acquirer') {
+                method = this.bus.importMethod('db/transfer.push.abortAcquirer');
+            } else if (DECLINED[where.toLowerCase()].includes(error && error.type)) {
                 method = this.bus.importMethod('db/transfer.push.fail' + where);
             } else {
                 method = this.bus.importMethod('db/transfer.push.reverse' + where);
@@ -100,7 +102,11 @@ module.exports = {
                     transfer.destinationPort = pushResult.destinationPort;
                     transfer.destinationSettlementDate = pushResult.destinationSettlementDate;
                     transfer.localDateTime = pushResult.localDateTime;
-                    return transfer;
+                    if (transfer.abortAcquirer) {
+                        return handleError(transfer, 'Acquirer')(transfer.abortAcquirer);
+                    } else {
+                        return transfer;
+                    }
                 } else {
                     throw errors.systemDecline('transfer.push.execute');
                 }
@@ -174,36 +180,44 @@ module.exports = {
             .then(processReversal(this.bus, this.log));
     },
     'card.execute': function(params) {
-        return this.bus.importMethod('db/atm.card.check')({
-            cardId: params.cardId,
-            sourceAccount: params.sourceAccount,
-            destinationAccount: params.destinationAccount,
-            pinOffset: params.pinOffset,
-            mode: params.mode
-        })
-        .then(result => Object.assign(params, {
-            sourceAccount: result.sourceAccountNumber,
-            sourceAccountName: result.sourceAccountName,
-            destinationAccount: result.destinationAccountNumber,
-            destinationAccountName: result.destinationAccountName,
-            destinationId: result.issuerId,
-            cardNumber: result.cardNumber,
-            ordererId: result.ordererId
-        }))
-        .then(result => !params.transferIdAcquirer && this.bus.importMethod(`db/${params.channelType}.terminal.nextId`)({
-            channelId: result.channelId
-        }))
-        .then(result => {
-            if (params.transferIdAcquirer) {
+        if (params.abortAcquirer) {
+            return this.bus.importMethod('transfer.push.execute')(params);
+        } else {
+            return this.bus.importMethod('db/atm.card.check')({
+                cardId: params.cardId,
+                sourceAccount: params.sourceAccount,
+                destinationAccount: params.destinationAccount,
+                pinOffset: params.pinOffset,
+                mode: params.mode
+            })
+            .catch(error => {
+                params.abortAcquirer = error;
+                return this.bus.importMethod('transfer.push.execute')(params);
+            })
+            .then(result => Object.assign(params, {
+                sourceAccount: result.sourceAccountNumber,
+                sourceAccountName: result.sourceAccountName,
+                destinationAccount: result.destinationAccountNumber,
+                destinationAccountName: result.destinationAccountName,
+                destinationId: result.issuerId,
+                cardNumber: result.cardNumber,
+                ordererId: result.ordererId
+            }))
+            .then(result => !params.transferIdAcquirer && this.bus.importMethod(`db/${params.channelType}.terminal.nextId`)({
+                channelId: result.channelId
+            }))
+            .then(result => {
+                if (params.transferIdAcquirer) {
+                    return params;
+                }
+                if (!result || !result[0] || !result[0][0] || !result[0][0].tsn) {
+                    throw errors.nextId();
+                }
+                params.transferIdAcquirer = result[0][0].tsn;
                 return params;
-            }
-            if (!result || !result[0] || !result[0][0] || !result[0][0].tsn) {
-                throw errors.nextId();
-            }
-            params.transferIdAcquirer = result[0][0].tsn;
-            return params;
-        })
-        .then(this.bus.importMethod('transfer.push.execute'));
+            })
+            .then(this.bus.importMethod('transfer.push.execute'));
+        }
     }
 };
 // todo handle timeout from destination port
