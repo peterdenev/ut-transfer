@@ -1,3 +1,13 @@
+<a name="5.13.0"></a>
+# [5.13.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.12.0...v5.13.0) (2017-02-12)
+
+
+### Features
+
+* implement transfer.push.reverse ([fb7e72c](https://github.com/softwaregroup-bg/ut-transfer/commit/fb7e72c))
+
+
+
 <a name="5.12.0"></a>
 # [5.12.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.11.14...v5.12.0) (2017-02-11)
 
