@@ -1,3 +1,13 @@
+<a name="5.14.0"></a>
+# [5.14.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.13.0...v5.14.0) (2017-02-12)
+
+
+### Features
+
+* add abortAcquirer ([a2a9e31](https://github.com/softwaregroup-bg/ut-transfer/commit/a2a9e31))
+
+
+
 <a name="5.13.0"></a>
 # [5.13.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.12.0...v5.13.0) (2017-02-12)
 
