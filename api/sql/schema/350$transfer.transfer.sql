@@ -1,6 +1,7 @@
 CREATE TABLE [transfer].[transfer](
     transferId bigint IDENTITY(1000,1) NOT NULL,
     transferTypeId bigint NOT NULL,
+    acquirerCode varchar(50),
     transferIdAcquirer varchar(50),
     transferIdIssuer varchar(50),
     transferIdMerchant varchar(50),

@@ -7,6 +7,7 @@ const InsufficientFunds = create('insufficientFunds', Transfer, 'Insufficient fu
 const InvalidAccount = create('invalidAccount', Transfer, 'Invalid account');
 const GenericDecline = create('genericDecline', Transfer, 'Transfer declined');
 const IncorrectPin = create('incorrectPin', Transfer, 'Incorrect PIN');
+const NotFound = create('notFound', Transfer, 'Transfer not found');
 const Unknown = create('unknown', Transfer, 'Unknown error');
 // merchant
 const Merchant = create('merchant');
@@ -24,6 +25,7 @@ module.exports = {
     invalidAccount: cause => new InvalidAccount(cause),
     genericDecline: cause => new GenericDecline(cause),
     incorrectPin: cause => new IncorrectPin(cause),
+    notFound: cause => new NotFound(cause),
     unknown: cause => new Unknown(cause),
     merchant: cause => new Merchant(cause),
     merchantGenericDecline: cause => new MerchantGenericDecline(cause),

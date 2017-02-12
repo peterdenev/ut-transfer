@@ -5,6 +5,49 @@ const DECLINED = {
 var errors = require('../../errors');
 var currency = require('../../currency');
 
+var processReversal = (bus, log) => params => {
+    var transferId;
+
+    var destinationReversal = reversal => {
+        reversal = reversal && reversal[0] && reversal[0][0];
+        if (reversal) {
+            transferId = reversal.transferId;
+            reversal.udfAcquirer && (reversal.udfAcquirer.mti = reversal.mti);
+            reversal.amount = {
+                transfer: currency.amount(reversal.transferCurrency, reversal.transferAmount)
+            };
+        }
+        return reversal && bus.importMethod(`${reversal.destinationPort}/transfer.${reversal.transferType}.${reversal.operation}`)(reversal);
+    };
+
+    var confirmReversal = reversalResult => {
+        return transferId && bus.importMethod('db/transfer.push.confirmReversal')({
+            transferId
+        });
+    };
+
+    var failReversal = reversalError => {
+        return Promise.resolve(transferId && bus.importMethod('db/transfer.push.failReversal')({
+            transferId,
+            type: reversalError.type || ('issuer.error'),
+            message: reversalError.message,
+            details: reversalError
+        }))
+        .catch(error => {
+            log.error && log.error(error);
+            return Promise.reject(reversalError);
+        })// .this is intentionally after catch as we do not want to log the reversalError
+        .then(() => {
+            return Promise.reject(reversalError);
+        });
+    };
+
+    return Promise.resolve(params)
+        .then(destinationReversal)
+        .then(confirmReversal)
+        .catch(failReversal);
+};
+
 module.exports = {
     'push.execute': function(params) {
         var handleError = (transfer, where) => error => {
@@ -22,7 +65,7 @@ module.exports = {
                 details: error
             })
             .catch(x => {
-                this.log.error && this.log.error(error);
+                this.log.error && this.log.error(x);
                 return Promise.reject(error);
             }) // .this is intentionally after catch as we do not want to this.log the original error
             .then(x => Promise.reject(error));
@@ -116,42 +159,19 @@ module.exports = {
     },
     'idle.execute': function(params, $meta) {
         $meta.mtid = 'discard';
-        var transferId;
-
-        var destinationReversal = reversal => {
-            reversal = reversal && reversal[0] && reversal[0][0];
-            if (reversal) {
-                transferId = reversal.transferId;
-                reversal.udfAcquirer && (reversal.udfAcquirer.mti = reversal.mti);
-                reversal.amount = {
-                    transfer: currency.amount(reversal.transferCurrency, reversal.transferAmount)
-                };
-            }
-            return reversal && this.bus.importMethod(`${params.destinationPort}/transfer.${reversal.transferType}.${reversal.operation}`)(reversal);
-        };
-
-        var confirmReversal = reversalResult => {
-            return transferId && this.bus.importMethod('db/transfer.push.confirmReversal')({
-                transferId
-            });
-        };
-
-        var failReversal = reversalError => {
-            return transferId && this.bus.importMethod('db/transfer.push.failReversal')({
-                transferId,
-                type: reversalError.type || ('issuer.error'),
-                message: reversalError.message,
-                details: reversalError
-            });
-        };
-
         return this.bus.importMethod('db/transfer.idle.execute')(params)
-            .then(destinationReversal)
-            .then(confirmReversal)
-            .catch(failReversal);
+            .then(processReversal(this.bus, this.log));
     },
     'push.reverse': function(params) {
-        return {};
+        return this.bus.importMethod('db/transfer.push.getByAcquirer')(params)
+            .then(result => {
+                if (!result || !result[0] || !result[0][0]) {
+                    throw errors.notFound();
+                } else {
+                    return result;
+                }
+            })
+            .then(processReversal(this.bus, this.log));
     },
     'card.execute': function(params) {
         return this.bus.importMethod('db/atm.card.check')({
@@ -166,6 +186,7 @@ module.exports = {
             sourceAccountName: result.sourceAccountName,
             destinationAccount: result.destinationAccountNumber,
             destinationAccountName: result.destinationAccountName,
+            destinationId: result.issuerId,
             cardNumber: result.cardNumber,
             ordererId: result.ordererId
         }))
