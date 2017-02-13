@@ -1,3 +1,13 @@
+<a name="5.15.0"></a>
+# [5.15.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.14.2...v5.15.0) (2017-02-13)
+
+
+### Features
+
+* add column state to transfer.event ([ed275c3](https://github.com/softwaregroup-bg/ut-transfer/commit/ed275c3))
+
+
+
 <a name="5.14.2"></a>
 ## [5.14.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.14.1...v5.14.2) (2017-02-13)
 
