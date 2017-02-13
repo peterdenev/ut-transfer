@@ -18,6 +18,7 @@ DECLARE @COUNT int = @@ROWCOUNT
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
+    @state = 'fail',
     @source = 'merchant',
     @message = @message,
     @udfDetails = @details

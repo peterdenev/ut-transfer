@@ -133,6 +133,7 @@ BEGIN TRY
     EXEC [transfer].[push.event]
         @transferId = @transferId,
         @type = 'transfer.push',
+        @state = 'request',
         @source = 'acquirer',
         @udfDetails = @udfAcquirer,
         @message = 'Transfer created'

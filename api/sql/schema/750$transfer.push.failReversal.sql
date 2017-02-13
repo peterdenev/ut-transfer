@@ -9,6 +9,7 @@ SET NOCOUNT ON
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
+    @state = 'failReversal',
     @source = 'issuer',
     @message = @message,
     @udfDetails = @details
