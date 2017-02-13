@@ -1,3 +1,13 @@
+<a name="5.14.1"></a>
+## [5.14.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.14.0...v5.14.1) (2017-02-13)
+
+
+### Bug Fixes
+
+* update ut-rule ([b530f21](https://github.com/softwaregroup-bg/ut-transfer/commit/b530f21))
+
+
+
 <a name="5.14.0"></a>
 # [5.14.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.13.0...v5.14.0) (2017-02-12)
 
