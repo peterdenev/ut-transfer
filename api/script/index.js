@@ -188,6 +188,7 @@ module.exports = {
                 sourceAccount: params.sourceAccount,
                 destinationAccount: params.destinationAccount,
                 pinOffset: params.pinOffset,
+                pinOffsetNew: params.pinOffsetNew,
                 mode: params.mode
             })
             .catch(error => {
