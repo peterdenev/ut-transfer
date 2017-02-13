@@ -11,7 +11,7 @@
   },
   "peerDependencies": {
     "ut-bus": "~5.8.2",
-    "ut-rule": "~6.2.10"
+    "ut-rule": "~7.0.0"
   },
   "description": "UT Transfer",
   "scripts": {
