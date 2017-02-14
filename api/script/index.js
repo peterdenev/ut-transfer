@@ -81,15 +81,17 @@ module.exports = {
             currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
             isSourceAmount: false
         }).then(decision => {
+            transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
+            transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
             if (decision.amount) {
                 transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
                 transfer.acquirerFee = decision.amount.acquirerFee;
                 transfer.issuerFee = decision.amount.issuerFee;
+                transfer.amount.acquirerFee = currency.amount(transfer.transferCurrency, transfer.acquirerFee);
+                transfer.amount.issuerFee = currency.amount(transfer.transferCurrency, transfer.issuerFee);
             }
             transfer.transferDateTime = decision.amount && decision.amount.transferDateTime;
             transfer.transferTypeId = decision.amount && decision.amount.transferTypeId;
-            transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
-            transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
             transfer.split = decision.split;
             return transfer;
         })
