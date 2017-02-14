@@ -92,6 +92,17 @@ module.exports = {
             transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
             transfer.split = decision.split;
             return transfer;
+        })
+        .catch(error => {
+            transfer.abortAcquirer = error;
+            transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
+            transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
+            return this.bus.importMethod('db/rule.operation.lookup')({operation: transfer.transferType})
+                .then(result => {
+                    transfer.transferDateTime = result && result.operation && result.operation.transferDateTime;
+                    transfer.transferTypeId = result && result.operation && result.operation.transferTypeId;
+                    return transfer;
+                });
         });
         var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.execute')(transfer)
             .then(pushResult => {
