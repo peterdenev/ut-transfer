@@ -1,3 +1,13 @@
+<a name="5.15.1"></a>
+## [5.15.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.0...v5.15.1) (2017-02-14)
+
+
+### Bug Fixes
+
+* handle limits ([b3190eb](https://github.com/softwaregroup-bg/ut-transfer/commit/b3190eb))
+
+
+
 <a name="5.15.0"></a>
 # [5.15.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.14.2...v5.15.0) (2017-02-13)
 
