@@ -1,3 +1,13 @@
+<a name="5.15.2"></a>
+## [5.15.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.1...v5.15.2) (2017-02-14)
+
+
+### Bug Fixes
+
+* pass fees ([f035192](https://github.com/softwaregroup-bg/ut-transfer/commit/f035192))
+
+
+
 <a name="5.15.1"></a>
 ## [5.15.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.0...v5.15.1) (2017-02-14)
 
