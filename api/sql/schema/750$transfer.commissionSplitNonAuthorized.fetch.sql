@@ -52,9 +52,9 @@ SET NOCOUNT ON
                                 END
 					        END DESC) AS rowNum
         FROM [transfer].split s
-            JOIN [transfer].[transfer] t ON t.transferId = s.transferId AND t.channelID = s.ActorId 
+            JOIN [transfer].[transfer] t ON t.transferId = s.transferId /*AND t.channelID = s.ActorId */
             JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
-        WHERE t.issuerTxState = 2 AND t.reversed = 0 AND t.channelID = @actorID AND t.channelType ='agent'
+        WHERE t.issuerTxState = 2 AND t.reversed = 0 AND s.actorId = @actorID /*AND t.channelID = @actorID*/ AND t.channelType ='agent'
         AND s.[state] IS NULL AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
         AND ( @transferDateTimeFrom IS NULL OR t.transferDateTime >= @transferDateTimeFrom )
         AND ( @transferDateTimeTo IS NULL OR t.transferDateTime < @transferDateTimeTo )
@@ -85,9 +85,9 @@ SET NOCOUNT ON
                                 END
 					        END DESC) AS rowNum
         FROM [transfer].split s
-            JOIN [transfer].[transfer] t ON t.transferId = s.transferId AND t.channelID = s.ActorId 
+            JOIN [transfer].[transfer] t ON t.transferId = s.transferId /*AND t.channelID = s.ActorId */
             JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
-        WHERE t.issuerTxState = 2 AND t.reversed = 0 AND t.channelID = @actorID AND t.channelType ='agent'
+        WHERE t.issuerTxState = 2 AND t.reversed = 0 AND /*t.channelID = @actorID*/ s.actorId = @actorID  AND t.channelType ='agent'
         AND s.[state] IS NULL AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
         AND ( @transferDateTimeFrom IS NULL OR t.transferDateTime >= @transferDateTimeFrom )
         AND ( @transferDateTimeTo IS NULL OR t.transferDateTime < @transferDateTimeTo )
