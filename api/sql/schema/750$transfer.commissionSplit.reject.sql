@@ -21,7 +21,7 @@ BEGIN TRY
         -- 5 -->rejected
         
         INSERT INTO [transfer].[splitAudit] (splitId, field, oldValue, createdBy, createdOn)
-        SELECT s.splitId, 'state', s.[state], @userId, @today
+        SELECT s.splitId, 'status', s.[state], @userId, @today
         FROM [transfer].split s
         JOIN @splitIds si on si.value = s.splitId
 
