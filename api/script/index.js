@@ -199,6 +199,8 @@ module.exports = {
             return this.bus.importMethod('db/atm.card.check')({
                 cardId: params.cardId,
                 sourceAccount: params.sourceAccount,
+                destinationType: params.destinationType,
+                destinationTypeId: params.destinationTypeId,
                 destinationAccount: params.destinationAccount,
                 pinOffset: params.pinOffset,
                 pinOffsetNew: params.pinOffsetNew,
