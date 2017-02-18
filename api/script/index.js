@@ -132,8 +132,13 @@ module.exports = {
                 return transfer;
             }
         };
+
+        function canSkip(transfer) {
+            return (transfer.transferType === 'changePin') && transfer.issuerFee === 0;
+        }
+
         var destinationPushExecute = (transfer) => {
-            if (transfer.destinationPort) {
+            if (transfer.destinationPort && !canSkip(transfer)) {
                 return this.bus.importMethod('db/transfer.push.requestIssuer')(transfer)
                     .then(() => transfer)
                     .then(this.bus.importMethod(transfer.destinationPort + '/transfer.push.execute'))
@@ -142,13 +147,13 @@ module.exports = {
                         transfer.transferIdIssuer = result.transferIdIssuer;
                         return transfer;
                     })
-                    .catch(handleError(transfer, 'Issuer'));
+                    .catch(handleError(transfer, 'Issuer'))
+                    .then(this.bus.importMethod('db/transfer.push.confirmIssuer'))
+                    .then(() => transfer);
             } else {
                 return transfer;
             }
         };
-        var confirmIssuer = (transfer) => this.bus.importMethod('db/transfer.push.confirmIssuer')(transfer)
-            .then(() => transfer);
         var merchantTransferExecute = (transfer) => {
             if (transfer.merchantPort) {
                 return this.bus.importMethod('db/transfer.push.requestMerchant')(transfer)
@@ -161,9 +166,9 @@ module.exports = {
                             transferIdMerchant: transfer.transferIdMerchant
                         };
                     })
+                    .catch(handleError(transfer, 'Merchant'))
                     .then(this.bus.importMethod('db/transfer.push.confirmMerchant'))
-                    .then(() => transfer)
-                    .catch(handleError(transfer, 'Merchant'));
+                    .then(() => transfer);
             } else {
                 return transfer;
             }
@@ -173,7 +178,6 @@ module.exports = {
             .then(dbPushExecute)
             .then(merchantTransferValidate)
             .then(destinationPushExecute)
-            .then(confirmIssuer)
             .then(merchantTransferExecute);
     },
     'idle.execute': function(params, $meta) {
