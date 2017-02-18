@@ -1,3 +1,13 @@
+<a name="5.15.4"></a>
+## [5.15.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.3...v5.15.4) (2017-02-18)
+
+
+### Bug Fixes
+
+* change pin skip destination ([bed0d82](https://github.com/softwaregroup-bg/ut-transfer/commit/bed0d82))
+
+
+
 <a name="5.15.3"></a>
 ## [5.15.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.2...v5.15.3) (2017-02-18)
 
