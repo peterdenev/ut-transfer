@@ -1,3 +1,14 @@
+<a name="5.15.3"></a>
+## [5.15.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.2...v5.15.3) (2017-02-18)
+
+
+### Bug Fixes
+
+* destination handling for cards ([c8ee181](https://github.com/softwaregroup-bg/ut-transfer/commit/c8ee181))
+* handle expiration ([9ec27eb](https://github.com/softwaregroup-bg/ut-transfer/commit/9ec27eb))
+
+
+
 <a name="5.15.2"></a>
 ## [5.15.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.1...v5.15.2) (2017-02-14)
 
