@@ -1,3 +1,19 @@
+<a name="5.16.0"></a>
+# [5.16.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.5...v5.16.0) (2017-02-19)
+
+
+### Bug Fixes
+
+* sms registration ([b43395d](https://github.com/softwaregroup-bg/ut-transfer/commit/b43395d))
+
+
+### Features
+
+* added cardAlert & cashAlert info to vTransferEvent ([f63a6ee](https://github.com/softwaregroup-bg/ut-transfer/commit/f63a6ee))
+* vTransferEvent view added ([f82926c](https://github.com/softwaregroup-bg/ut-transfer/commit/f82926c))
+
+
+
 <a name="5.15.5"></a>
 ## [5.15.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.4...v5.15.5) (2017-02-19)
 
