@@ -133,8 +133,9 @@ module.exports = {
             }
         };
 
-        function canSkip(transfer) {
-            return (transfer.transferType === 'changePin') && transfer.issuerFee === 0;
+        function canSkip(transfer) { // todo streamline skip logic
+            return ((transfer.transferType === 'changePin') && (transfer.issuerFee === 0)) ||
+                ((transfer.transferType === 'sms') && (transfer.issuerFee === 0));
         }
 
         var destinationPushExecute = (transfer) => {
