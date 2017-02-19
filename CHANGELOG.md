@@ -1,3 +1,13 @@
+<a name="5.15.5"></a>
+## [5.15.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.4...v5.15.5) (2017-02-19)
+
+
+### Bug Fixes
+
+* pass account types ([6f70e74](https://github.com/softwaregroup-bg/ut-transfer/commit/6f70e74))
+
+
+
 <a name="5.15.4"></a>
 ## [5.15.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.3...v5.15.4) (2017-02-18)
 
