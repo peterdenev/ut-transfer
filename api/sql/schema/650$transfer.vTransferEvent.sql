@@ -13,6 +13,7 @@ SELECT
     t.[merchantId],
     t.[transferTypeId],
     t.[cardId],
+    t.[reversed],
     request.udfDetails [requestDetails],
     request.eventDateTime [requestDateTime],
     request.type [requestType],
