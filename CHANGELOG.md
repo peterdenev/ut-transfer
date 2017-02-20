@@ -1,3 +1,13 @@
+<a name="5.16.1"></a>
+## [5.16.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.16.0...v5.16.1) (2017-02-20)
+
+
+### Bug Fixes
+
+* renamed fields ([112c0a6](https://github.com/softwaregroup-bg/ut-transfer/commit/112c0a6))
+
+
+
 <a name="5.16.0"></a>
 # [5.16.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.15.5...v5.16.0) (2017-02-19)
 
