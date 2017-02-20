@@ -186,7 +186,7 @@ BEGIN TRY
             OUTPUT inserted.transferId, inserted.sourceAccount, inserted.destinationAccount, inserted.transferAmount INTO @transfer
             SELECT s.debit, s.credit, 'GHS' /*transferCurrency*/,  sum(s.amount), /*s.actorId */ @channelId, 'agent', @transferTypeFeeId,
                 @transferDateTime, REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''),
-                @destinationSettlementDate, 0, NULL, 'cbs',  0.00, 0.00, 0.00, 'FEE'
+                @destinationSettlementDate, 0, NULL, 'cbs',  0.00, 0.00, 0.00, @description+' -CHARGES'
             FROM @splitTT s
 			WHERE s.tag LIKE '%|realtime|%' AND (tag LIKE '%|issuer|%' OR tag LIKE '%|acquirer|%')
             GROUP BY s.credit, s.debit--, s.actorId
