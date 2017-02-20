@@ -29,14 +29,14 @@ SELECT
     reverseError.eventDateTime [reverseErrorDateTime],
     reverseError.type [reverseErrorType],
     reverseError.message [reverseErrorMessage],
-    cardAlert.udfDetails [cardAlertErrorDetails],
-    cardAlert.eventDateTime [cardAlertErrorDateTime],
-    cardAlert.type [cardAlertErrorType],
-    cardAlert.message [cardAlertErrorMessage],
-    cashAlert.udfDetails [cashAlertErrorDetails],
-    cashAlert.eventDateTime [cashAlertErrorDateTime],
-    cashAlert.type [cashAlertErrorType],
-    cashAlert.message [cashAlertErrorMessage],
+    cardAlert.udfDetails [cardAlertDetails],
+    cardAlert.eventDateTime [cardAlertDateTime],
+    cardAlert.type [cardAlertType],
+    cardAlert.message [cardAlertMessage],
+    cashAlert.udfDetails [cashAlertDetails],
+    cashAlert.eventDateTime [cashAlertDateTime],
+    cashAlert.type [cashAlertType],
+    cashAlert.message [cashAlertMessage],
     n.itemName [transferType]
 FROM
     [transfer].[vTransfer] t
