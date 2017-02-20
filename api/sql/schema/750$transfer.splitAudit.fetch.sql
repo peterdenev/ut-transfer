@@ -10,8 +10,8 @@ AS
         WHEN s.field ='status' AND s.oldValue = '5' THEN  'Rejected' 
         WHEN s.field ='status' AND s.oldValue = '4' THEN  'Authorized' 
         ELSE s.oldValue
-
     END AS oldValue, 
+    s.createdOn,
     p.firstName, p.lastName
     FROM transfer.splitAudit s
     JOIN customer.person p ON p.actorId = s.createdBy
