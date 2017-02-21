@@ -55,17 +55,17 @@ BEGIN TRY
         JOIN @splitIds si ON si.value = s.splitId
         GROUP BY s.credit, s.debit, s.actorId
 
+        INSERT INTO [transfer].[splitAudit] (splitId, field, oldValue, createdBy, createdOn)
+        SELECT s.splitId, 'status', s.[state], @userId, @today
+        FROM [transfer].split s
+        JOIN @splitIds si on si.value = s.splitId
+
         UPDATE s
         SET [state] = 2,
             txtId = t.transferId
         FROM [transfer].split s
         JOIN @splitIds si ON si.value = s.splitId
         JOIN #transfer t ON t.sourceAccount = s.debit AND t.destinationAccount = s.credit
-
-        INSERT INTO [transfer].[splitAudit] (splitId, field, oldValue, createdBy, createdOn)
-        SELECT s.splitId, 'status', s.[state], @userId, @today
-        FROM [transfer].split s
-        JOIN @splitIds si on si.value = s.splitId
 
     END
 

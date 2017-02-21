@@ -3,7 +3,7 @@ MERGE INTO
 USING
     (VALUES
         ('deposit','Deposit / cash in'),
-        ('withdraw','Withdraw / cash out'),
+        ('withdraw','Withdrawal / cash out'),
         --('withdrawOtp','Withdraw with OTP'),
         ('transfer','Funds transfer to account'),
         --('transferOtp','Funds transfer with OTP'),
@@ -17,7 +17,7 @@ USING
         --('loanDisburse', 'Loan disbursement'),
         --('loanRepay', 'Loan repayment'),
         --('forex', 'Foreign currency exchange'),
-        ('agentMinistatement', 'Agent Ministatement'),
+        ('agentMinistatement', 'Agent Mini Statement'),
         ('agentFloatRequest', 'Agent Float Request'),
         ('agentBalance', 'Agent Balance'),
         ('commission', 'Commission'),
@@ -27,6 +27,7 @@ JOIN
 	core.itemType t on t.alias='operation'
 ON
     target.itemCode = source.itemCode
+WHEN MATCHED THEN UPDATE SET target.itemName = source.itemName
 WHEN
     NOT MATCHED BY TARGET THEN
 INSERT
