@@ -38,6 +38,11 @@ SET NOCOUNT ON
     BEGIN
         SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
             s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount,
+            CASE WHEN t.issuerTxState=2 THEN 'Successful' 
+            WHEN t.issuerTxState = 4 THEN 'Failed (cbs)'
+            WHEN t.issuerTxState = 3 THEN 'Failed'
+            WHEN t.issuerTxState = 1 THEN 'Requested'
+            ELSE 'Unknown' END AS [Status],
             ROW_NUMBER() OVER(ORDER BY
 					         CASE WHEN @sortOrder = 'ASC' THEN
 						        CASE
@@ -65,6 +70,11 @@ SET NOCOUNT ON
     BEGIN
         SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
             s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount,
+            CASE WHEN t.issuerTxState=2 THEN 'Successful' 
+            WHEN t.issuerTxState = 4 THEN 'Failed (cbs)'
+            WHEN t.issuerTxState = 3 THEN 'Failed'
+            WHEN t.issuerTxState = 1 THEN 'Requested'
+            ELSE 'Unknown' END AS [Status],
             ROW_NUMBER() OVER(ORDER BY
 					         CASE WHEN @sortOrder = 'ASC' THEN
 						        CASE
