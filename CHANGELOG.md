@@ -1,3 +1,13 @@
+<a name="5.17.1"></a>
+## [5.17.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.17.0...v5.17.1) (2017-02-24)
+
+
+### Bug Fixes
+
+* add columns to vTransferEvent ([9eeb963](https://github.com/softwaregroup-bg/ut-transfer/commit/9eeb963))
+
+
+
 <a name="5.17.0"></a>
 # [5.17.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.16.1...v5.17.0) (2017-02-21)
 
