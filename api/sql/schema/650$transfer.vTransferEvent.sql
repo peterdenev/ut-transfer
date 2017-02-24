@@ -66,7 +66,7 @@ SELECT
         ELSE ISNULL(cashAlert.message, '') + ISNULL(cardAlert.message, '')
     END as alerts
 FROM
-    [transfer].[vTransfer] t
+    [transfer].[transfer] t
 OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
