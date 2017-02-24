@@ -1,3 +1,14 @@
+<a name="5.17.2"></a>
+## [5.17.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.17.1...v5.17.2) (2017-02-24)
+
+
+### Bug Fixes
+
+* rename state ([fac8b0d](https://github.com/softwaregroup-bg/ut-transfer/commit/fac8b0d))
+* show reversed transactions in the report ([7c00c4f](https://github.com/softwaregroup-bg/ut-transfer/commit/7c00c4f))
+
+
+
 <a name="5.17.1"></a>
 ## [5.17.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.17.0...v5.17.1) (2017-02-24)
 
