@@ -1,3 +1,13 @@
+<a name="5.17.3"></a>
+## [5.17.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.17.2...v5.17.3) (2017-03-08)
+
+
+### Bug Fixes
+
+* dependencies ([61a26f6](https://github.com/softwaregroup-bg/ut-transfer/commit/61a26f6))
+
+
+
 <a name="5.17.2"></a>
 ## [5.17.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.17.1...v5.17.2) (2017-02-24)
 
