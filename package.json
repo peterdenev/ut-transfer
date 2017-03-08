@@ -10,8 +10,8 @@
     "ut-tools": "^5.13.5"
   },
   "peerDependencies": {
-    "ut-bus": "~5.8.2",
-    "ut-rule": "~7.0.0"
+    "ut-bus": "^5.9.0",
+    "ut-rule": "^8.1.0"
   },
   "description": "UT Transfer",
   "scripts": {
