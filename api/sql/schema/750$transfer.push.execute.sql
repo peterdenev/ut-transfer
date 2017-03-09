@@ -116,10 +116,10 @@ BEGIN TRY
         @expireTime,
         @destinationPort,
         @transferCurrency,
-        @transferAmount,
-        @acquirerFee,
-        @issuerFee,
-        @transferFee,
+        CONVERT( DECIMAL(17,2), @transferAmount ), --@transferAmount,
+        CONVERT( DECIMAL(17,2), @acquirerFee ), --@acquirerFee
+        CONVERT( DECIMAL(17,2), @issuerFee ), --@issuerFee
+        CONVERT( DECIMAL(17,2), @transferFee ), --@transferFee
         @description,
         0
 
@@ -142,7 +142,7 @@ BEGIN TRY
             @split = @split, -- split with Alias as accounts
             @debitAccount= @sourceAccount, --debit Account of transaction
             @creditAccount= @destinationAccount, --credit Account of transaction
-	        @meta = @meta -- information for the user that makes the operation
+	       @meta = @meta -- information for the user that makes the operation
 
         INSERT INTO
                 [transfer].[split](
@@ -160,7 +160,7 @@ BEGIN TRY
             @transferId,
             debit,
             credit,
-            amount,
+            CONVERT( DECIMAL(17,2), amount ), --amount
             conditionId,
             splitNameId,
             [description],

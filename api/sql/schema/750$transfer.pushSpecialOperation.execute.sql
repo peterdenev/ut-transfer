@@ -125,10 +125,10 @@ BEGIN TRY
         @expireTime,
         @destinationPort,
         @transferCurrency,
-        @transferAmount,
-        @acquirerFee,
-        @issuerFee,
-        @transferFee,
+        CONVERT( DECIMAL(17,2), @transferAmount ), --@transferAmount,
+        CONVERT( DECIMAL(17,2), @acquirerFee ), --@acquirerFee
+        CONVERT( DECIMAL(17,2), @issuerFee ), --@issuerFee
+        CONVERT( DECIMAL(17,2), @transferFee ), --@transferFee
         @description,
         0
 
@@ -184,7 +184,7 @@ BEGIN TRY
                 channelId, channelType, transferTypeId, transferDateTime, localDateTime, settlementDate, reversed, issuerTxState,
                 destinationPort, [acquirerFee], [issuerFee], [transferFee], [description])
             OUTPUT inserted.transferId, inserted.sourceAccount, inserted.destinationAccount, inserted.transferAmount INTO @transfer
-            SELECT s.debit, s.credit, 'GHS' /*transferCurrency*/,  sum(s.amount), /*s.actorId */ @channelId, 'agent', @transferTypeFeeId,
+            SELECT s.debit, s.credit, 'GHS' /*transferCurrency*/,  CONVERT(DECIMAL(15,2),sum(s.amount)), /*s.actorId */ @channelId, 'agent', @transferTypeFeeId,
                 @transferDateTime, REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''),
                 @destinationSettlementDate, 0, NULL, 'cbs',  0.00, 0.00, 0.00, @description+' -CHARGES'
             FROM @splitTT s
@@ -224,7 +224,7 @@ BEGIN TRY
             @transferId,
             debit,
             credit,
-            amount,
+            CONVERT( DECIMAL(17,2), amount ),
             conditionId,
             splitNameId,
             [description],
