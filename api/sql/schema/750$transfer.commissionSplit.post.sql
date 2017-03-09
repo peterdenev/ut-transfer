@@ -48,7 +48,7 @@ BEGIN TRY
             channelId, channelType, transferTypeId, transferDateTime, localDateTime, settlementDate, reversed, issuerTxState,
             destinationPort, [acquirerFee], [issuerFee], [transferFee], [description])
         OUTPUT inserted.transferId, inserted.sourceAccount, inserted.destinationAccount, inserted.transferAmount INTO #transfer
-        SELECT s.debit, s.credit, 'GHS' /*transferCurrency*/,  sum(s.amount),
+        SELECT s.debit, s.credit, 'GHS' /*transferCurrency*/,  CONVERT( DECIMAL(17,2), sum(s.amount) ),
             s.actorId, 'agent', @transferTypeId, @tranferDT, @localDT, @settlementDate, 0, NULL,
             'cbs',  0.00, 0.00, 0.00, 'COMISSION'
         FROM [transfer].split s

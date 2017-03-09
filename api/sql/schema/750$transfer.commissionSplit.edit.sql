@@ -27,7 +27,7 @@ BEGIN TRY
 
 
         UPDATE [transfer].split
-        SET amount = @amount
+        SET amount = CONVERT( DECIMAL(17,2), @amount )
         FROM [transfer].split
         WHERE splitId = @splitId
     END
