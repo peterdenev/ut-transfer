@@ -35,7 +35,8 @@
 * issuerTxState
 * acquirerTxState
 * merchantTxState
-* destinationId
+* issuerId
+* ledgerId
 
 ### Amounts
 

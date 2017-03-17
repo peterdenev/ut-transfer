@@ -1,4 +1,5 @@
 const DECLINED = {
+    ledger: ['transfer.insufficientFunds', 'transfer.invalidAccount', 'transfer.genericDecline', 'transfer.incorrectPin'],
     issuer: ['transfer.insufficientFunds', 'transfer.invalidAccount', 'transfer.genericDecline', 'transfer.incorrectPin'],
     merchant: ['merchant.genericDecline']
 };
@@ -8,7 +9,7 @@ var currency = require('../../currency');
 var processReversal = (bus, log) => params => {
     var transferId;
 
-    var destinationReversal = reversal => {
+    var portReversal = (port, reversal) => {
         reversal = reversal && reversal[0] && reversal[0][0];
         if (reversal) {
             transferId = reversal.transferId;
@@ -17,7 +18,19 @@ var processReversal = (bus, log) => params => {
                 transfer: currency.amount(reversal.transferCurrency, reversal.transferAmount)
             };
         }
-        return reversal && bus.importMethod(`${reversal.destinationPort}/transfer.${reversal.transferType}.${reversal.operation}`)(reversal);
+        return reversal && bus.importMethod(`${port}/transfer.${reversal.transferType}.${reversal.operation}`)(reversal);
+    };
+
+    var reverse = reversal => {
+        return portReversal(reversal.issuerPort, reversal)
+        .then(result => {
+            if (reversal.issuerPort === reversal.ledgerPort) {
+                return result;
+            } else {
+                return portReversal(reversal.ledgerPort, reversal)
+                .then(() => result);
+            }
+        });
     };
 
     var confirmReversal = reversalResult => {
@@ -43,7 +56,7 @@ var processReversal = (bus, log) => params => {
     };
 
     return Promise.resolve(params)
-        .then(destinationReversal)
+        .then(reverse)
         .then(confirmReversal)
         .catch(failReversal);
 };
@@ -112,8 +125,9 @@ module.exports = {
                 if (pushResult && pushResult.transferId) {
                     transfer.transferId = pushResult.transferId;
                     transfer.merchantPort = pushResult.merchantPort;
-                    transfer.destinationPort = pushResult.destinationPort;
-                    transfer.destinationSettlementDate = pushResult.destinationSettlementDate;
+                    transfer.issuerPort = pushResult.issuerPort;
+                    transfer.ledgerPort = pushResult.ledgerPort;
+                    transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
                     transfer.localDateTime = pushResult.localDateTime;
                     if (transfer.abortAcquirer) {
                         return handleError(transfer, 'Acquirer')(transfer.abortAcquirer);
@@ -138,11 +152,28 @@ module.exports = {
                 ((transfer.transferType === 'sms') && (transfer.issuerFee === 0));
         }
 
-        var destinationPushExecute = (transfer) => {
-            if (transfer.destinationPort && !canSkip(transfer)) {
+        var ledgerPushExecute = (transfer) => {
+            if (transfer.ledgerPort && (transfer.issuerPort !== transfer.ledgerPort)) {
+                return this.bus.importMethod('db/transfer.push.requestLedger')(transfer)
+                    .then(() => transfer)
+                    .then(this.bus.importMethod(transfer.ledgerPort + '/transfer.push.execute'))
+                    .catch(handleError(transfer, 'Ledger'))
+                    .then(result => {
+                        transfer.transferIdLedger = result.transferIdIssuer;
+                        return transfer;
+                    })
+                    .then(this.bus.importMethod('db/transfer.push.confirmLedger'))
+                    .then(() => transfer);
+            } else {
+                return transfer;
+            }
+        };
+
+        var issuerPushExecute = (transfer) => {
+            if (transfer.issuerPort && !canSkip(transfer)) {
                 return this.bus.importMethod('db/transfer.push.requestIssuer')(transfer)
                     .then(() => transfer)
-                    .then(this.bus.importMethod(transfer.destinationPort + '/transfer.push.execute'))
+                    .then(this.bus.importMethod(transfer.issuerPort + '/transfer.push.execute'))
                     .then(result => {
                         transfer.balance = result.balance;
                         transfer.transferIdIssuer = result.transferIdIssuer;
@@ -178,7 +209,8 @@ module.exports = {
         return ruleValidate(params)
             .then(dbPushExecute)
             .then(merchantTransferValidate)
-            .then(destinationPushExecute)
+            .then(ledgerPushExecute)
+            .then(issuerPushExecute)
             .then(merchantTransferExecute);
     },
     'idle.execute': function(params, $meta) {
@@ -222,7 +254,8 @@ module.exports = {
                 sourceAccountName: result.sourceAccountName,
                 destinationAccount: result.destinationAccountNumber,
                 destinationAccountName: result.destinationAccountName,
-                destinationId: result.issuerId,
+                issuerId: result.issuerId,
+                ledgerId: result.ledgerId,
                 cardNumber: result.cardNumber,
                 ordererId: result.ordererId
             }))

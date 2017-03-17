@@ -103,7 +103,8 @@ Definitions
 * **params.cardId** - card id of the card (in case of card transaction)
 * **params.sourceAccount** - account number of the source account
 * **params.destinationAccount** - account number of the destination account
-* **params.destinationId** - identifier of the issuer (partnerId from the transfer.partner table)
+* **params.issuerId** - identifier of the issuer (partnerId from the transfer.partner table)
+* **params.ledgerId** - identifier of the ledger, where transfer should also be posted (defaults to 'cbs')
 * **params.transferCurrency** - alphabetic currency code
 * **params.transferAmount** - amount of the transfer
 * **params.acquirerFee** - fee to be paid to the acquirer, debited from the source account in addition to the transfer amount

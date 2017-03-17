@@ -17,7 +17,8 @@ ALTER PROCEDURE [transfer].[push.execute]
     @expireSeconds int,
     @transferCurrency varchar(3),
     @transferAmount money,
-    @destinationId varchar(50),
+    @issuerId varchar(50),
+    @ledgerId varchar(50),
     @acquirerFee money,
     @issuerFee money,
     @transferFee money,
@@ -32,11 +33,14 @@ DECLARE @merchantPort varchar(50),
     @merchantSettlementDate datetime,
     @merchantSerialNumber bigint,
     @merchantSettings XML,
-    @destinationPort varchar(50),
-    @destinationMode varchar(20),
-    @destinationSettlementDate datetime,
-    @destinationSerialNumber bigint,
-    @destinationSettings XML
+    @issuerPort varchar(50),
+    @issuerMode varchar(20),
+    @issuerSettlementDate datetime,
+    @issuerSerialNumber bigint,
+    @issuerSettings XML,
+    @ledgerPort varchar(50),
+    @ledgerMode varchar(20),
+    @ledgerSerialNumber bigint
 
 BEGIN TRY
     -- todo check permission
@@ -56,13 +60,22 @@ BEGIN TRY
     UPDATE
         [transfer].[partner]
     SET
-        @destinationPort = port,
-        @destinationMode = mode,
-        @destinationSettlementDate = settlementDate,
-        @destinationSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1,
-        @destinationSettings = settings
+        @issuerPort = port,
+        @issuerMode = mode,
+        @issuerSettlementDate = settlementDate,
+        @issuerSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1,
+        @issuerSettings = settings
     WHERE
-        partnerId = ISNULL(@destinationId, 'cbs')
+        partnerId = @issuerId
+
+    UPDATE
+        [transfer].[partner]
+    SET
+        @ledgerPort = port,
+        @ledgerMode = mode,
+        @ledgerSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1
+    WHERE
+        partnerId = @ledgerId
 
     INSERT INTO [transfer].[transfer](
         transferDateTime,
@@ -82,7 +95,8 @@ BEGIN TRY
         sourceAccount,
         destinationAccount,
         expireTime,
-        destinationId,
+        issuerId,
+        ledgerId,
         transferCurrency,
         transferAmount,
         acquirerFee,
@@ -97,18 +111,21 @@ BEGIN TRY
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @merchantSettlementDate, 120),'-',''),':',''),' ','') merchantSettlementDate,
         @merchantSerialNumber merchantSerialNumber,
         @merchantSettings merchantSettings,
-        @destinationMode destinationMode,
-        REPLACE(REPLACE(REPLACE(CONVERT(varchar, @destinationSettlementDate, 120),'-',''),':',''),' ','') destinationSettlementDate,
-        @destinationSerialNumber destinationSerialNumber,
-        @destinationSettings destinationSettings,
-        @destinationPort destinationPort
+        @issuerMode issuerMode,
+        REPLACE(REPLACE(REPLACE(CONVERT(varchar, @issuerSettlementDate, 120),'-',''),':',''),' ','') issuerSettlementDate,
+        @issuerSerialNumber issuerSerialNumber,
+        @issuerSettings issuerSettings,
+        @issuerPort issuerPort,
+        @ledgerPort ledgerPort,
+        @ledgerMode ledgerMode,
+        @ledgerSerialNumber ledgerSerialNumber
     SELECT
         @transferDateTime,
         @transferTypeId,
         @acquirerCode,
         @transferIdAcquirer,
         ISNULL(@localDateTime, REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ','')),
-        @destinationSettlementDate,
+        @issuerSettlementDate,
         @channelId,
         @channelType,
         @ordererId,
@@ -120,7 +137,8 @@ BEGIN TRY
         @sourceAccount,
         @destinationAccount,
         ISNULL(@expireTime, DATEADD(SECOND, @expireSeconds, @transferDateTime)),
-        @destinationId,
+        @issuerId,
+        @ledgerId,
         @transferCurrency,
         @transferAmount,
         @acquirerFee,

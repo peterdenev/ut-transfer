@@ -1,5 +1,5 @@
 ALTER PROCEDURE [transfer].[idle.execute]
-    @destinationPort varchar(50)
+    @issuerPort varchar(50)
 AS
 DECLARE @callParams XML
 DECLARE
@@ -29,7 +29,7 @@ BEGIN TRY
             FROM
                 [transfer].[transfer] t
             JOIN
-                [transfer].[partner] p ON p.partnerId = t.destinationId AND p.mode in ('online') AND p.port = @destinationPort
+                [transfer].[partner] p ON p.partnerId = t.issuerId AND p.mode in ('online') AND p.port = @issuerPort
             WHERE
                 t.issuerTxState IN (8, 11, 13, 14) AND
                 ISNULL(t.acquirerTxState, CASE t.channelType WHEN 'POS' THEN 2 else 0 END) IN (2) AND
@@ -64,7 +64,7 @@ BEGIN TRY
                 FROM
                     [transfer].[transfer] t
                 JOIN
-                    [transfer].[partner] p ON p.partnerId = t.destinationId AND p.port = @destinationPort
+                    [transfer].[partner] p ON p.partnerId = t.issuerId AND p.port = @issuerPort
                 WHERE
                     (
                         (t.issuerTxState = 2 AND ISNULL(t.acquirerTxState, 0) IN (0 , 3, 4, 5) AND p.mode = 'online') OR                --tx succeeded at issuer during online but failed at acquirer and current mode is online
@@ -111,7 +111,7 @@ BEGIN TRY
                 JOIN
                     [transfer].[transfer] d ON d.transferId = cc.firstTransferId
                 JOIN
-                    [transfer].[partner] p ON p.partnerId = d.destinationId AND p.port = @destinationPort
+                    [transfer].[partner] p ON p.partnerId = d.issuerId AND p.port = @issuerPort
                 WHERE
                     cc.status IS NULL
                     AND cc.expireTime < GETDATE()
@@ -133,7 +133,8 @@ BEGIN TRY
         SELECT TOP 1
             @mtid mti,
             @opcode operation,
-            @destinationPort destinationPort,
+            @issuerPort issuerPort,
+            p.port ledgerPort,
             t.cardId,
             'push' transferType,
             -- CASE
@@ -143,7 +144,7 @@ BEGIN TRY
             t.transferAmount,
             t.transferCurrency,
             t.localDateTime,
-            t.settlementDate destinationSettlementDate,
+            t.settlementDate issuerSettlementDate,
             t.merchantType,
             e.udfDetails udfAcquirer,
             t.transferId,
@@ -154,6 +155,8 @@ BEGIN TRY
             [transfer].[transfer] t
         LEFT JOIN
             [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
+        LEFT JOIN
+            [transfer].[partner] p ON p.partnerId = t.ledgerId
         WHERE
             t.transferId = @txid
         ORDER BY

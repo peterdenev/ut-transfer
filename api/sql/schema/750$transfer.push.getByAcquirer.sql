@@ -7,13 +7,14 @@ AS
     SELECT TOP 1
         '430' mti,
         'reverse' operation,
-        p.port destinationPort,
+        pi.port issuerPort,
+        pl.port ledgerPort,
         t.cardId,
         'push' transferType,
         t.transferAmount,
         t.transferCurrency,
         t.localDateTime,
-        t.settlementDate destinationSettlementDate,
+        t.settlementDate issuerSettlementDate,
         t.merchantType,
         e.udfDetails udfAcquirer,
         t.transferId,
@@ -24,7 +25,9 @@ AS
     FROM
         [transfer].[transfer] t
     JOIN
-        [transfer].[partner] p on p.partnerId = t.destinationId
+        [transfer].[partner] pi on pi.partnerId = t.issuerId
+    LEFT JOIN
+        [transfer].[partner] pl on pl.partnerId = t.ledgerId
     LEFT JOIN
         [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
     WHERE
