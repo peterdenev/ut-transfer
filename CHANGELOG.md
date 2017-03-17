@@ -1,3 +1,18 @@
+<a name="6.0.0"></a>
+# [6.0.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.17.3...v6.0.0) (2017-03-17)
+
+
+### Features
+
+* improve acquirer transfers ([f769e0c](https://github.com/softwaregroup-bg/ut-transfer/commit/f769e0c))
+
+
+### BREAKING CHANGES
+
+* parameter destinationId is removed from transfer.push.execute and instead, issuerId and ledgerId should be used.
+
+
+
 <a name="5.17.3"></a>
 ## [5.17.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.17.2...v5.17.3) (2017-03-08)
 
