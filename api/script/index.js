@@ -9,7 +9,9 @@ var currency = require('../../currency');
 var processReversal = (bus, log) => params => {
     var transferId;
 
-    var portReversal = (port, reversal) => {
+    var portReversal = (port, reversal) => bus.importMethod(`${port}/transfer.${reversal.transferType}.${reversal.operation}`)(reversal);
+
+    var reverse = reversal => {
         reversal = reversal && reversal[0] && reversal[0][0];
         if (reversal) {
             transferId = reversal.transferId;
@@ -18,11 +20,7 @@ var processReversal = (bus, log) => params => {
                 transfer: currency.amount(reversal.transferCurrency, reversal.transferAmount)
             };
         }
-        return reversal && bus.importMethod(`${port}/transfer.${reversal.transferType}.${reversal.operation}`)(reversal);
-    };
-
-    var reverse = reversal => {
-        return portReversal(reversal.issuerPort, reversal)
+        return reversal && portReversal(reversal.issuerPort, reversal)
         .then(result => {
             if (reversal.issuerPort === reversal.ledgerPort) {
                 return result;
