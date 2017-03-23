@@ -1,3 +1,14 @@
+<a name="6.0.1"></a>
+## [6.0.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.0.0...v6.0.1) (2017-03-23)
+
+
+### Bug Fixes
+
+* dependencies ([2a3d54a](https://github.com/softwaregroup-bg/ut-transfer/commit/2a3d54a))
+* reversal handling ([2530489](https://github.com/softwaregroup-bg/ut-transfer/commit/2530489))
+
+
+
 <a name="6.0.0"></a>
 # [6.0.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v5.17.3...v6.0.0) (2017-03-17)
 
