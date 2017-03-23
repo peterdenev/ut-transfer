@@ -7,7 +7,7 @@
     "ut-error": "^5.4.0"
   },
   "devDependencies": {
-    "ut-tools": "^5.13.5"
+    "ut-tools": "^5.15.0"
   },
   "peerDependencies": {
     "ut-bus": "^5.9.0",
