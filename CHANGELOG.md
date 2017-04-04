@@ -1,3 +1,13 @@
+<a name="6.0.3"></a>
+## [6.0.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.0.2...v6.0.3) (2017-04-04)
+
+
+### Bug Fixes
+
+* update ut-rule ([24fdbf3](https://github.com/softwaregroup-bg/ut-transfer/commit/24fdbf3))
+
+
+
 <a name="6.0.2"></a>
 ## [6.0.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.0.1...v6.0.2) (2017-04-03)
 
