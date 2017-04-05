@@ -12,19 +12,19 @@ BEGIN TRY
     DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return INT = 0
 --    EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
 
-    SELECT TOP 1 @sortOrder = dir, @sortBy = field FROM @orderBy  
+    SELECT TOP 1 @sortOrder = dir, @sortBy = field FROM @orderBy
 
-    SET @callParams = ( SELECT    @startDate AS startDate, 
-                                  @endDate AS endDate, 
-                                  (SELECT * from @orderBy rows FOR XML AUTO, TYPE) AS orderBy, 
-                                  (SELECT * from @meta rows FOR XML AUTO, TYPE) AS meta 
+    SET @callParams = ( SELECT    @startDate AS startDate,
+                                  @endDate AS endDate,
+                                  (SELECT * from @orderBy rows FOR XML AUTO, TYPE) AS orderBy,
+                                  (SELECT * from @meta rows FOR XML AUTO, TYPE) AS meta
                         FOR XML RAW('params'),TYPE)
 
     SELECT 'transferWeekOfYear' AS resultSetName
 
-    ;WITH transferWeekOfYear AS 
+    ;WITH transferWeekOfYear AS
     (
-       SELECT  
+       SELECT
             DATEPART(ww,t.transferDateTime) AS weekNum,
             DATEPART(YYYY,t.transferDateTime) AS YearNum,
             COUNT(t.transferId) AS recordsTotalByDay,
@@ -42,10 +42,10 @@ BEGIN TRY
             SUM(ISNULL(t.amountSettlement, 0)) AS amountSettlement,
             SUM(SUM(ISNULL(t.amountSettlement, 0))) OVER (PARTITION BY 1) AS amountSettlementTotal,
             ROW_NUMBER() OVER (
-              ORDER BY CASE 
+              ORDER BY CASE
                 WHEN @sortOrder = 'ASC'
-                    THEN CASE                         
-                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(ww,t.transferDateTime)                     
+                    THEN CASE
+                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(ww,t.transferDateTime)
                         WHEN @sortBy = 'transferCount' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferCountPercent' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferAmount' THEN SUM(ISNULL(t.transferAmount, 0))
@@ -62,10 +62,10 @@ BEGIN TRY
                         WHEN @sortBy = 'amountSettlementPercent' THEN SUM(ISNULL(t.amountSettlement, 0))
                     END
                 END ASC,
-              CASE 
+              CASE
                 WHEN @sortOrder = 'DESC'
-                    THEN CASE 
-                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(ww,t.transferDateTime)                    
+                    THEN CASE
+                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(ww,t.transferDateTime)
                         WHEN @sortBy = 'transferCount' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferCountPercent' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferAmount' THEN SUM(ISNULL(t.transferAmount, 0))
@@ -80,15 +80,17 @@ BEGIN TRY
                         WHEN @sortBy = 'amountBillingPercent' THEN SUM(ISNULL(t.amountBilling, 0))
                         WHEN @sortBy = 'amountSettlement' THEN SUM(ISNULL(t.amountSettlement, 0))
                         WHEN @sortBy = 'amountSettlementPercent' THEN SUM(ISNULL(t.amountSettlement, 0))
-                    END                                                           
+                    END
                 END DESC
             ) AS rowNum,
             COUNT(*) OVER (PARTITION BY 1) AS dayTotal
        FROM [transfer].[vTransfer] t
-       WHERE   
+       WHERE
            (@startDate      IS NULL or t.transferDateTime      >= @startDate)
        AND (@endDate        IS NULL or t.transferDateTime      <= @endDate)
-       GROUP BY DATEPART(ww,t.transferDateTime) 
+       GROUP BY
+        DATEPART(ww,t.transferDateTime),
+        DATEPART(YYYY,t.transferDateTime)
     )
     SELECT  -- [weekDay]
         CAST(YearNum * 100 + weekNum AS NVARCHAR) AS agreatepredicate,
@@ -107,7 +109,7 @@ BEGIN TRY
         CAST(amountSettlement AS DECIMAL(18, 2)) AS amountSettlement,
         CAST(CAST(amountSettlement*100.0/ISNULL(NULLIF(amountSettlementTotal,0),1) AS DECIMAL(18, 2)) AS NVARCHAR(50)) + ' %'  AS amountSettlementPercent,
         100 + rowNum AS sortFlag
-    FROM transferWeekOfYear 
+    FROM transferWeekOfYear
        UNION ALL
     SELECT  -- TOTAL
        'TOTAL' AS agreatepredicate,
@@ -126,7 +128,7 @@ BEGIN TRY
        CAST(SUM(amountSettlement)  AS DECIMAL(18, 2)) AS amountSettlement,
        NULL AS amountSettlementPercent,
        200 AS sortFlag
-    FROM transferWeekOfYear 
+    FROM transferWeekOfYear
     UNION ALL
     SELECT  -- AVERAGE
         'AVERAGE' AS agreatepredicate,
@@ -145,10 +147,10 @@ BEGIN TRY
         CAST((SUM(amountSettlement)*1.0/Count(weekNum)) AS DECIMAL(18, 2)) AS amountSettlement,
         NULL AS amountSettlementPercent,
         301 AS sortFlag
-    FROM transferWeekOfYear         
+    FROM transferWeekOfYear
 --    having Count(Distinct weekDayNum)>0
     ORDER BY sortFlag
-          
+
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
@@ -156,6 +158,6 @@ BEGIN CATCH
     IF @@TRANCOUNT > 0
         ROLLBACK TRANSACTION
 
-    EXEC [core].[error] 
+    EXEC [core].[error]
     RETURN 55555
 END CATCH
