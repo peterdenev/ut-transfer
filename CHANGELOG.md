@@ -1,3 +1,13 @@
+<a name="6.1.1"></a>
+## [6.1.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.1.0...v6.1.1) (2017-04-05)
+
+
+### Bug Fixes
+
+* fix bad query ([2d879a3](https://github.com/softwaregroup-bg/ut-transfer/commit/2d879a3))
+
+
+
 <a name="6.1.0"></a>
 # [6.1.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.0.3...v6.1.0) (2017-04-05)
 
