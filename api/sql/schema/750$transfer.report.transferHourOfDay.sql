@@ -1,0 +1,158 @@
+ALTER PROCEDURE [transfer].[report.transferHourOfDay]
+    @startDate DATETIME = NULL,
+    @endDate DATETIME = NULL,
+    @orderBy core.orderByTT READONLY,                  -- what kind of sort to be used ascending or descending & on which column results to be sorted
+    @meta core.metaDataTT READONLY                     -- information for the user that makes the operation
+AS
+    DECLARE @callParams XML
+    DECLARE @sortOrder NVARCHAR(5) = 'ASC'
+    DECLARE @sortBy NVARCHAR(50) = 'agreatepredicate'
+BEGIN TRY
+     -- checks if the user has a right to make the operation
+    DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return INT = 0
+--    EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
+
+    SELECT TOP 1 @sortOrder = dir, @sortBy = field FROM @orderBy  
+
+    SET @callParams = ( SELECT  @startDate AS startDate, 
+                                @endDate AS endDate, 
+                                (SELECT * from @orderBy rows FOR XML AUTO, TYPE) AS orderBy, 
+                                (SELECT * from @meta rows FOR XML AUTO, TYPE) AS meta 
+                    FOR XML RAW('params'),TYPE)
+
+    SELECT 'transferHourOfDay' AS resultSetName;
+
+    WITH transferHourOfDay AS 
+    (
+        SELECT  -- TOP 20
+            DATEPART(HH,t.transferDateTime) AS hourOfDay,
+            COUNT(t.transferId) AS recordsTotalByDay,
+            SUM(COUNT(t.transferId)) OVER (PARTITION BY 1) AS recordsTotal,
+            SUM(ISNULL(t.transferAmount, 0)) AS transferAmount,
+            SUM(SUM(ISNULL(t.transferAmount, 0))) OVER (PARTITION BY 1) AS transferAmountTotal,
+            SUM(ISNULL(t.acquirerFee, 0)) AS acquirerFee,
+            SUM(SUM(ISNULL(t.acquirerFee, 0))) OVER (PARTITION BY 1) AS acquirerFeeTotal,
+            SUM(ISNULL(t.issuerFee, 0)) AS issuerFee,
+            SUM(SUM(ISNULL(t.issuerFee, 0))) OVER (PARTITION BY 1) AS issuerFeeTotal,
+            SUM(ISNULL(t.transferFee, 0)) AS transferFee,
+            SUM(SUM(ISNULL(t.transferFee, 0))) OVER (PARTITION BY 1) AS transferFeeTotal,
+            SUM(ISNULL(t.amountBilling, 0)) AS amountBilling,
+            SUM(SUM(ISNULL(t.amountBilling, 0))) OVER (PARTITION BY 1) AS amountBillingTotal,
+            SUM(ISNULL(t.amountSettlement, 0)) AS amountSettlement,
+            SUM(SUM(ISNULL(t.amountSettlement, 0))) OVER (PARTITION BY 1) AS amountSettlementTotal,
+            ROW_NUMBER() OVER (
+              ORDER BY CASE 
+                WHEN @sortOrder = 'ASC'
+                    THEN CASE                         
+                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(hh,t.transferDateTime)                     
+                        WHEN @sortBy = 'transferCount' THEN COUNT(t.transferId)
+                        WHEN @sortBy = 'transferCountPercent' THEN COUNT(t.transferId)
+                        WHEN @sortBy = 'transferAmount' THEN SUM(ISNULL(t.transferAmount, 0))
+                        WHEN @sortBy = 'transferAmountPercent' THEN SUM(ISNULL(t.transferAmount, 0))
+                        WHEN @sortBy = 'acquirerFee' THEN SUM(ISNULL(t.acquirerFee, 0))
+                        WHEN @sortBy = 'acquirerFeePercent' THEN SUM(ISNULL(t.acquirerFee, 0))
+                        WHEN @sortBy = 'issuerFee' THEN SUM(ISNULL(t.issuerFee, 0))
+                        WHEN @sortBy = 'issuerFeePercent' THEN SUM(ISNULL(t.issuerFee, 0))
+                        WHEN @sortBy = 'transferFee' THEN SUM(ISNULL(t.transferFee, 0))
+                        WHEN @sortBy = 'transferFeePercent' THEN SUM(ISNULL(t.transferFee, 0))
+                        WHEN @sortBy = 'amountBilling' THEN SUM(ISNULL(t.amountBilling, 0))
+                        WHEN @sortBy = 'amountBillingPercent' THEN SUM(ISNULL(t.amountBilling, 0))
+                        WHEN @sortBy = 'amountSettlement' THEN SUM(ISNULL(t.amountSettlement, 0))
+                        WHEN @sortBy = 'amountSettlementPercent' THEN SUM(ISNULL(t.amountSettlement, 0))
+                    END
+                END ASC,
+              CASE 
+                WHEN @sortOrder = 'DESC'
+                    THEN CASE 
+                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(hh,t.transferDateTime)                    
+                        WHEN @sortBy = 'transferCount' THEN COUNT(t.transferId)
+                        WHEN @sortBy = 'transferCountPercent' THEN COUNT(t.transferId)
+                        WHEN @sortBy = 'transferAmount' THEN SUM(ISNULL(t.transferAmount, 0))
+                        WHEN @sortBy = 'transferAmountPercent' THEN SUM(ISNULL(t.transferAmount, 0))
+                        WHEN @sortBy = 'acquirerFee' THEN SUM(ISNULL(t.acquirerFee, 0))
+                        WHEN @sortBy = 'acquirerFeePercent' THEN SUM(ISNULL(t.acquirerFee, 0))
+                        WHEN @sortBy = 'issuerFee' THEN SUM(ISNULL(t.issuerFee, 0))
+                        WHEN @sortBy = 'issuerFeePercent' THEN SUM(ISNULL(t.issuerFee, 0))
+                        WHEN @sortBy = 'transferFee' THEN SUM(ISNULL(t.transferFee, 0))
+                        WHEN @sortBy = 'transferFeePercent' THEN SUM(ISNULL(t.transferFee, 0))
+                        WHEN @sortBy = 'amountBilling' THEN SUM(ISNULL(t.amountBilling, 0))
+                        WHEN @sortBy = 'amountBillingPercent' THEN SUM(ISNULL(t.amountBilling, 0))
+                        WHEN @sortBy = 'amountSettlement' THEN SUM(ISNULL(t.amountSettlement, 0))
+                        WHEN @sortBy = 'amountSettlementPercent' THEN SUM(ISNULL(t.amountSettlement, 0))
+                    END                                                           
+                END DESC
+            ) AS rowNum,
+            COUNT(*) OVER (PARTITION BY 1) AS dayTotal
+        FROM [transfer].[vTransfer] t
+        WHERE   
+            (@startDate      IS NULL or t.transferDateTime      >= @startDate)
+        AND (@endDate        IS NULL or t.transferDateTime      <= @endDate)
+        GROUP BY DATEPART(hh,t.transferDateTime)
+    )
+    SELECT  -- [weekDay]
+        CAST(hourOfDay AS NVARCHAR) AS agreatepredicate,
+        CAST(recordsTotalByDay AS NVARCHAR(50)) AS transferCount,
+        CAST(CAST(recordsTotalByDay*100.0/ISNULL(NULLIF(recordsTotal,0),1) AS DECIMAL(18, 2)) AS NVARCHAR(50)) + ' %' AS transferCountPercent,
+        CAST(transferAmount AS DECIMAL(18, 2)) AS transferAmount,
+        CAST(CAST(transferAmount*100.0/ISNULL(NULLIF(transferAmountTotal,0),1) AS DECIMAL(18, 2)) AS NVARCHAR(50)) + ' %' AS transferAmountPercent,
+        CAST(acquirerFee AS DECIMAL(18, 2)) AS acquirerFee,
+        CAST(CAST(acquirerFee*100.0/ISNULL(NULLIF(acquirerFeeTotal,0),1) AS DECIMAL(18, 2)) AS NVARCHAR(50)) + ' %' AS acquirerFeePercent,
+        CAST(issuerFee AS DECIMAL(18, 2)) AS issuerFee,
+        CAST(CAST(issuerFee*100.0/ISNULL(NULLIF(issuerFeeTotal,0),1) AS DECIMAL(18, 2))AS NVARCHAR(50)) + ' %' AS issuerFeePercent,
+        CAST(transferFee AS DECIMAL(18, 2)) AS transferFee,
+        CAST(CAST(transferFee*100.0/ISNULL(NULLIF(transferFeeTotal,0),1) AS DECIMAL(18, 2)) AS NVARCHAR(50)) + ' %' AS transferFeePercent,
+        CAST(amountBilling AS DECIMAL(18, 2)) AS amountBilling,
+        CAST(CAST(amountBilling*100.0/ISNULL(NULLIF(amountBillingTotal,0),1) AS DECIMAL(18, 2))AS NVARCHAR(50)) + ' %' AS amountBillingPercent,
+        CAST(amountSettlement AS DECIMAL(18, 2)) AS amountSettlement,
+        CAST(CAST(amountSettlement*100.0/ISNULL(NULLIF(amountSettlementTotal,0),1) AS DECIMAL(18, 2)) AS NVARCHAR(50)) + ' %'  AS amountSettlementPercent,
+        100 + rowNum AS sortFlag
+    FROM transferHourOfDay 
+       UNION ALL
+    SELECT  -- TOTAL
+       'TOTAL' AS agreatepredicate,
+       CAST(SUM(recordsTotalByDay) AS NVARCHAR(50)) AS transferCount,
+       NULL AS transferCountPercent,
+       CAST(SUM(transferAmount) AS DECIMAL(18, 2)) AS transferAmount,
+       NULL AS transferAmountPercent,
+       CAST(SUM(acquirerFee) AS DECIMAL(18, 2)) AS acquirerFee,
+       NULL AS acquirerFeePercent,
+       CAST(SUM(issuerFee) AS DECIMAL(18, 2)) AS issuerFee,
+       NULL AS issuerFeePercent,
+       CAST(SUM(transferFee) AS DECIMAL(18, 2)) AS transferFee,
+       NULL AS transferFeePercent,
+       CAST(SUM(amountBilling) AS DECIMAL(18, 2)) AS amountBilling,
+       NULL AS amountBillingPercent,
+       CAST(SUM(amountSettlement)  AS DECIMAL(18, 2)) AS amountSettlement,
+       NULL AS amountSettlementPercent,
+       200 AS sortFlag
+    FROM transferHourOfDay 
+    UNION ALL
+    SELECT  -- AVERAGE
+        'AVERAGE' AS agreatepredicate,
+        CAST(CAST(AVG(recordsTotalByDay*1.0) AS DECIMAL(18, 2)) AS NVARCHAR(50)) AS transferCount,
+        NULL AS transferCountPercent,
+        CAST((SUM(transferAmount)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS transferAmount,
+        NULL AS transferAmountPercent,
+        CAST((SUM(acquirerFee)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS acquirerFee,
+        NULL AS acquirerFeePercent,
+        CAST((SUM(issuerFee)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS issuerFee,
+        NULL AS issuerFeePercent,
+        CAST((SUM(transferFee)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS transferFee,
+        NULL AS transferFeePercent,
+        CAST((SUM(amountBilling)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS amountBilling,
+        NULL AS amountBillingPercent,
+        CAST((SUM(amountSettlement)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS amountSettlement,
+        NULL AS amountSettlementPercent,
+        300 AS sortFlag
+    FROM transferHourOfDay         
+    ORDER BY sortFlag
+
+    EXEC core.auditCall @procid = @@PROCID, @params = @callParams
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION
+
+    EXEC [core].[error]
+    RETURN 55555
+END CATCH
