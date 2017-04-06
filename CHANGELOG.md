@@ -1,3 +1,13 @@
+<a name="6.3.0"></a>
+# [6.3.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.2.0...v6.3.0) (2017-04-06)
+
+
+### Features
+
+* add currency parameter in grouping categories ([#9](https://github.com/softwaregroup-bg/ut-transfer/issues/9)) ([70cc7ca](https://github.com/softwaregroup-bg/ut-transfer/commit/70cc7ca))
+
+
+
 <a name="6.2.0"></a>
 # [6.2.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.1.1...v6.2.0) (2017-04-06)
 
