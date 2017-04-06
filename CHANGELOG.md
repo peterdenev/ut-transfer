@@ -1,3 +1,13 @@
+<a name="6.2.0"></a>
+# [6.2.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.1.1...v6.2.0) (2017-04-06)
+
+
+### Features
+
+* report validations ([f130947](https://github.com/softwaregroup-bg/ut-transfer/commit/f130947))
+
+
+
 <a name="6.1.1"></a>
 ## [6.1.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.1.0...v6.1.1) (2017-04-05)
 
