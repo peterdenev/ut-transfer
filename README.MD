@@ -28,7 +28,7 @@ The following minimum set of transfer types should be supported:
 * funds transfer / push transfer to account in foreign ledger
 * mobile airtime top up
 * bill payment
-* cheque deposit / payment / etc.
+* cheque deposit / payment / etc...
 * loan disbursement
 * loan repayment
 * currency exchange

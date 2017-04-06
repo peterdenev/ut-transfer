@@ -7,6 +7,7 @@ module.exports = () => ({
         'db/transfer': require('./api/sql')
     },
     validations: {
-        transfer: require('./validations')
+        transfer: require('./validations/transfer'),
+        'db/transfer': require('./validations/db/transfer')
     }
 });
