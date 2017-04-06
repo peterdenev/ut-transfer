@@ -1,6 +1,7 @@
 ALTER PROCEDURE [transfer].[report.transferDayOfWeek]
     @startDate DATETIME = NULL,
     @endDate DATETIME = NULL,
+    @transferCurrency NVARCHAR(3) = NULL,
     @orderBy core.orderByTT READONLY,                  -- what kind of sort to be used ascending or descending & on which column results to be sorted
     @meta core.metaDataTT READONLY                     -- information for the user that makes the operation
 AS
@@ -19,36 +20,38 @@ BEGIN TRY
 
     SET @callParams = ( SELECT  @startDate AS startDate, 
                                 @endDate AS endDate, 
+                                @transferCurrency AS transferCurrency,
                                 (SELECT * from @orderBy rows FOR XML AUTO, TYPE) AS orderBy, 
                                 (SELECT * from @meta rows FOR XML AUTO, TYPE) AS meta 
                         FOR XML RAW('params'),TYPE)
 
-    SELECT 'transferDayOfWeek' AS resultSetName;
+    SELECT 'transferDayOfWeek' AS resultSetName
 
-    WITH transferDayOfWeek AS 
+    ;WITH transferDayOfWeek AS 
     (
         SELECT 
-            DATEPART(w,t.transferDateTime) AS weekDayNum,
-            DATENAME(dw,t.transferDateTime) AS weekDayName,
+            DATEPART(WEEKDAY, t.transferDateTime) AS weekDayNum,
+            DATENAME(WEEKDAY, t.transferDateTime) AS weekDayName,
+            t.transferCurrency AS transferCurrency,
             COUNT(t.transferId) AS recordsTotalByDay,
-            SUM(COUNT(t.transferId)) OVER (PARTITION BY 1) AS recordsTotal,
+            SUM(COUNT(t.transferId)) OVER (PARTITION BY t.transferCurrency) AS recordsTotal,
             SUM(ISNULL(t.transferAmount, 0)) AS transferAmount,
-            SUM(SUM(ISNULL(t.transferAmount, 0))) OVER (PARTITION BY 1) AS transferAmountTotal,
+            SUM(SUM(ISNULL(t.transferAmount, 0))) OVER (PARTITION BY t.transferCurrency) AS transferAmountTotal,
             SUM(ISNULL(t.acquirerFee, 0)) AS acquirerFee,
-            SUM(SUM(ISNULL(t.acquirerFee, 0))) OVER (PARTITION BY 1) AS acquirerFeeTotal,
+            SUM(SUM(ISNULL(t.acquirerFee, 0))) OVER (PARTITION BY t.transferCurrency) AS acquirerFeeTotal,
             SUM(ISNULL(t.issuerFee, 0)) AS issuerFee,
-            SUM(SUM(ISNULL(t.issuerFee, 0))) OVER (PARTITION BY 1) AS issuerFeeTotal,
+            SUM(SUM(ISNULL(t.issuerFee, 0))) OVER (PARTITION BY t.transferCurrency) AS issuerFeeTotal,
             SUM(ISNULL(t.transferFee, 0)) AS transferFee,
-            SUM(SUM(ISNULL(t.transferFee, 0))) OVER (PARTITION BY 1) AS transferFeeTotal,
+            SUM(SUM(ISNULL(t.transferFee, 0))) OVER (PARTITION BY t.transferCurrency) AS transferFeeTotal,
             SUM(ISNULL(t.amountBilling, 0)) AS amountBilling,
-            SUM(SUM(ISNULL(t.amountBilling, 0))) OVER (PARTITION BY 1) AS amountBillingTotal,
+            SUM(SUM(ISNULL(t.amountBilling, 0))) OVER (PARTITION BY t.transferCurrency) AS amountBillingTotal,
             SUM(ISNULL(t.amountSettlement, 0)) AS amountSettlement,
-            SUM(SUM(ISNULL(t.amountSettlement, 0))) OVER (PARTITION BY 1) AS amountSettlementTotal,
+            SUM(SUM(ISNULL(t.amountSettlement, 0))) OVER (PARTITION BY t.transferCurrency) AS amountSettlementTotal,
             ROW_NUMBER() OVER (
               ORDER BY CASE 
                 WHEN @sortOrder = 'ASC'
                     THEN CASE                         
-                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(w,t.transferDateTime)                     
+                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(WEEKDAY, t.transferDateTime)                     
                         WHEN @sortBy = 'transferCount' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferCountPercent' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferAmount' THEN SUM(ISNULL(t.transferAmount, 0))
@@ -68,7 +71,7 @@ BEGIN TRY
               CASE 
                 WHEN @sortOrder = 'DESC'
                     THEN CASE 
-                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(w,t.transferDateTime)                    
+                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(WEEKDAY, t.transferDateTime)                    
                         WHEN @sortBy = 'transferCount' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferCountPercent' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferAmount' THEN SUM(ISNULL(t.transferAmount, 0))
@@ -85,13 +88,17 @@ BEGIN TRY
                         WHEN @sortBy = 'amountSettlementPercent' THEN SUM(ISNULL(t.amountSettlement, 0))
                     END                                                           
                 END DESC
-          ) rowNum,
+            ) AS rowNum,
           COUNT(*) OVER (PARTITION BY 1) AS dayTotal
        FROM [transfer].[vTransfer] t
-       WHERE   
-           (@startDate      IS NULL or t.transferDateTime      >= @startDate)
-       AND (@endDate        IS NULL or t.transferDateTime      <= @endDate)
-       GROUP BY DATEPART(dw,t.transferDateTime), DATENAME(dw,t.transferDateTime)
+       WHERE
+           (@startDate IS NULL OR t.transferDateTime >= @startDate)
+       AND (@endDate IS NULL OR t.transferDateTime <= @endDate)
+       AND (@transferCurrency IS NULL OR t.transferCurrency = @transferCurrency)
+       GROUP BY 
+        DATEPART(WEEKDAY, t.transferDateTime), 
+        DATENAME(WEEKDAY, t.transferDateTime),
+        t.transferCurrency
     )
     SELECT  -- [weekDay]
         CAST(weekDayNum AS NVARCHAR)+ '.' + weekDayName AS agreatepredicate,
@@ -109,7 +116,8 @@ BEGIN TRY
         CAST(CAST(amountBilling*100.0/ISNULL(NULLIF(amountBillingTotal,0),1) AS DECIMAL(18, 2))AS NVARCHAR(50)) + ' %' AS amountBillingPercent,
         CAST(amountSettlement AS DECIMAL(18, 2)) AS amountSettlement,
         CAST(CAST(amountSettlement*100.0/ISNULL(NULLIF(amountSettlementTotal,0),1) AS DECIMAL(18, 2)) AS NVARCHAR(50)) + ' %'  AS amountSettlementPercent,
-        10 + rowNum AS sortFlag
+        transferCurrency,
+        1000 + rowNum AS sortFlag
     FROM transferDayOfWeek 
        UNION ALL
     SELECT  -- TOTAL
@@ -128,12 +136,14 @@ BEGIN TRY
         NULL AS amountBillingPercent,
         CAST(SUM(amountSettlement)  AS DECIMAL(18, 2)) AS amountSettlement,
         NULL AS amountSettlementPercent,
-        20 AS sortFlag
-    FROM transferDayOfWeek 
+        transferCurrency,
+        2000 AS sortFlag
+    FROM transferDayOfWeek
+    GROUP BY transferCurrency
     UNION ALL
     SELECT  -- AVERAGE
         'AVERAGE' AS agreatepredicate,
-        CAST(CAST(AVG(recordsTotalByDay*1.0) AS DECIMAL(18, 2)) AS NVARCHAR(50)) AS transferCount,
+        CAST(CAST(AVG(recordsTotalByDay*1.0) AS DECIMAL(18, 1)) AS NVARCHAR(50)) AS transferCount,
         NULL AS transferCountPercent,
         CAST((SUM(transferAmount)*1.0/Count(weekDayNum)) AS DECIMAL(18, 2)) AS transferAmount,
         NULL AS transferAmountPercent,
@@ -147,10 +157,16 @@ BEGIN TRY
         NULL AS amountBillingPercent,
         CAST((SUM(amountSettlement)*1.0/Count(weekDayNum)) AS DECIMAL(18, 2)) AS amountSettlement,
         NULL AS amountSettlementPercent,
-        31 AS sortFlag
-    FROM transferDayOfWeek         
---    having Count(Distinct weekDayNum)>0
-    ORDER BY sortFlag
+        transferCurrency,
+        3001 AS sortFlag
+    FROM transferDayOfWeek
+    GROUP BY transferCurrency
+    UNION ALL
+    SELECT -- CURRENCY NAME
+        transferCurrency, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,  transferCurrency, 0 AS sortFlag
+    FROM transferDayOfWeek
+    GROUP BY transferCurrency       
+    ORDER BY transferCurrency, sortFlag
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
     SET DATEFIRST @DATEFIRST                                                    -- restore default
