@@ -173,6 +173,9 @@ module.exports = {
                     .then(() => transfer)
                     .then(this.bus.importMethod(transfer.issuerPort + '/transfer.push.execute'))
                     .then(result => {
+                        if (transfer.transferType === 'ministatement') {
+                            transfer.ministatement = result.ministatement;
+                        }
                         transfer.balance = result.balance;
                         transfer.transferIdIssuer = result.transferIdIssuer;
                         return transfer;
