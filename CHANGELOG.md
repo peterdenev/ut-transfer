@@ -1,3 +1,13 @@
+<a name="6.4.0"></a>
+# [6.4.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.3.1...v6.4.0) (2017-04-07)
+
+
+### Features
+
+* support mini statement result ([aed08ac](https://github.com/softwaregroup-bg/ut-transfer/commit/aed08ac))
+
+
+
 <a name="6.3.1"></a>
 ## [6.3.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.3.0...v6.3.1) (2017-04-07)
 
