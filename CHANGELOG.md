@@ -1,3 +1,13 @@
+<a name="6.3.1"></a>
+## [6.3.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.3.0...v6.3.1) (2017-04-07)
+
+
+### Bug Fixes
+
+* include tranfer currency filter in joi validation ([#10](https://github.com/softwaregroup-bg/ut-transfer/issues/10)) ([d937ee4](https://github.com/softwaregroup-bg/ut-transfer/commit/d937ee4))
+
+
+
 <a name="6.3.0"></a>
 # [6.3.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.2.0...v6.3.0) (2017-04-06)
 
