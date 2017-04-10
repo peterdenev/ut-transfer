@@ -1,9 +1,9 @@
-ALTER PROCEDURE [transfer].[report.transferTransactionType]
+ALTER PROCEDURE [transfer].[report.byHourOfDay]
     @startDate DATETIME = NULL,
     @endDate DATETIME = NULL,
     @transferCurrency NVARCHAR(3) = NULL,
-    @orderBy core.orderByTT READONLY,          -- what kind of sort to be used ascending or descending & on which column results to be sorted
-    @meta core.metaDataTT READONLY             -- information for the user that makes the operation
+    @orderBy core.orderByTT READONLY,                  -- what kind of sort to be used ascending or descending & on which column results to be sorted
+    @meta core.metaDataTT READONLY                     -- information for the user that makes the operation
 AS
     DECLARE @callParams XML
     DECLARE @sortOrder NVARCHAR(5) = 'ASC'
@@ -16,18 +16,18 @@ BEGIN TRY
     SELECT TOP 1 @sortOrder = dir, @sortBy = field FROM @orderBy  
 
     SET @callParams = ( SELECT  @startDate AS startDate, 
-                                @endDate AS endDate, 
+                                @endDate AS endDate,
                                 @transferCurrency AS transferCurrency,
                                 (SELECT * from @orderBy rows FOR XML AUTO, TYPE) AS orderBy, 
                                 (SELECT * from @meta rows FOR XML AUTO, TYPE) AS meta 
                     FOR XML RAW('params'),TYPE)
 
-    SELECT 'transferTransactyonType' AS resultSetName
+    SELECT 'transferHourOfDay' AS resultSetName
 
-    ;WITH transferTransactyonType AS 
+    ;WITH transferHourOfDay AS 
     (
         SELECT  -- TOP 20
-            it.itemName AS transactionType,
+            DATEPART(HOUR,t.transferDateTime) AS hourOfDay,
             t.transferCurrency AS transferCurrency,
             COUNT(t.transferId) AS recordsTotalByDay,
             SUM(COUNT(t.transferId)) OVER (PARTITION BY t.transferCurrency) AS recordsTotal,
@@ -47,7 +47,7 @@ BEGIN TRY
               ORDER BY CASE 
                 WHEN @sortOrder = 'ASC'
                     THEN CASE                         
-                        WHEN @sortBy = 'agreatepredicate' THEN UNICODE(it.itemName)
+                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(HOUR,t.transferDateTime)                     
                         WHEN @sortBy = 'transferCount' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferCountPercent' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferAmount' THEN SUM(ISNULL(t.transferAmount, 0))
@@ -67,7 +67,7 @@ BEGIN TRY
               CASE 
                 WHEN @sortOrder = 'DESC'
                     THEN CASE 
-                        WHEN @sortBy = 'agreatepredicate' THEN UNICODE(it.itemName)
+                        WHEN @sortBy = 'agreatepredicate' THEN DATEPART(HOUR,t.transferDateTime)                    
                         WHEN @sortBy = 'transferCount' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferCountPercent' THEN COUNT(t.transferId)
                         WHEN @sortBy = 'transferAmount' THEN SUM(ISNULL(t.transferAmount, 0))
@@ -87,17 +87,16 @@ BEGIN TRY
             ) AS rowNum,
             COUNT(*) OVER (PARTITION BY 1) AS dayTotal
         FROM [transfer].[vTransfer] t
-        LEFT JOIN  core.itemName it ON it.itemNameId = t.transferTypeId
         WHERE   
-            (@startDate      IS NULL or t.transferDateTime      >= @startDate)
-        AND (@endDate        IS NULL or t.transferDateTime      <= @endDate)
+            (@startDate IS NULL or t.transferDateTime >= @startDate)
+        AND (@endDate IS NULL or t.transferDateTime <= @endDate)
         AND (@transferCurrency IS NULL OR t.transferCurrency = @transferCurrency)
         GROUP BY 
-            it.itemName,
+            DATEPART(HOUR,t.transferDateTime),
             t.transferCurrency
     )
-    SELECT  -- [transactionType]
-        transactionType AS agreatepredicate,
+    SELECT  -- [weekDay]
+        CAST(hourOfDay AS NVARCHAR) AS agreatepredicate,
         CAST(recordsTotalByDay AS NVARCHAR(50)) AS transferCount,
         CAST(CAST(recordsTotalByDay*100.0/ISNULL(NULLIF(recordsTotal,0),1) AS DECIMAL(18, 2)) AS NVARCHAR(50)) + ' %' AS transferCountPercent,
         CAST(transferAmount AS DECIMAL(18, 2)) AS transferAmount,
@@ -113,55 +112,50 @@ BEGIN TRY
         CAST(amountSettlement AS DECIMAL(18, 2)) AS amountSettlement,
         CAST(CAST(amountSettlement*100.0/ISNULL(NULLIF(amountSettlementTotal,0),1) AS DECIMAL(18, 2)) AS NVARCHAR(50)) + ' %'  AS amountSettlementPercent,
         transferCurrency,
-        100 + rowNum AS sortFlag
-    FROM transferTransactyonType 
-       UNION ALL
-    SELECT  -- TOTAL
-        'TOTAL' AS agreatepredicate,
-        CAST(SUM(recordsTotalByDay) AS NVARCHAR(50)) AS transferCount,
-        NULL AS transferCountPercent,
-        CAST(SUM(transferAmount) AS DECIMAL(18, 2)) AS transferAmount,
-        NULL AS transferAmountPercent,
-        CAST(SUM(acquirerFee) AS DECIMAL(18, 2)) AS acquirerFee,
-        NULL AS acquirerFeePercent,
-        CAST(SUM(issuerFee) AS DECIMAL(18, 2)) AS issuerFee,
-        NULL AS issuerFeePercent,
-        CAST(SUM(transferFee) AS DECIMAL(18, 2)) AS transferFee,
-        NULL AS transferFeePercent,
-        CAST(SUM(amountBilling) AS DECIMAL(18, 2)) AS amountBilling,
-        NULL AS amountBillingPercent,
-        CAST(SUM(amountSettlement)  AS DECIMAL(18, 2)) AS amountSettlement,
-        NULL AS amountSettlementPercent,
-        transferCurrency,
-        200 AS sortFlag
-    FROM transferTransactyonType
-    GROUP BY transferCurrency
+        1000 + rowNum AS sortFlag
+    FROM transferHourOfDay 
     UNION ALL
     SELECT  -- AVERAGE
-        'AVERAGE' AS agreatepredicate,
+        transferCurrency + ' - AVERAGE' AS agreatepredicate,
         CAST(CAST(AVG(recordsTotalByDay*1.0) AS DECIMAL(18, 1)) AS NVARCHAR(50)) AS transferCount,
         NULL AS transferCountPercent,
-        CAST((SUM(transferAmount)*1.0/Count(transactionType)) AS DECIMAL(18, 2)) AS transferAmount,
+        CAST((SUM(transferAmount)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS transferAmount,
         NULL AS transferAmountPercent,
-        CAST((SUM(acquirerFee)*1.0/Count(transactionType)) AS DECIMAL(18, 2)) AS acquirerFee,
+        CAST((SUM(acquirerFee)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS acquirerFee,
         NULL AS acquirerFeePercent,
-        CAST((SUM(issuerFee)*1.0/Count(transactionType)) AS DECIMAL(18, 2)) AS issuerFee,
+        CAST((SUM(issuerFee)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS issuerFee,
         NULL AS issuerFeePercent,
-        CAST((SUM(transferFee)*1.0/Count(transactionType)) AS DECIMAL(18, 2)) AS transferFee,
+        CAST((SUM(transferFee)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS transferFee,
         NULL AS transferFeePercent,
-        CAST((SUM(amountBilling)*1.0/Count(transactionType)) AS DECIMAL(18, 2)) AS amountBilling,
+        CAST((SUM(amountBilling)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS amountBilling,
         NULL AS amountBillingPercent,
-        CAST((SUM(amountSettlement)*1.0/Count(transactionType)) AS DECIMAL(18, 2)) AS amountSettlement,
+        CAST((SUM(amountSettlement)*1.0/Count(hourOfDay)) AS DECIMAL(18, 2)) AS amountSettlement,
         NULL AS amountSettlementPercent,
         transferCurrency,
-        301 AS sortFlag
-    FROM transferTransactyonType
-    GROUP BY transferCurrency         
+        2000 AS sortFlag
+    FROM transferHourOfDay
+    GROUP BY transferCurrency
     UNION ALL
-    SELECT -- CURRENCY NAME
-        transferCurrency, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,  transferCurrency, 0 AS sortFlag
-    FROM transferTransactyonType
-    GROUP BY transferCurrency       
+    SELECT  -- TOTAL
+       transferCurrency + ' - TOTAL' AS agreatepredicate,
+       CAST(SUM(recordsTotalByDay) AS NVARCHAR(50)) AS transferCount,
+       NULL AS transferCountPercent,
+       CAST(SUM(transferAmount) AS DECIMAL(18, 2)) AS transferAmount,
+       NULL AS transferAmountPercent,
+       CAST(SUM(acquirerFee) AS DECIMAL(18, 2)) AS acquirerFee,
+       NULL AS acquirerFeePercent,
+       CAST(SUM(issuerFee) AS DECIMAL(18, 2)) AS issuerFee,
+       NULL AS issuerFeePercent,
+       CAST(SUM(transferFee) AS DECIMAL(18, 2)) AS transferFee,
+       NULL AS transferFeePercent,
+       CAST(SUM(amountBilling) AS DECIMAL(18, 2)) AS amountBilling,
+       NULL AS amountBillingPercent,
+       CAST(SUM(amountSettlement)  AS DECIMAL(18, 2)) AS amountSettlement,
+       NULL AS amountSettlementPercent,
+       transferCurrency,
+       3000 AS sortFlag
+    FROM transferHourOfDay 
+    GROUP BY transferCurrency
     ORDER BY transferCurrency, sortFlag
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
@@ -170,6 +164,6 @@ BEGIN CATCH
     IF @@TRANCOUNT > 0
         ROLLBACK TRANSACTION
 
-    EXEC [core].[error] 
+    EXEC [core].[error]
     RETURN 55555
 END CATCH

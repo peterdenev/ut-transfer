@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[report.transferDetails]
+ALTER PROCEDURE [transfer].[transferDetails.get]
     @startDate DATETIME = NULL,
     @endDate DATETIME = NULL,
     @processingCode INT = NULL,
