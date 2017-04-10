@@ -73,6 +73,44 @@ module.exports = {
         acquirerErrorType: joi.string().allow(null),
         acquirerErrorMessage: joi.string().allow(null),
         merchantErrorType: joi.string().allow(null),
-        merchantErrorMessage: joi.string().allow(null)
+        merchantErrorMessage: joi.string().allow(null),
+        udfAcquirer: joi.object().allow(null),
+        transferType: joi.string().allow(null),
+        channelId: joi.number().allow(null),
+        channelType: joi.string().allow(null),
+        ordererId: joi.number().allow(null),
+        sourceAccount: joi.string().allow(null),
+        merchantInvoice: joi.string().allow(null),
+        destinationAccount: joi.string().allow(null),
+        issuerId: joi.string().allow(null),
+        amount: joi.object().keys({
+            transfer: joi.object().keys({
+                currency: joi.string().allow(null),
+                amount: joi.number().allow(null)
+            }),
+            acquirerFee: joi.object().keys({
+                currency: joi.string().allow(null),
+                amount: joi.string().allow(null),
+                scale: joi.number().allow(null),
+                cents: joi.number().allow(null)
+            }),
+            issuerFee: joi.object().keys({
+                currency: joi.string().allow(null),
+                amount: joi.string().allow(null),
+                scale: joi.number().allow(null),
+                cents: joi.number().allow(null)
+            })
+        }),
+        transferAmount: joi.number().allow(null),
+        transferCurrency: joi.string().allow(null),
+        transferFee: joi.number().allow(null),
+        acquirerFee: joi.number().allow(null),
+        issuerFee: joi.number().allow(null),
+        transferDateTime: joi.string().allow(null),
+        split: joi.array().allow(null),
+        merchantPort: joi.string().allow(null),
+        issuerPort: joi.string().allow(null),
+        ledgerPort: joi.string().allow(null),
+        issuerSettlementDate: joi.string().allow(null)
     })
 };
