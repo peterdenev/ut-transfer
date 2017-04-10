@@ -1,7 +1,7 @@
 module.exports = {
-    'report.transferDetails': require('./report.transferDetails'),
-    'report.transferTransactionType': require('./report.transferTransactionType'),
-    'report.transferHourOfDay': require('./report.transferHourOfDay'),
-    'report.transferDayOfWeek': require('./report.transferDayOfWeek'),
-    'report.transferWeekOfYear': require('./report.transferWeekOfYear')
+    'transferDetails.get': require('./transferDetails.get'),
+    'report.byTypeOfTransfer': require('./report.byTypeOfTransfer'),
+    'report.byHourOfDay': require('./report.byHourOfDay'),
+    'report.byDayOfWeek': require('./report.byDayOfWeek'),
+    'report.byWeekofYear': require('./report.byWeekofYear')
 };
