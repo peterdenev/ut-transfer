@@ -35,6 +35,12 @@ module.exports = {
         destinationAccount: joi.string().allow(null),
         issuerId: joi.string().allow(null),
         ledgerId: joi.string().allow(null),
+        amount: joi.object().keys({
+            transfer: joi.object().keys({
+                currency: joi.string().required(),
+                amount: joi.number().required()
+            })
+        }),
         transferCurrency: joi.string(),
         transferAmount: joi.string(),
         acquirerFee: joi.string().allow(null),
