@@ -1,3 +1,18 @@
+<a name="6.5.0"></a>
+# [6.5.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.4.1...v6.5.0) (2017-04-10)
+
+
+### Bug Fixes
+
+* push.execute result validations ([#15](https://github.com/softwaregroup-bg/ut-transfer/issues/15)) ([131e0a5](https://github.com/softwaregroup-bg/ut-transfer/commit/131e0a5))
+
+
+### Features
+
+* rename procedures and move AVERAGE before TOTAL in results ([#14](https://github.com/softwaregroup-bg/ut-transfer/issues/14)) ([381f4bf](https://github.com/softwaregroup-bg/ut-transfer/commit/381f4bf))
+
+
+
 <a name="6.4.1"></a>
 ## [6.4.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.4.0...v6.4.1) (2017-04-10)
 
