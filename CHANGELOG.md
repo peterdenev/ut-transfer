@@ -1,3 +1,13 @@
+<a name="6.4.1"></a>
+## [6.4.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.4.0...v6.4.1) (2017-04-10)
+
+
+### Bug Fixes
+
+* push.execute validations add amount object ([#13](https://github.com/softwaregroup-bg/ut-transfer/issues/13)) ([48b5ce2](https://github.com/softwaregroup-bg/ut-transfer/commit/48b5ce2))
+
+
+
 <a name="6.4.0"></a>
 # [6.4.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.3.1...v6.4.0) (2017-04-07)
 
