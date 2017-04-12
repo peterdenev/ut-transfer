@@ -55,7 +55,6 @@ module.exports = {
         transferId: joi.number(),
         transferTypeId: joi.number(),
         localDateTime: joi.string(),
-        balance: joi.string(),
         transferIdIssuer: joi.string().allow(null),
         transferIdMerchant: joi.string().allow(null),
         expireTime: joi.string().allow(null),
@@ -111,6 +110,16 @@ module.exports = {
         merchantPort: joi.string().allow(null),
         issuerPort: joi.string().allow(null),
         ledgerPort: joi.string().allow(null),
-        issuerSettlementDate: joi.string().allow(null)
+        issuerSettlementDate: joi.string().allow(null),
+        balance: joi.object().keys({
+            available: joi.number().allow(null),
+            ledger: joi.number().allow(null),
+            accounts: joi.array().allow(null)
+        }),
+        ministatement: joi.object().keys({
+            operations: joi.array().allow(null),
+            accounts: joi.array().allow(null)
+        }),
+        description: joi.string().allow(null)
     })
 };
