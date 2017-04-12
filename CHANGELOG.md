@@ -1,3 +1,13 @@
+<a name="6.5.2"></a>
+## [6.5.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.5.1...v6.5.2) (2017-04-12)
+
+
+### Bug Fixes
+
+* push.execute result validations ([#18](https://github.com/softwaregroup-bg/ut-transfer/issues/18)) ([1f7889f](https://github.com/softwaregroup-bg/ut-transfer/commit/1f7889f))
+
+
+
 <a name="6.5.1"></a>
 ## [6.5.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.5.0...v6.5.1) (2017-04-10)
 
