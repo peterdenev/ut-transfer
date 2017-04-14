@@ -1,3 +1,13 @@
+<a name="6.6.0"></a>
+# [6.6.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.5.2...v6.6.0) (2017-04-14)
+
+
+### Features
+
+* reports ([23506d9](https://github.com/softwaregroup-bg/ut-transfer/commit/23506d9))
+
+
+
 <a name="6.5.2"></a>
 ## [6.5.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.5.1...v6.5.2) (2017-04-12)
 
