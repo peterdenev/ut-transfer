@@ -1,3 +1,14 @@
+<a name="6.6.2"></a>
+## [6.6.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.1...v6.6.2) (2017-04-19)
+
+
+### Bug Fixes
+
+* rename 1/2 ([95ef9ea](https://github.com/softwaregroup-bg/ut-transfer/commit/95ef9ea))
+* rename 2/2 ([a1d2b7f](https://github.com/softwaregroup-bg/ut-transfer/commit/a1d2b7f))
+
+
+
 <a name="6.6.1"></a>
 ## [6.6.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.0...v6.6.1) (2017-04-19)
 
