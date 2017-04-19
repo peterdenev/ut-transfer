@@ -1,3 +1,13 @@
+<a name="6.6.3"></a>
+## [6.6.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.2...v6.6.3) (2017-04-19)
+
+
+### Bug Fixes
+
+* typo ([35b11ff](https://github.com/softwaregroup-bg/ut-transfer/commit/35b11ff))
+
+
+
 <a name="6.6.2"></a>
 ## [6.6.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.1...v6.6.2) (2017-04-19)
 
