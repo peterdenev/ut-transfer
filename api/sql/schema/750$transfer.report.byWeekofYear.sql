@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[report.byWeekofYear]
+ALTER PROCEDURE [transfer].[report.byWeekOfYear]
     @startDate DATETIME = NULL,
     @endDate DATETIME = NULL,
     @transferCurrency NVARCHAR(3) = NULL,
@@ -45,7 +45,7 @@ BEGIN TRY
             SUM(ISNULL(t.amountSettlement, 0)) AS amountSettlement,
             SUM(SUM(ISNULL(t.amountSettlement, 0))) OVER (PARTITION BY t.transferCurrency) AS amountSettlementTotal,
             ROW_NUMBER() OVER (
-              ORDER BY CASE 
+              ORDER BY CASE
                  WHEN @sortOrder = 'ASC'
                     THEN CASE
                         WHEN @sortBy = 'agreatepredicate' THEN DATEPART(WEEK,t.transferDateTime)
@@ -63,7 +63,7 @@ BEGIN TRY
                         WHEN @sortBy = 'amountBillingPercent' THEN SUM(ISNULL(t.amountBilling, 0))
                         WHEN @sortBy = 'amountSettlement' THEN SUM(ISNULL(t.amountSettlement, 0))
                         WHEN @sortBy = 'amountSettlementPercent' THEN SUM(ISNULL(t.amountSettlement, 0))
-                    END 
+                    END
                 END ASC,    -- NUMBER
               CASE WHEN @sortOrder = 'DESC'
                     THEN CASE
@@ -88,13 +88,13 @@ BEGIN TRY
                 WHEN @sortOrder = 'ASC'
                     THEN CASE
                         WHEN @sortBy = 'transferCurrency' THEN t.transferCurrency
-                    END 
+                    END
                 END ASC,    -- STRING
               CASE WHEN @sortOrder = 'DESC'
                     THEN CASE
                         WHEN @sortBy = 'transferCurrency' THEN t.transferCurrency
                     END
-                END DESC    -- STRING           
+                END DESC    -- STRING
             ) AS rowNum,
             COUNT(*) OVER (PARTITION BY 1) AS dayTotal
        FROM [transfer].[vTransfer] t
