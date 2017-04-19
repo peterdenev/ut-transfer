@@ -1,3 +1,13 @@
+<a name="6.6.1"></a>
+## [6.6.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.0...v6.6.1) (2017-04-19)
+
+
+### Bug Fixes
+
+* camelcase ([b052ab7](https://github.com/softwaregroup-bg/ut-transfer/commit/b052ab7))
+
+
+
 <a name="6.6.0"></a>
 # [6.6.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.5.2...v6.6.0) (2017-04-14)
 
