@@ -1,3 +1,13 @@
+<a name="6.6.6"></a>
+## [6.6.6](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.5...v6.6.6) (2017-04-24)
+
+
+### Bug Fixes
+
+* add currency column to transfer statistics ([#25](https://github.com/softwaregroup-bg/ut-transfer/issues/25)) ([8dbd6b6](https://github.com/softwaregroup-bg/ut-transfer/commit/8dbd6b6))
+
+
+
 <a name="6.6.5"></a>
 ## [6.6.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.4...v6.6.5) (2017-04-24)
 
