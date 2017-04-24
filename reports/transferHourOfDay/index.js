@@ -16,7 +16,8 @@ module.exports = (gridStyle) => ({
             { name: 'issuerFee', title: 'Issuer Fee' },
             { name: 'issuerFeePercent', title: '%' },
             { name: 'acquirerFee', title: 'Aquirer Fee' },
-            { name: 'acquirerFeePercent', title: '%' }
+            { name: 'acquirerFeePercent', title: '%' },
+            { name: 'transferCurrency', title: 'Currency' }
         ],
         method: 'db/transfer.report.byHourOfDay',
         resultsetName: 'transferHourOfDay',

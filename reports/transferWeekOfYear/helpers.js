@@ -8,6 +8,7 @@ module.exports = {
             switch (field.name) {
                 case 'agreatepredicate':
                 case 'transferCount':
+                case 'transferCurrency':
                     break;
                 default:
                     if (!isHeader) {
