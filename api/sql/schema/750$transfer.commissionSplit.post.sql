@@ -1,6 +1,6 @@
 ALTER PROCEDURE [transfer].[commissionSplit.post] -- post commission
     @splitIds core.arrayNumberList READONLY, -- the list of items
-	@meta core.metaDataTT READONLY -- information for the user that makes the operation
+    @meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
 
 DECLARE @callParams XML
