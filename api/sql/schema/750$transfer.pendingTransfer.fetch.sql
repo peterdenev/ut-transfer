@@ -10,8 +10,8 @@ SET NOCOUNT ON
     DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return INT = 0
     EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
     IF @return != 0
- 	BEGIN
-         RETURN 55555
+    BEGIN
+        RETURN 55555
     END
 
     SELECT 'pendingTransfer' as resultSetName
@@ -22,4 +22,4 @@ SET NOCOUNT ON
     WHERE p.phoneNumber = @phoneNumber
     AND p.securityCode = @securityCode
     AND t.transferAmount= @transferAmount
-    AND p.[status] IS NULL
+    AND p.secondTransferId IS NULL
