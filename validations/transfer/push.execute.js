@@ -22,12 +22,13 @@ module.exports = {
                 'forex'
             ]
         ),
+        acquirerCode: joi.string().allow(null),
         transferIdAcquirer: joi.string().allow(null),
         transferDateTime: joi.string().allow(null),
         channelId: joi.number(),
         channelType: joi.string(),
         ordererId: joi.number().allow(null),
-        merchantId: joi.number().allow(null),
+        merchantId: joi.string().allow(null),
         merchantInvoice: joi.string().allow(null),
         merchantType: joi.string().allow(null),
         cardId: joi.number().allow(null),
@@ -120,6 +121,8 @@ module.exports = {
             operations: joi.array().allow(null),
             accounts: joi.array().allow(null)
         }),
-        description: joi.string().allow(null)
+        description: joi.string().allow(null),
+        acquirerCode: joi.string().allow(null),
+        transferIdAcquirer: joi.string().allow(null)
     })
 };
