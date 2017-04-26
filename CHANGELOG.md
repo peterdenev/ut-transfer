@@ -1,3 +1,13 @@
+<a name="6.6.7"></a>
+## [6.6.7](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.6...v6.6.7) (2017-04-26)
+
+
+### Bug Fixes
+
+* validations ([#26](https://github.com/softwaregroup-bg/ut-transfer/issues/26)) ([d8fa39f](https://github.com/softwaregroup-bg/ut-transfer/commit/d8fa39f))
+
+
+
 <a name="6.6.6"></a>
 ## [6.6.6](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.5...v6.6.6) (2017-04-24)
 
