@@ -1,3 +1,13 @@
+<a name="6.6.9"></a>
+## [6.6.9](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.8...v6.6.9) (2017-04-28)
+
+
+### Bug Fixes
+
+* reverse uses state 4 ([fe3fe15](https://github.com/softwaregroup-bg/ut-transfer/commit/fe3fe15))
+
+
+
 <a name="6.6.8"></a>
 ## [6.6.8](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.7...v6.6.8) (2017-04-28)
 
