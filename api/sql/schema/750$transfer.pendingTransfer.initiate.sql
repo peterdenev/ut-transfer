@@ -19,8 +19,8 @@ BEGIN TRY
     BEGIN TRANSACTION
     BEGIN
         
-        INSERT INTO [transfer].pending ( firstTransferId, securityCode, attempts, customerNumber, phoneNumber, [status] )
-        SELECT firstTransferId, securityCode, 0, customerNumber, phoneNumber, 0
+        INSERT INTO [transfer].pending ( firstTransferId, securityCode, attempts, customerNumber, phoneNumber )
+        SELECT firstTransferId, securityCode, 0, customerNumber, phoneNumber
         FROM @pendingTransfer
 
     END
