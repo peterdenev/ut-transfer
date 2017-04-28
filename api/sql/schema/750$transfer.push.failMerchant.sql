@@ -9,7 +9,7 @@ SET NOCOUNT ON
 UPDATE
     [transfer].[transfer]
 SET
-    merchantTxState = 4
+    merchantTxState = 3
 WHERE
     transferId = @transferId AND
     merchantTxState = 1
