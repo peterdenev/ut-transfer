@@ -1,3 +1,13 @@
+<a name="6.7.0"></a>
+# [6.7.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.9...v6.7.0) (2017-04-28)
+
+
+### Features
+
+* add procedure and validation for partner.fetch ([#27](https://github.com/softwaregroup-bg/ut-transfer/issues/27)) ([08864eb](https://github.com/softwaregroup-bg/ut-transfer/commit/08864eb))
+
+
+
 <a name="6.6.9"></a>
 ## [6.6.9](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.8...v6.6.9) (2017-04-28)
 
