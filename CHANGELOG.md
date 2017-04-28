@@ -1,3 +1,13 @@
+<a name="6.7.1"></a>
+## [6.7.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.7.0...v6.7.1) (2017-04-28)
+
+
+### Bug Fixes
+
+* move partner.fetch validation in db folder ([#29](https://github.com/softwaregroup-bg/ut-transfer/issues/29)) ([03a25d5](https://github.com/softwaregroup-bg/ut-transfer/commit/03a25d5))
+
+
+
 <a name="6.7.0"></a>
 # [6.7.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.9...v6.7.0) (2017-04-28)
 
