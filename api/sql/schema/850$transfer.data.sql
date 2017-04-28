@@ -28,3 +28,33 @@ INSERT
     (itemTypeId, itemCode, itemName)
 VALUES
     (t.itemTypeId, source.itemCode, source.itemName);
+
+MERGE INTO
+    [user].[actionCategory] as target
+USING
+    (VALUES
+        ('transfer')
+    ) AS source (name)
+ON
+    target.name=source.name
+WHEN NOT MATCHED BY TARGET THEN
+INSERT
+    ([name])
+VALUES
+    (source.[name]);
+
+MERGE INTO
+    [user].[action] as target
+USING
+    (VALUES
+        ('transfer.partner.fetch', 'transfer.partner.fetch', '{}')
+    ) AS source (actionId, description, valueMap)
+JOIN
+	[user].[actionCategory] c ON c.name = 'transfer'
+ON
+    target.actionId=source.actionId
+WHEN NOT MATCHED BY TARGET THEN
+INSERT
+    ([actionId], [actionCategoryId], [description], [valueMap])
+VALUES
+    (source.[actionId], c.[actionCategoryId], source.[description], source.[valueMap]);
