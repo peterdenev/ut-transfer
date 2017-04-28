@@ -1,3 +1,13 @@
+<a name="6.6.8"></a>
+## [6.6.8](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.7...v6.6.8) (2017-04-28)
+
+
+### Bug Fixes
+
+* fail with proper state 3 ([86224f6](https://github.com/softwaregroup-bg/ut-transfer/commit/86224f6))
+
+
+
 <a name="6.6.7"></a>
 ## [6.6.7](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.6.6...v6.6.7) (2017-04-26)
 
