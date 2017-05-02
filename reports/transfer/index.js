@@ -92,7 +92,7 @@ module.exports = (gridStyle) => ({
             labelTo: 'Date to',
             nameMap: { from: 'startDate', to: 'endDate' },
             type: filterElementTypes.dateTimePickerBetween,
-            timeFormat: 'HH:mm:ss',
+            timeFormat: 'HH:mm',
             dateFormat: 'YYYY-MM-DD',
             defaultValue: {
                 from: startDate,
