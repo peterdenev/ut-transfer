@@ -1,3 +1,13 @@
+<a name="6.7.3"></a>
+## [6.7.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.7.2...v6.7.3) (2017-05-02)
+
+
+### Bug Fixes
+
+* use proper state ([be6d994](https://github.com/softwaregroup-bg/ut-transfer/commit/be6d994))
+
+
+
 <a name="6.7.2"></a>
 ## [6.7.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.7.1...v6.7.2) (2017-04-28)
 
