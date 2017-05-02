@@ -1,0 +1,1 @@
+export const CHANGE_NAME_FILTER = Symbol('CHANGE_NAME_FILTER_BATCHES');

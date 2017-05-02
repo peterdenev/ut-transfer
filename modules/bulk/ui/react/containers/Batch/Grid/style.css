@@ -1,0 +1,6 @@
+th:last-child {
+  width: 50px;
+}
+th:last-child > div {
+  float: right;
+}

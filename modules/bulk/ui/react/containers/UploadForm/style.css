@@ -1,0 +1,64 @@
+
+.uploadForm .errorMessage {
+    margin-top: 10px;
+    text-align: center;
+    color: red;
+}
+
+.uploadForm .successMessage {
+    margin-top: 10px;
+    text-align: center;
+    color: green;
+}
+
+.fileInput {
+  margin: 0 auto;
+  width: 400px;
+}
+
+.fileInput input[type="file"] {
+    display: none;
+}
+
+.infoInputWrapper {
+    margin-top: 10px;
+    width: 333px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+
+.inputWrapClassName {
+  padding-left: 20px;
+  text-align: center;
+}
+
+.footer {
+  justify-content: flex-end;
+}
+
+.footer button {
+  margin-left: 10px;
+}
+
+.buttonsInnerWrapper {
+    position: absolute;
+    height: 30px; 
+}
+.buttonsWrapper {
+    display: inline-block;
+    position: relative;
+    top: 1px;
+    margin-top: 0px;
+    height: 30px;
+    vertical-align: top;
+}
+.browseBtn {
+    margin-top: 9px;
+    background-color: #d4d8dd;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    padding: 4.5px;
+    cursor: pointer;
+    color: #595959;
+}

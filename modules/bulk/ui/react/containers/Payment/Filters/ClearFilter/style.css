@@ -1,0 +1,31 @@
+.toolbarElement {
+    float: left;
+    margin: 12px 20px 0 0;
+}
+
+.toolbarElement:last-child {
+    margin-right: 0;
+}
+
+.noRightMargin {
+    margin-right: 0;
+}
+
+.closeArrow {
+    width: 28px;
+    height: 28px;
+    margin-top: 0;
+    background-color: #f4f4f4;
+    background-image: url('./images/clearfilters-arrow.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.closeArrow:hover {
+    background-color: #e8e8e8;
+}

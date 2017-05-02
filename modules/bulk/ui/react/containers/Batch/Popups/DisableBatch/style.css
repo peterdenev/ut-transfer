@@ -1,0 +1,30 @@
+.disableForm {
+    width: 500px;
+    margin: 0 auto;
+}
+
+.commentTextArea {
+    padding: 5px 160px;
+    margin: 0 auto;
+}
+
+.warning {
+    padding: 5px 0px;
+}
+
+.footer {
+  justify-content: flex-end;
+}
+
+.footer button {
+  margin-right: 10px;
+}
+
+.reason {
+  margin-top: 40px;
+  display: flex;
+}
+
+.flexBasis {
+  flex-basis: 600px;
+}

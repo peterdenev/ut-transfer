@@ -1,0 +1,13 @@
+.customSearchDropdown {
+    float: left;
+    width: 40%;
+    background-color: #F4F4F4;
+}
+.customSearchDropdown svg {
+    background-color: transparent;
+    fill: #000 !important;
+}
+.customSearchTextField {
+    float: left;
+    width: 60%;
+}

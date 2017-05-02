@@ -1,0 +1,120 @@
+.uploadForm {
+    width: 500px;
+    margin: 0 auto;
+}
+
+.uploadForm .errorMessage {
+    margin-top: 10px;
+    text-align: center;
+    color: red;
+}
+
+.uploadForm .successMessage {
+    margin-top: 10px;
+    text-align: center;
+    color: green;
+}
+
+.footer {
+  justify-content: flex-end;
+}
+
+.footer button {
+  margin-right: 10px;
+}
+
+.inputWrapClassName {
+  width: 100%
+}
+
+.row {
+  margin-top: 10px;
+  display: flex;
+}
+
+.flexBasis {
+  flex-basis: 600px;
+}
+
+.buttonsInnerWrapper {
+    position: absolute;
+    height: 30px; 
+}
+.buttonsWrapper {
+    display: inline-block;
+    position: relative;
+    top: 1px;
+    margin-top: 0px;
+    height: 30px;
+    vertical-align: top;
+}
+
+.replaceBtn {
+    background-color: #d4d8dd;
+    padding: 8px;
+    cursor: pointer;
+    color: #595959;
+    margin: 0;
+    border-right: 1px solid #f5f5f5;
+}
+
+.downloadBtn {
+  background-color: #d4d8dd;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  padding: 8px;
+  cursor: pointer;
+  color: #595959;
+  margin: 0;
+}
+
+.fileInput {
+  margin: 0 auto;
+  margin-top: 20px;
+  width: 400px;
+}
+
+.fileInput input[type="file"] {
+    display: none;
+}
+
+.infoInputWrapper {
+    margin-top: 10px;
+    width: 328px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.label {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding-right: 90px;
+  color: #595959;
+}
+
+.inputDisplay {
+  display: none;
+}
+
+.outerStatus {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.innerStatusSign {
+  font-family: Roboto;
+  padding: 5px;
+  background: #546684;
+  border-radius: 3px;
+  border-style: solid;
+  border-color: #546684;
+  color: white;
+  font-size: 14px;
+  margin-left: 10px;
+  padding: 3px 6px;
+}
+
+.innerStatusLabel {
+  font-size: 16px;
+}

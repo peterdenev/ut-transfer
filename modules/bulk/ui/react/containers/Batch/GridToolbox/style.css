@@ -1,0 +1,39 @@
+.gridToolBoxButtons {
+    float: right;
+}
+
+.buttonWrap {
+  text-align: right;
+}
+
+.buttonWrap > * {
+  margin: 5px !important;
+}
+
+.filterWrap {
+  display: flex;
+  margin-top: 5px;
+  text-align: right;
+  float: right
+}
+
+.filterWrap > div {
+  margin-right: 10px;
+}
+
+.standardFilter {
+  width: 240px;
+}
+
+.doubleDateInput {
+  float: right;
+  display: flex;
+  width: 460px !important;
+  padding-left: 0 !important;
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+
+.doubleDateInput > div {
+  padding-right: 10px;
+}
