@@ -1,3 +1,13 @@
+<a name="6.9.0"></a>
+# [6.9.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.8.1...v6.9.0) (2017-05-02)
+
+
+### Features
+
+* add bulk payments front end and backend method validations ([#28](https://github.com/softwaregroup-bg/ut-transfer/issues/28)) ([794f2eb](https://github.com/softwaregroup-bg/ut-transfer/commit/794f2eb))
+
+
+
 <a name="6.8.1"></a>
 ## [6.8.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.8.0...v6.8.1) (2017-05-02)
 
