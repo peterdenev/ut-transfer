@@ -7,7 +7,7 @@ DECLARE
     @mtid varchar(4),
     @opcode varchar(20)
 BEGIN TRY
-
+    -- forward stored
     UPDATE
         [transfer].[transfer]
     SET
