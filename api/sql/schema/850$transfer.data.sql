@@ -21,7 +21,8 @@ USING
         ('agentFloatRequest', 'Agent Float Request'),
         ('agentBalance', 'Agent Balance'),
         ('commission', 'Commission'),
-        ('fee', 'Fee')
+        ('fee', 'Fee'),
+        ('airline', 'Airline ticket purchase')
     ) AS source (itemCode, itemName)
 JOIN
 	core.itemType t on t.alias='operation'
