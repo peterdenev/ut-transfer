@@ -23,7 +23,7 @@ module.exports = (gridStyle) => ({
             { name: 'alerts', title: 'ALERTS' }
         ],
         allowColumnConfig: true,
-        method: 'card.report.transfer',
+        method: 'db/transfer.report.transfer',
         resultsetName: 'transfers',
         rowStyleField: 'style',
         externalStyle: gridStyle

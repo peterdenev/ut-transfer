@@ -4,5 +4,6 @@ module.exports = {
     'report.byHourOfDay': require('./report.byHourOfDay'),
     'report.byDayOfWeek': require('./report.byDayOfWeek'),
     'report.byWeekOfYear': require('./report.byWeekOfYear'),
+    'report.transfer': require('./report.transfer'),
     'partner.fetch': require('./partner.fetch')
 };
