@@ -1,5 +1,15 @@
 var { filterElementTypes } = require('ut-front-react/components/GridToolBox/types');
 
+var startDate = new Date();
+startDate.setHours(0);
+startDate.setMinutes(0);
+startDate.setSeconds(0);
+
+var endDate = new Date();
+endDate.setHours(23);
+endDate.setMinutes(59);
+endDate.setSeconds(59);
+
 module.exports = (gridStyle) => ({
     title: 'Transaction report',
     grid: {
@@ -23,7 +33,7 @@ module.exports = (gridStyle) => ({
             { name: 'alerts', title: 'ALERTS' }
         ],
         allowColumnConfig: true,
-        method: 'card.report.transfer',
+        method: 'db/transfer.report.transfer',
         resultsetName: 'transfers',
         rowStyleField: 'style',
         externalStyle: gridStyle
@@ -82,11 +92,11 @@ module.exports = (gridStyle) => ({
             labelTo: 'Date to',
             nameMap: { from: 'startDate', to: 'endDate' },
             type: filterElementTypes.dateTimePickerBetween,
-            timeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
-            dateFormat: { day: 'numeric', month: 'numeric', year: 'numeric' },
+            timeFormat: 'HH:mm',
+            dateFormat: 'YYYY-MM-DD',
             defaultValue: {
-                from: new Date(),
-                to: new Date()
+                from: startDate,
+                to: endDate
             }
         },
         {
