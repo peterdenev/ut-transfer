@@ -14,6 +14,10 @@ module.exports = {
                 classNames.push('rightAlign');
             }
 
+            if (!isHeader && data.style) {
+                classNames.push(data.style);
+            }
+
             if (allowHtml) {
                 return evalResult(result, 'div', classNames, nodeContext);
             }
