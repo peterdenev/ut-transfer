@@ -1,3 +1,13 @@
+<a name="6.8.0"></a>
+# [6.8.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.7.4...v6.8.0) (2017-05-02)
+
+
+### Features
+
+* add settlement report procedure ([cd0b928](https://github.com/softwaregroup-bg/ut-transfer/commit/cd0b928))
+
+
+
 <a name="6.7.4"></a>
 ## [6.7.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.7.3...v6.7.4) (2017-05-02)
 
