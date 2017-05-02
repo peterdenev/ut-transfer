@@ -1,3 +1,16 @@
+<a name="6.8.1"></a>
+## [6.8.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.8.0...v6.8.1) (2017-05-02)
+
+
+### Bug Fixes
+
+* add filter default value && datetime format strings ([691fffa](https://github.com/softwaregroup-bg/ut-transfer/commit/691fffa))
+* apply classnames ([ddcfae9](https://github.com/softwaregroup-bg/ut-transfer/commit/ddcfae9))
+* move transfer report procedure to module ([380c02e](https://github.com/softwaregroup-bg/ut-transfer/commit/380c02e))
+* remove seconds ([3fd8508](https://github.com/softwaregroup-bg/ut-transfer/commit/3fd8508))
+
+
+
 <a name="6.8.0"></a>
 # [6.8.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.7.4...v6.8.0) (2017-05-02)
 
