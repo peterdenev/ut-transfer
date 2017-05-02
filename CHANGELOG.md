@@ -1,3 +1,13 @@
+<a name="6.7.4"></a>
+## [6.7.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.7.3...v6.7.4) (2017-05-02)
+
+
+### Bug Fixes
+
+* format date ([067ec22](https://github.com/softwaregroup-bg/ut-transfer/commit/067ec22))
+
+
+
 <a name="6.7.3"></a>
 ## [6.7.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.7.2...v6.7.3) (2017-05-02)
 
