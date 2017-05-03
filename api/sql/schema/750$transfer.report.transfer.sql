@@ -37,7 +37,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
     (
         SELECT
             t.[transferId],
-            c.cardNumber [cardNumber],
+            'xxxx' + c.cardNumber [cardNumber],
             t.[transferDateTime],
             t.[sourceAccount],
             t.[destinationAccount],
@@ -54,7 +54,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             NULL [additionalInfo],
             t.style,
             t.alerts,
-            ROW_NUMBER() OVER(ORDER BY t.[transferId]) as [RowNum],
+            ROW_NUMBER() OVER(ORDER BY t.[transferId] DESC) as [RowNum],
             COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal]
         FROM
             [integration].[vTransferEvent] t
@@ -118,7 +118,7 @@ SELECT
     [alerts],
     [style]
 FROM  #transfersReport
-ORDER BY rowNum desc
+ORDER BY rowNum
 
 SELECT 'pagination' AS resultSetName
 
