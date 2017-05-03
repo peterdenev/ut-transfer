@@ -69,15 +69,15 @@ BEGIN TRY
     WHERE
         partnerId = @issuerId
 
-    IF LENGTH(@settlementDate) = 4
+    IF LEN(@settlementDate) = 4
     BEGIN
-        SET @issuerSettlementDate = DATEFROMPARTS(DATEPART(YEAR, GETDATE()), LEFT(@settlementDate, 2), RIGHT(@settlementDate, 2))
+        SET @issuerSettlementDate = CAST(CAST(DATEPART(YEAR, GETDATE()) AS CHAR(4)) + @settlementDate AS DATETIME)
         SET @issuerSettlementDate = DATEADD(YEAR, CASE
             WHEN DATEPART(MONTH, @issuerSettlementDate) = 1 AND DATEPART(MONTH, GETDATE()) = 12 THEN -1
             WHEN DATEPART(MONTH, @issuerSettlementDate) = 12 AND DATEPART(MONTH, GETDATE()) = 1 THEN 1
             ELSE 0 END, @issuerSettlementDate)
     END ELSE
-    IF LENGTH(@settlementDate) > 4
+    IF LEN(@settlementDate) > 4
     BEGIN
         SET @issuerSettlementDate = CAST(@settlementDate AS datetime)
     END
