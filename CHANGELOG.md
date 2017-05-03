@@ -1,3 +1,13 @@
+<a name="6.9.3"></a>
+## [6.9.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.2...v6.9.3) (2017-05-03)
+
+
+### Bug Fixes
+
+* order ([843adf5](https://github.com/softwaregroup-bg/ut-transfer/commit/843adf5))
+
+
+
 <a name="6.9.2"></a>
 ## [6.9.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.1...v6.9.2) (2017-05-03)
 
