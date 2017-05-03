@@ -17,9 +17,9 @@ DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
 DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return INT = 0
 DECLARE @totalRows INT
 
-EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
-IF @return != 0
-    RETURN 55555
+--EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
+--IF @return != 0
+--    RETURN 55555
 
 IF @pageNumber IS NULL
     SET @pageNumber = 1
