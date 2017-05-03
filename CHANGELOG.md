@@ -1,3 +1,14 @@
+<a name="6.9.1"></a>
+## [6.9.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.0...v6.9.1) (2017-05-03)
+
+
+### Bug Fixes
+
+* settlement and transfer reports ([de10492](https://github.com/softwaregroup-bg/ut-transfer/commit/de10492))
+* settlement date ([7f5eca5](https://github.com/softwaregroup-bg/ut-transfer/commit/7f5eca5))
+
+
+
 <a name="6.9.0"></a>
 # [6.9.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.8.1...v6.9.0) (2017-05-02)
 
