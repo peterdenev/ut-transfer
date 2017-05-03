@@ -11,26 +11,26 @@ endDate.setMinutes(59);
 endDate.setSeconds(59);
 
 module.exports = (gridStyle) => ({
-    title: 'Transaction report',
+    title: 'Transfer report',
     grid: {
         fields: [
-            { name: 'transferId', title: 'TRANS#' },
-            { name: 'cardNumber', title: 'CARD NUMBER' },
-            { name: 'transferDateTime', title: 'DATE AND TIME OF TXN' },
-            { name: 'sourceAccount', title: 'DEBIT ACCOUNT' },
-            { name: 'destinationAccount', title: 'CREDIT ACCOUNT' },
-            { name: 'description', title: 'DESCRIPTION' },
+            { name: 'transferId', title: 'Trans#' },
+            { name: 'cardNumber', title: 'Card Number' },
+            { name: 'transferDateTime', title: 'Date and Time of TXN' },
+            { name: 'sourceAccount', title: 'Debit Account' },
+            { name: 'destinationAccount', title: 'Credit Account' },
+            { name: 'description', title: 'Description' },
             { name: 'transferIdAcquirer', title: 'RRN' },
-            { name: 'transferAmount', title: 'TRANSACTION AMOUNT' },
-            { name: 'transferCurrency', title: 'CURRENCY' },
-            { name: 'terminalId', title: 'DEVICE ID' },
-            { name: 'terminalName', title: 'DEVICE LOCATION' },
-            { name: 'responseCode', title: 'RESPONSE CODE' },
-            { name: 'issuerTxStateName', title: 'ISSUER STATE' },
-            { name: 'reversalCode', title: 'REVERSAL CODE' },
+            { name: 'transferAmount', title: 'Transfer Amount' },
+            { name: 'transferCurrency', title: 'Currency' },
+            { name: 'terminalId', title: 'Device Id' },
+            { name: 'terminalName', title: 'Device Location' },
+            { name: 'responseCode', title: 'Response Code' },
+            { name: 'issuerTxStateName', title: 'Issuer State' },
+            { name: 'reversalCode', title: 'Reversal Code' },
             { name: 'merchantName', title: 'Merchant' },
-            { name: 'additionalInfo', title: 'ADDITIONAL INFO' },
-            { name: 'alerts', title: 'ALERTS' }
+            { name: 'additionalInfo', title: 'Additional Info' },
+            { name: 'alerts', title: 'Alerts' }
         ],
         allowColumnConfig: true,
         method: 'db/transfer.report.transfer',
@@ -75,8 +75,8 @@ module.exports = (gridStyle) => ({
         },
         {
             name: 'processingCode',
-            label: 'Transaction Type',
-            placeholder: 'Transaction Type',
+            label: 'Transfer Type',
+            placeholder: 'Transfer Type',
             type: filterElementTypes.dropDown,
             showAllOption: false,
             canSelectPlaceholder: true,

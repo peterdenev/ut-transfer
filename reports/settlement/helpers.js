@@ -5,6 +5,19 @@ module.exports = {
         return (value, field, data, isHeader) => {
             var classNames = ['cell'];
             var result = value;
+
+            switch (field.name) {
+                case 'transferAmount':
+                case 'transferFee':
+                case 'deniedCount':
+                    classNames.push('rightAlign');
+                    if (!isHeader) {
+                        classNames.push('textColorBlue');
+                    }
+                    break;
+                default:
+                    break;
+            }
             if (allowHtml) {
                 return evalResult(result, 'div', classNames, nodeContext);
             }
