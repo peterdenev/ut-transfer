@@ -1,3 +1,13 @@
+<a name="6.9.2"></a>
+## [6.9.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.1...v6.9.2) (2017-05-03)
+
+
+### Bug Fixes
+
+* use proper functions ([60157e1](https://github.com/softwaregroup-bg/ut-transfer/commit/60157e1))
+
+
+
 <a name="6.9.1"></a>
 ## [6.9.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.0...v6.9.1) (2017-05-03)
 
