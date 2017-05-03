@@ -1,3 +1,13 @@
+<a name="6.9.4"></a>
+## [6.9.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.3...v6.9.4) (2017-05-03)
+
+
+### Bug Fixes
+
+* temporarily remove permission check ([9a8d6b1](https://github.com/softwaregroup-bg/ut-transfer/commit/9a8d6b1))
+
+
+
 <a name="6.9.3"></a>
 ## [6.9.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.2...v6.9.3) (2017-05-03)
 
