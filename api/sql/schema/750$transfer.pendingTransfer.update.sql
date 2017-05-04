@@ -1,7 +1,8 @@
 ALTER PROCEDURE [transfer].[pendingTransfer.update] -- update status of pending transfer
     @pendingId INT, -- unique id of pending transaction
     @secondTransferId BIGINT, -- second transfer Id
-    @status INT, -- status of pending transfer
+    @status INT, -- status of pending transfer,
+    @reversalAttempts INT = NULL,
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
 SET NOCOUNT ON
@@ -20,8 +21,9 @@ BEGIN TRY
         [transfer].[pending]
     SET
         secondTransferId = @secondTransferId,
-        attempts = attempts + 1,
-        [status] = [status]
+        attempts = CASE WHEN @reversalAttempts IS NULL THEN attempts + 1 ELSE attempts END,
+        [status] = [status],
+        reversalAttempts = @reversalAttempts
     WHERE
         pendingId = @pendingId
 
