@@ -131,16 +131,15 @@ var destinationReverseExecute = (transfer) => {
 
     if (transfer.destinationPort) {
         return bus.importMethod(transfer.destinationPort + '/transfer.reverse.execute')(transfer)
-            .then(() => transfer)
-            .then(() => bus.importMethod('db/transfer.push.reverse')({
+            .then((result) => bus.importMethod('db/transfer.push.reverse')({
                     transferId: transfer.transferId,
                     source: 'issuer',
                     type: 'transfer.reverse',
-                    message: 'system reversal',
-                    details: 'system reversal'}
-            ))
-            .then(() => transfer)
-            .catch(function(error) {
+                    message: 'System reversal',
+                    details: 'System reversal msgid: ' + result.msgId}
+            )).then(() => {
+                return {success: true};
+            }).catch(function(error) {
                 return Promise.reject(error);
             });
     } else {
