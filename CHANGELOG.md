@@ -1,3 +1,13 @@
+<a name="6.9.5"></a>
+## [6.9.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.4...v6.9.5) (2017-05-04)
+
+
+### Bug Fixes
+
+* handle iso channel ([ca7884c](https://github.com/softwaregroup-bg/ut-transfer/commit/ca7884c))
+
+
+
 <a name="6.9.4"></a>
 ## [6.9.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.3...v6.9.4) (2017-05-03)
 
