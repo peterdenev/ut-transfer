@@ -23,7 +23,6 @@ module.exports = (gridStyle) => ({
         filterAutoFetch: true
     },
     filters: [
-        { name: 'cardNumber', label: 'Card Number', placeholder: 'Card Number', type: filterElementTypes.searchBox },
         {
             label: 'Settlement Date',
             name: 'settlementDate',
