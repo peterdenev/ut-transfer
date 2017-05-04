@@ -21,5 +21,7 @@ SET NOCOUNT ON
     JOIN [transfer].[transfer] t ON t.transferId = p.firstTransferId
     WHERE p.phoneNumber = @phoneNumber
     AND p.securityCode = @securityCode
-    AND t.transferAmount= @transferAmount
+    AND t.transferAmount = @transferAmount
     AND p.secondTransferId IS NULL
+    AND t.reversed = 0 
+    AND p.expireTime > getdate()
