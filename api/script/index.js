@@ -124,6 +124,30 @@ var dbGet = transfer => bus.importMethod('db/transfer.get')(transfer)
     }
 });
 
+var destinationReverseExecute = (transfer) => {
+    if (transfer.reversed === true) {
+        throw errors.reversed('transfer.reverse.execute')
+    }
+
+    if (transfer.destinationPort) {
+        return bus.importMethod(transfer.destinationPort + '/transfer.reverse.execute')(transfer)
+            .then(() => transfer)
+            .then(() => bus.importMethod('db/transfer.push.reverse')({
+                    transferId: transfer.transferId,
+                    source: 'issuer',
+                    type: 'transfer.reverse',
+                    message: 'system reversal',
+                    details: 'system reversal'}
+            ))
+            .then(() => transfer)
+            .catch(function(error) {
+                return Promise.reject(error);
+            });
+    } else {
+        return transfer;
+    }
+};
+
 module.exports = {
     'init': function(b) {
         bus = b;
@@ -144,6 +168,11 @@ module.exports = {
             .then(destinationPushExecute)
             .then(confirmIssuer)
             .then(merchantTransferExecute);
+    },
+    'reverse.execute': function(params) {
+        self = this;
+        return dbGet(params)
+            .then(destinationReverseExecute)
     }
 };
 // todo handle timeout from destination port
