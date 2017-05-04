@@ -58,6 +58,7 @@ SELECT
     (CASE
         WHEN t.[reversed] = 1 THEN 'transferReversed'
         WHEN t.[issuerTxState] in (2, 8, 12) AND ISNULL(cardAlert.type, cashAlert.type) IS NOT NULL THEN 'transferAlert'
+        WHEN t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)  THEN 'transferNormal'
         WHEN t.[acquirerTxState] in (2, 8, 12) THEN 'transferNormal'
         ELSE 'transferError'
     END) [style],
