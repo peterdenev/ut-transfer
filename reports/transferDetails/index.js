@@ -16,7 +16,7 @@ module.exports = (gridStyle) => ({
     title: 'Transfer Details',
     grid: {
         fields: [
-            { name: 'transferId', title: 'Transfer Id' },
+            { name: 'transferId', title: 'Trans#' },
             { name: 'channelType', title: 'Device Type' },
             { name: 'channelId', title: 'Device Id' },
             { name: 'typeTransaction', title: 'Transfer Type' },
@@ -74,11 +74,7 @@ module.exports = (gridStyle) => ({
             labelFrom: 'Transfer From',
             labelTo: 'Transfer To',
             nameMap: {from: 'startDate', to: 'endDate'},
-            type: filterElementTypes.dateTimePickerBetween,
-            defaultValue: {
-                from: startDate,
-                to: endDate
-            }
+            type: filterElementTypes.dateTimePickerBetween
         }
     ],
     order: {

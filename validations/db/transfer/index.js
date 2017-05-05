@@ -6,5 +6,6 @@ module.exports = {
     'report.byWeekOfYear': require('./report.byWeekOfYear'),
     'report.transfer': require('./report.transfer'),
     'report.settlement': require('./report.settlement'),
+    'report.settlementDetails': require('./report.settlementDetails'),
     'partner.fetch': require('./partner.fetch')
 };

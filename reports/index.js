@@ -1,5 +1,6 @@
 module.exports = (gridStyle) => ({
     SettlementReport: require('./settlement')(gridStyle),
+    SettlementDetails: require('./settlementDetails')(gridStyle),
     TransferReport: require('./transfer')(gridStyle),
     TransferDetails: require('./transferDetails')(gridStyle),
     TransferHourOfDay: require('./transferHourOfDay')(gridStyle),
