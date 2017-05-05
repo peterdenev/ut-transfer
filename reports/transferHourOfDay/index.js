@@ -1,11 +1,22 @@
 var { filterElementTypes } = require('ut-front-react/components/GridToolBox/types');
 
+var startDate = new Date();
+startDate.setMinutes(0);
+startDate.setSeconds(0);
+startDate.setMilliseconds(0);
+
+var endDate = new Date();
+endDate.setHours(startDate.getHours());
+endDate.setMinutes(59);
+endDate.setSeconds(59);
+endDate.setMilliseconds(999);
+
 module.exports = (gridStyle) => ({
     title: 'Transfer Hour of Day Statistics ',
     grid: {
         fields: [
             { name: 'agreatepredicate', title: 'Hour of Day' },
-            { name: 'transferCount', title: 'Transaction Count' },
+            { name: 'transferCount', title: 'Transfer Count' },
             { name: 'transferCountPercent', title: '%' },
             { name: 'amountBilling', title: 'Billing Amount' },
             { name: 'amountBillingPercent', title: '%' },
@@ -45,10 +56,14 @@ module.exports = (gridStyle) => ({
             }
         },
         {
-            labelFrom: 'Transaction From',
-            labelTo: 'Transaction To',
+            labelFrom: 'Transfer From',
+            labelTo: 'Transfer To',
             nameMap: {from: 'startDate', to: 'endDate'},
-            type: filterElementTypes.dateTimePickerBetween
+            type: filterElementTypes.dateTimePickerBetween,
+            defaultValue: {
+                from: startDate,
+                to: endDate
+            }
         }
     ],
     order: {

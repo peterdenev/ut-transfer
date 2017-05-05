@@ -1,5 +1,11 @@
 var { filterElementTypes } = require('ut-front-react/components/GridToolBox/types');
 
+var date = new Date();
+date.setHours(0);
+date.setMinutes(0);
+date.setSeconds(0);
+date.setMilliseconds(0);
+
 module.exports = (gridStyle) => ({
     title: 'Settlement Report',
     grid: {
@@ -26,7 +32,8 @@ module.exports = (gridStyle) => ({
         {
             label: 'Settlement Date',
             name: 'settlementDate',
-            type: filterElementTypes.datePicker
+            type: filterElementTypes.datePicker,
+            defaultValue: date
         },
         {
             type: filterElementTypes.clear, validateFilter: false

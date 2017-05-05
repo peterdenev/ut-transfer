@@ -4,11 +4,13 @@ var startDate = new Date();
 startDate.setHours(0);
 startDate.setMinutes(0);
 startDate.setSeconds(0);
+startDate.setMilliseconds(0);
 
 var endDate = new Date();
 endDate.setHours(23);
 endDate.setMinutes(59);
 endDate.setSeconds(59);
+endDate.setMilliseconds(999);
 
 module.exports = (gridStyle) => ({
     title: 'Transfer report',
