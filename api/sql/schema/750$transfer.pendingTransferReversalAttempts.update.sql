@@ -1,7 +1,6 @@
-ALTER PROCEDURE [transfer].[pendingTransfer.update] -- update status of pending transfer
+ALTER PROCEDURE [transfer].[pendingTransferReversalAttempts.update] -- update status of pending transfer
     @pendingId INT, -- unique id of pending transaction
-    @secondTransferId BIGINT, -- second transfer Id
-    @status INT = NULL, -- status of pending transfer,
+    @reversalAttempts INT, --counter of reversal attempts
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
 SET NOCOUNT ON
@@ -19,9 +18,7 @@ BEGIN TRY
     UPDATE
         [transfer].[pending]
     SET
-        secondTransferId = @secondTransferId,
-        attempts = attempts + 1,
-        [status] = ISNULL(@status, [status])
+        reversalAttempts = @reversalAttempts
     WHERE
         pendingId = @pendingId
 
@@ -44,4 +41,3 @@ BEGIN CATCH
 	EXEC [core].[error]
     RETURN 55555
 END CATCH
-
