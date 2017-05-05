@@ -1,20 +1,12 @@
 ALTER PROCEDURE [transfer].[pendingTransferReversalAttempts.update] -- update status of pending transfer
     @pendingId INT, -- unique id of pending transaction
-    @reversalAttempts INT, --counter of reversal attempts
-    @meta core.metaDataTT READONLY -- information for the user that makes the operation
+    @reversalAttempts INT --counter of reversal attempts
 AS
 SET NOCOUNT ON
 DECLARE @callParams XML
-DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
 
 BEGIN TRY
-    DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return INT = 0
-    EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
-    IF @return != 0
-    BEGIN
-        RETURN 55555
-    END
-
+   
     UPDATE
         [transfer].[pending]
     SET
