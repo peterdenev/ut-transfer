@@ -1,3 +1,20 @@
+<a name="6.10.0"></a>
+# [6.10.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.5...v6.10.0) (2017-05-05)
+
+
+### Bug Fixes
+
+* optimization ([67d86b6](https://github.com/softwaregroup-bg/ut-transfer/commit/67d86b6))
+* remove redundant filter ([#32](https://github.com/softwaregroup-bg/ut-transfer/issues/32)) ([3d66850](https://github.com/softwaregroup-bg/ut-transfer/commit/3d66850))
+* set filter default values & rename transaction to transfer ([#33](https://github.com/softwaregroup-bg/ut-transfer/issues/33)) ([56ffca4](https://github.com/softwaregroup-bg/ut-transfer/commit/56ffca4))
+
+
+### Features
+
+* Settlement details report ([#34](https://github.com/softwaregroup-bg/ut-transfer/issues/34)) ([98a11c3](https://github.com/softwaregroup-bg/ut-transfer/commit/98a11c3))
+
+
+
 <a name="6.9.5"></a>
 ## [6.9.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.4...v6.9.5) (2017-05-04)
 
