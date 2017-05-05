@@ -37,27 +37,10 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
     (
         SELECT
             t.[transferId],
-            'xxxx' + c.cardNumber [cardNumber],
-            t.[transferDateTime],
-            t.[sourceAccount],
-            t.[destinationAccount],
-            t.[transferType] [description],
-            t.[transferIdAcquirer],
-            t.[transferAmount],
-            t.[transferCurrency],
-            t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') [terminalId],
-            t.[requestDetails].value('(/root/terminalName)[1]', 'varchar(40)') [terminalName],
-            ISNULL(t.errorMessage, 'Success') [responseCode],
-            t.[issuerTxStateName],
-            ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
-            t.[merchantId] [merchantName],
-            NULL [additionalInfo],
-            t.style,
-            t.alerts,
             ROW_NUMBER() OVER(ORDER BY t.[transferId] DESC) as [RowNum],
             COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal]
         FROM
-            [integration].[vTransferEvent] t
+            [transfer].[transfer] t
         INNER JOIN
             [card].[card] c ON c.cardId = t.cardId
         WHERE
@@ -66,30 +49,13 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@endDate IS NULL OR t.[transferDateTime] < DATEADD(d, 1, @endDate))
             AND (@issuerTxState IS NULL OR t.[issuerTxState] = @issuerTxState)
             AND (@cardNumber IS NULL OR c.[cardNumber] LIKE '%' + @cardNumber + '%')
-            AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') LIKE '%' + @deviceId + '%')
+            -- AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') LIKE '%' + @deviceId + '%')
             AND (@processingCode IS NULL OR t.[transferTypeId] = @processingCode)
             AND (@merchantName IS NULL OR t.[merchantId] LIKE '%' + @merchantName + '%')
     )
 
 SELECT
     [transferId],
-    [cardNumber],
-    [transferDateTime],
-    [sourceAccount],
-    [destinationAccount],
-    [description],
-    [transferIdAcquirer],
-    [transferAmount],
-    [transferCurrency],
-    [terminalId],
-    [terminalName],
-    [responseCode],
-    [issuerTxStateName],
-    [reversalCode],
-    [merchantName],
-    [additionalInfo],
-    [style],
-    [alerts],
     [RowNum],
     [recordsTotal]
 INTO #transfersReport
@@ -99,26 +65,32 @@ WHERE (RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND R
 SELECT 'transfers' AS resultSetName
 
 SELECT
-    [transferId],
-    [cardNumber],
-    [transferDateTime],
-    [sourceAccount],
-    [destinationAccount],
-    [description],
-    [transferIdAcquirer],
-    [transferAmount],
-    [transferCurrency],
-    [terminalId],
-    [terminalName],
-    [responseCode],
-    [issuerTxStateName],
-    [reversalCode],
-    [merchantName],
-    [additionalInfo],
-    [alerts],
-    [style]
-FROM  #transfersReport
-ORDER BY rowNum
+    t.[transferId],
+    'XXXX' + c.cardNumber [cardNumber],
+    convert(varchar(19), t.[transferDateTime], 120) transferDateTime,
+    t.[sourceAccount],
+    t.[destinationAccount],
+    t.[transferType] [description],
+    t.[transferIdAcquirer],
+    t.[transferAmount],
+    t.[transferCurrency],
+    t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') [terminalId],
+    t.[requestDetails].value('(/root/terminalName)[1]', 'varchar(40)') [terminalName],
+    ISNULL(t.errorMessage, 'Success') [responseCode],
+    t.[issuerTxStateName],
+    ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
+    t.[merchantId] [merchantName],
+    NULL [additionalInfo],
+    t.style,
+    t.alerts
+FROM  
+    #transfersReport r
+JOIN
+    transfer.vTransferEvent t ON t.transferId = r.transferId
+JOIN
+    [card].[card] c ON c.cardId = t.cardId
+ORDER BY 
+    r.rowNum
 
 SELECT 'pagination' AS resultSetName
 

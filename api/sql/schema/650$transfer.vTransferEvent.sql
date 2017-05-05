@@ -2,7 +2,7 @@ ALTER VIEW [transfer].[vTransferEvent]
 AS
 SELECT
     t.[transferId],
-    convert(varchar(19), t.[transferDateTime], 120) transferDateTime,
+    t.[transferDateTime],
     t.[sourceAccount],
     t.[destinationAccount],
     t.[issuerTxState],
