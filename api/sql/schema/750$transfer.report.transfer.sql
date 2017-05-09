@@ -3,8 +3,8 @@ ALTER PROCEDURE [transfer].[report.transfer]
     @accountNumber varchar(100),
     @deviceId varchar(100),
     @processingCode varchar(100),
-    @startDate date,
-    @endDate date,
+    @startDate datetime,
+    @endDate datetime,
     @issuerTxState int,
     @merchantName varchar(100),
     @pageNumber int, -- page number for result
@@ -46,7 +46,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
         WHERE
             (@accountNumber IS NULL OR t.[sourceAccount] LIKE '%' + @accountNumber + '%')
             AND (@startDate IS NULL OR t.[transferDateTime] >= @startDate)
-            AND (@endDate IS NULL OR t.[transferDateTime] < DATEADD(d, 1, @endDate))
+            AND (@endDate IS NULL OR t.[transferDateTime] <= @endDate)
             AND (@issuerTxState IS NULL OR t.[issuerTxState] = @issuerTxState)
             AND (@cardNumber IS NULL OR c.[cardNumber] LIKE '%' + @cardNumber + '%')
             -- AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') LIKE '%' + @deviceId + '%')
@@ -83,13 +83,13 @@ SELECT
     NULL [additionalInfo],
     t.style,
     t.alerts
-FROM  
+FROM
     #transfersReport r
 JOIN
     transfer.vTransferEvent t ON t.transferId = r.transferId
 JOIN
     [card].[card] c ON c.cardId = t.cardId
-ORDER BY 
+ORDER BY
     r.rowNum
 
 SELECT 'pagination' AS resultSetName
