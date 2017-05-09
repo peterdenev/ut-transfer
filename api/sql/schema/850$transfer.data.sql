@@ -7,6 +7,7 @@ USING
         --('withdrawOtp','Withdraw with OTP'),
         ('transfer','Funds transfer to account'),
         ('transferOtp','Funds transfer with OTP'),
+        ('transferOtpCash','Funds transfer with OTP - Cash option'),
         ('balance','Balance enquiry'),
         ('ministatement','Mini statement enquiry'),
         ('topup', 'Top up'),
