@@ -1,3 +1,13 @@
+<a name="6.10.1"></a>
+## [6.10.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.0...v6.10.1) (2017-05-09)
+
+
+### Bug Fixes
+
+* parameters are datetime ([7570ea7](https://github.com/softwaregroup-bg/ut-transfer/commit/7570ea7))
+
+
+
 <a name="6.10.0"></a>
 # [6.10.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.9.5...v6.10.0) (2017-05-05)
 
