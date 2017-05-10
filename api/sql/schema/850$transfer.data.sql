@@ -4,7 +4,7 @@ USING
     (VALUES
         ('deposit','Deposit / cash in'),
         ('withdraw','Withdrawal / cash out'),
-        --('withdrawOtp','Withdraw with OTP'),
+        ('withdrawOtp','Withdraw with OTP'),
         ('transfer','Funds transfer to account'),
         ('transferOtp','Funds transfer with OTP'),
         ('transferOtpCash','Funds transfer with OTP - Cash option'),
