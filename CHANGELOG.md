@@ -1,3 +1,13 @@
+<a name="6.10.2"></a>
+## [6.10.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.1...v6.10.2) (2017-05-10)
+
+
+### Bug Fixes
+
+* version bump ([#36](https://github.com/softwaregroup-bg/ut-transfer/issues/36)) ([8e9bdba](https://github.com/softwaregroup-bg/ut-transfer/commit/8e9bdba))
+
+
+
 <a name="6.10.1"></a>
 ## [6.10.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.0...v6.10.1) (2017-05-09)
 
