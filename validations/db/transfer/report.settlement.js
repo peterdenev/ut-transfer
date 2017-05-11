@@ -6,6 +6,6 @@ module.exports = {
         settlementDate: joi.string().allow('', null)
     }),
     result: joi.object().keys({
-        settlement: joi.any()
+        settlement: joi.array()
     })
 };

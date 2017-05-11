@@ -16,7 +16,7 @@ module.exports = {
         deviceID: joi.string()
     }),
     result: joi.object().keys({
-        transferDetails: joi.any(),
+        transferDetails: joi.array(),
         pagination: joi.array().items(joi.object().keys({
             pageSize: joi.number(),
             pageNumber: joi.number(),

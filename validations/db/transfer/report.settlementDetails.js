@@ -12,6 +12,12 @@ module.exports = {
         pageSize: joi.number().min(1)
     }),
     result: joi.object().keys({
-        settlementDetails: joi.any()
+        settlementDetails: joi.array(),
+        pagination: joi.array().items(joi.object().keys({
+            pageSize: joi.number(),
+            pageNumber: joi.number(),
+            pagesTotal: joi.number(),
+            recordsTotal: joi.number()
+        }))
     })
 };

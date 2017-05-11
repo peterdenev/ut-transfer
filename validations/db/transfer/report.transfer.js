@@ -17,5 +17,13 @@ module.exports = {
         pageNumber: joi.number().min(1),
         pageSize: joi.number().min(1)
     }),
-    result: joi.any()
+    result: joi.object().keys({
+        transfers: joi.array(),
+        pagination: joi.array().items(joi.object().keys({
+            pageSize: joi.number(),
+            pageNumber: joi.number(),
+            pagesTotal: joi.number(),
+            recordsTotal: joi.number()
+        }))
+    })
 };

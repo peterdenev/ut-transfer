@@ -12,6 +12,6 @@ module.exports = {
         transferCurrency: joi.string().length(3)
     }),
     result: joi.object().keys({
-        transferWeekOfYear: joi.any()
+        transferWeekOfYear: joi.array()
     })
 };
