@@ -1,3 +1,13 @@
+<a name="6.10.6"></a>
+## [6.10.6](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.5...v6.10.6) (2017-05-11)
+
+
+### Bug Fixes
+
+* include pagination in result and expect joi array instead of any in report validations ([#41](https://github.com/softwaregroup-bg/ut-transfer/issues/41)) ([738d598](https://github.com/softwaregroup-bg/ut-transfer/commit/738d598))
+
+
+
 <a name="6.10.5"></a>
 ## [6.10.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.4...v6.10.5) (2017-05-11)
 
