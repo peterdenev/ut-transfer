@@ -1,4 +1,4 @@
-var {evalResult} = require('ut-report/assets/script/common');
+var {evalResult, formatNumber} = require('ut-report/assets/script/common');
 
 module.exports = {
     transformCellValue: function({allowHtml, nodeContext, dateFormat, locale}) {
@@ -7,11 +7,16 @@ module.exports = {
             var result = value;
 
             switch (field.name) {
+                case 'transferCount':
+                case 'deniedCount':
+                case 'dueTo':
+                    classNames.push('rightAlign');
+                    break;
                 case 'transferAmount':
                 case 'transferFee':
-                case 'deniedCount':
                     classNames.push('rightAlign');
                     if (!isHeader) {
+                        result = formatNumber(result);
                         classNames.push('textColorBlue');
                     }
                     break;

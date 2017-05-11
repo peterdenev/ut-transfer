@@ -6,8 +6,10 @@ module.exports = {
             var classNames = ['cell'];
             var result = value;
             switch (field.name) {
-                case 'agreatepredicate':
                 case 'transferCount':
+                    classNames.push('rightAlign');
+                    break;
+                case 'agreatepredicate':
                 case 'transferCurrency':
                     break;
                 default:

@@ -6,6 +6,9 @@ module.exports = {
             var classNames = ['cell'];
             var result = value;
             switch (field.name) {
+                case 'dueTo':
+                    classNames.push('rightAlign');
+                    break;
                 case 'transferAmount':
                 case 'transferFee':
                     if (!isHeader) {
