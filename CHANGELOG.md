@@ -1,3 +1,13 @@
+<a name="6.10.5"></a>
+## [6.10.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.4...v6.10.5) (2017-05-11)
+
+
+### Bug Fixes
+
+* total amount/count, stats of successful txn, optimization ([886af8b](https://github.com/softwaregroup-bg/ut-transfer/commit/886af8b))
+
+
+
 <a name="6.10.4"></a>
 ## [6.10.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.3...v6.10.4) (2017-05-11)
 
