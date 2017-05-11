@@ -95,6 +95,7 @@ BEGIN TRY
            (@startDate IS NULL OR t.transferDateTime >= @startDate)
        AND (@endDate IS NULL OR t.transferDateTime <= @endDate)
        AND (@transferCurrency IS NULL OR t.transferCurrency = @transferCurrency)
+       AND t.success = 1
        GROUP BY 
         DATEPART(WEEKDAY, t.transferDateTime), 
         DATENAME(WEEKDAY, t.transferDateTime),

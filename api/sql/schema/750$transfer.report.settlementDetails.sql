@@ -46,14 +46,15 @@ BEGIN TRY
             p.issuerId AS issuerId,
             p.[name] AS productName,
             n.itemName [transferType],
-            CASE WHEN v.issuerTxState = 2 AND n.itemCode IN (N'sale', N'withdraw') THEN v.transferAmount END AS transferAmount,
-            CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END AS transferFee,
-            ISNULL((CASE WHEN v.issuerTxState = 2 AND n.itemCode IN (N'sale', N'withdraw') THEN v.transferAmount END),0) +
-            ISNULL((CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END), 0) [dueTo],
+            CASE WHEN v.success = 1 AND n.itemCode IN (N'sale', N'withdraw') THEN v.transferAmount END AS transferAmount,
+            CASE WHEN v.success = 1 THEN v.acquirerFee END AS transferFee,
+            ISNULL((CASE WHEN v.success = 1 AND n.itemCode IN (N'sale', N'withdraw') THEN v.transferAmount END),0) +
+            ISNULL((CASE WHEN v.success = 1 THEN v.acquirerFee END), 0) [dueTo],
             v.transferCurrency AS transferCurrency,
             CASE WHEN v.channelType = N'iso' THEN v.transferIdIssuer ELSE v.transferId END AS transferIdIssuer,  -- authorisationCode
             processing.x.value(N'(terminalId)[1]', N'NVARCHAR(150)') AS deviceId,
             processing.x.value(N'(terminalName)[1]', N'NVARCHAR(150)') AS deviceName,
+            v.style,
             ROW_NUMBER() OVER (
                 ORDER BY CASE 
                     WHEN @sortOrder = N'ASC'
@@ -72,11 +73,11 @@ BEGIN TRY
                             WHEN @sortBy = N'issuerId' THEN p.issuerId
                             WHEN @sortBy = N'productName' THEN p.[name]
                             WHEN @sortBy = N'transferType' THEN n.itemName
-                            WHEN @sortBy = N'transferAmount' THEN CASE  WHEN v.issuerTxState = 2 AND n.itemCode IN (N'sale', N'withdraw') 
+                            WHEN @sortBy = N'transferAmount' THEN CASE  WHEN v.success = 1 AND n.itemCode IN (N'sale', N'withdraw') 
                                                                             THEN REPLICATE(N'0',30-len(v.transferAmount)) + CAST(v.transferAmount AS NVARCHAR(50)) END
-                            WHEN @sortBy = N'transferFee' THEN CASE WHEN v.issuerTxState = 2 
+                            WHEN @sortBy = N'transferFee' THEN CASE WHEN v.success = 1 
                                                                         THEN REPLICATE(N'0',30-len(v.acquirerFee)) + CAST(v.acquirerFee AS NVARCHAR(50)) END
-                            WHEN @sortBy = N'dueTo' THEN CASE  WHEN v.issuerTxState = 2 AND n.itemCode IN (N'sale', N'withdraw') 
+                            WHEN @sortBy = N'dueTo' THEN CASE  WHEN v.success = 1 AND n.itemCode IN (N'sale', N'withdraw') 
                                                                         THEN REPLICATE(N'0',30-len(ISNULL(v.transferAmount, 0) + ISNULL(v.acquirerFee, 0))) + CAST(ISNULL(v.transferAmount, 0) + ISNULL(v.acquirerFee, 0) AS NVARCHAR(50)) END
                             WHEN @sortBy = N'transferCurrency' THEN v.transferCurrency
                             WHEN @sortBy = N'transferIdIssuer' THEN CASE WHEN v.channelType = N'iso' 
@@ -103,11 +104,11 @@ BEGIN TRY
                             WHEN @sortBy = N'issuerId' THEN p.issuerId
                             WHEN @sortBy = N'productName' THEN p.[name]
                             WHEN @sortBy = N'transferType' THEN n.itemName
-                            WHEN @sortBy = N'transferAmount' THEN CASE  WHEN v.issuerTxState = 2 AND n.itemCode IN (N'sale', N'withdraw') 
+                            WHEN @sortBy = N'transferAmount' THEN CASE  WHEN v.success = 1 AND n.itemCode IN (N'sale', N'withdraw') 
                                                                             THEN REPLICATE(N'0',30-len(v.transferAmount)) + CAST(v.transferAmount AS NVARCHAR(50)) END
-                            WHEN @sortBy = N'transferFee' THEN CASE WHEN v.issuerTxState = 2 
+                            WHEN @sortBy = N'transferFee' THEN CASE WHEN v.success = 1 
                                                                         THEN REPLICATE(N'0',30-len(v.acquirerFee)) + CAST(v.acquirerFee AS NVARCHAR(50)) END
-                            WHEN @sortBy = N'dueTo' THEN CASE  WHEN v.issuerTxState = 2 AND n.itemCode IN (N'sale', N'withdraw') 
+                            WHEN @sortBy = N'dueTo' THEN CASE  WHEN v.success = 1 AND n.itemCode IN (N'sale', N'withdraw') 
                                                                         THEN REPLICATE(N'0',30-len(ISNULL(v.transferAmount, 0) + ISNULL(v.acquirerFee, 0))) + CAST(ISNULL(v.transferAmount, 0) + ISNULL(v.acquirerFee, 0) AS NVARCHAR(50)) END
                             WHEN @sortBy = N'transferCurrency' THEN v.transferCurrency
                             WHEN @sortBy = N'transferIdIssuer' THEN CASE WHEN v.channelType = N'iso' 
@@ -119,10 +120,7 @@ BEGIN TRY
                     END DESC
           ) AS rowNum,
           COUNT(*) OVER (PARTITION BY 1) AS recordsTotal
-        FROM
-            [transfer].vTransfer v
-        JOIN 
-            [transfer].vTransferEvent e ON e.transferId = v.transferId
+        FROM [transfer].vTransferEvent v
         JOIN
             [card].[card] c ON c.cardId = v.cardId
         JOIN
@@ -130,7 +128,7 @@ BEGIN TRY
         JOIN
             [core].[itemName] n ON n.itemNameId = v.transferTypeId
         OUTER APPLY
-            e.requestDetails.nodes(N'/root') AS processing(x)
+            v.requestDetails.nodes(N'/root') AS processing(x)
         WHERE
             v.issuerTxState IN (2,3) 
         AND v.settlementDate >= DATEADD(DAY, DATEDIFF(DAY, 0, ISNULL(@settlementDate, GETDATE())), 0)
@@ -156,6 +154,7 @@ BEGIN TRY
         sd.transferIdIssuer,
         sd.deviceId,
         sd.deviceName,
+        sd.style,
         sd.rowNum,
         sd.recordsTotal
     INTO #settlementDetails
@@ -184,6 +183,7 @@ BEGIN TRY
         sd.transferIdIssuer,
         sd.deviceId,
         sd.deviceName,
+        sd.style,
         sd.rowNum,
         sd.recordsTotal
     FROM #settlementDetails sd

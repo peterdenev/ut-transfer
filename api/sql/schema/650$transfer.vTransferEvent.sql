@@ -14,6 +14,11 @@ SELECT
     t.[transferTypeId],
     t.[cardId],
     t.[reversed],
+    t.[settlementDate],
+    t.[channelType],
+    t.[localDateTime],
+    t.[transferIdIssuer],
+    t.[acquirerFee],
     request.udfDetails [requestDetails],
     request.eventDateTime [requestDateTime],
     request.[type] [requestType],
@@ -65,7 +70,11 @@ SELECT
     CASE
         WHEN ISNULL(cashAlert.[message], N'') != '' AND ISNULL(cardAlert.[message], N'') != N'' THEN cashAlert.[message] + CHAR(10) + CHAR(13) + cardAlert.[message]
         ELSE ISNULL(cashAlert.[message], N'') + ISNULL(cardAlert.[message], N'')
-    END as alerts
+    END as alerts,
+    CASE
+        WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] in (2, 8, 12)) THEN 1
+        ELSE 0
+    END success    
 FROM
     [transfer].[transfer] t
 OUTER APPLY

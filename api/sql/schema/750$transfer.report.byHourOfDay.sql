@@ -91,6 +91,7 @@ BEGIN TRY
             (@startDate IS NULL or t.transferDateTime >= @startDate)
         AND (@endDate IS NULL or t.transferDateTime <= @endDate)
         AND (@transferCurrency IS NULL OR t.transferCurrency = @transferCurrency)
+        AND t.success = 1
         GROUP BY 
             DATEPART(HOUR,t.transferDateTime),
             t.transferCurrency

@@ -37,12 +37,19 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
     (
         SELECT
             t.[transferId],
+            t.[transferAmount],
+            t.[transferCurrency],
+            CASE
+                WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] in (2, 8, 12)) THEN 1
+                ELSE 0
+            END AS success,
             ROW_NUMBER() OVER(ORDER BY t.[transferId] DESC) as [RowNum],
             COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal]
         FROM
             [transfer].[transfer] t
         INNER JOIN
             [card].[card] c ON c.cardId = t.cardId
+        LEFT JOIN [atm].[terminal] tl ON tl.actorId = t.channelId
         WHERE
             (@accountNumber IS NULL OR t.[sourceAccount] LIKE '%' + @accountNumber + '%')
             AND (@startDate IS NULL OR t.[transferDateTime] >= @startDate)
@@ -50,17 +57,31 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@issuerTxState IS NULL OR t.[issuerTxState] = @issuerTxState)
             AND (@cardNumber IS NULL OR c.[cardNumber] LIKE '%' + @cardNumber + '%')
             -- AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') LIKE '%' + @deviceId + '%')
+            AND (@deviceId IS NULL OR tl.terminalId LIKE '%' + @deviceId + '%')
             AND (@processingCode IS NULL OR t.[transferTypeId] = @processingCode)
             AND (@merchantName IS NULL OR t.[merchantId] LIKE '%' + @merchantName + '%')
     )
 
+-- INSERT INTO #transfersReport
 SELECT
     [transferId],
     [RowNum],
-    [recordsTotal]
+    [recordsTotal],
+    [transferAmount]    AS transferAmountTotal,
+    [transferCurrency]
 INTO #transfersReport
 FROM cte
 WHERE (RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize))
+UNION ALL
+SELECT
+    NULL AS [transferId],
+    MIN([recordsTotal]) + 1 AS [RowNum],
+    COUNT([transferId]) AS [recordsTotal],
+    SUM(ISNULL([transferAmount], 0)) AS transferAmountTotal,
+    [transferCurrency]
+FROM cte
+WHERE success = 1
+GROUP BY transferCurrency
 
 SELECT 'transfers' AS resultSetName
 
@@ -82,15 +103,41 @@ SELECT
     t.[merchantId] [merchantName],
     NULL [additionalInfo],
     t.style,
-    t.alerts
+    t.alerts,
+    r.rowNum
 FROM
     #transfersReport r
 JOIN
     transfer.vTransferEvent t ON t.transferId = r.transferId
 JOIN
     [card].[card] c ON c.cardId = t.cardId
-ORDER BY
+UNION ALL
+SELECT
+    NULL AS transferId,
+    NULL AS cardNumber,
+    NULL AS transferDateTime,
+    NULL AS sourceAccount,
+    NULL AS destinationAccount,
+    'TOTAL Successful' AS [description],
+    r.recordsTotal AS transferIdAcquirer,
+    r.transferAmountTotal AS transferAmount,
+    r.[transferCurrency],
+    NULL AS terminalId,
+    NULL AS terminalName,
+    NULL AS responseCode,
+    NULL AS issuerTxStateName,
+    NULL AS reversalCode,
+    NULL AS merchantName,
+    NULL [additionalInfo],
+    NULL AS style,
+    NULL AS alerts,
     r.rowNum
+FROM
+    #transfersReport r
+WHERE   r.[transferId] IS NULL
+AND     (RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize))
+ORDER BY
+    r.rowNum, transferId desc
 
 SELECT 'pagination' AS resultSetName
 
