@@ -1,3 +1,14 @@
+<a name="6.10.3"></a>
+## [6.10.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.2...v6.10.3) (2017-05-11)
+
+
+### Bug Fixes
+
+* register export/print handlers and provide method and resultset name ([679b009](https://github.com/softwaregroup-bg/ut-transfer/commit/679b009))
+* report column styles ([46246f9](https://github.com/softwaregroup-bg/ut-transfer/commit/46246f9))
+
+
+
 <a name="6.10.2"></a>
 ## [6.10.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.1...v6.10.2) (2017-05-10)
 
