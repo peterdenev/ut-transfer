@@ -1,3 +1,13 @@
+<a name="6.10.4"></a>
+## [6.10.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.3...v6.10.4) (2017-05-11)
+
+
+### Bug Fixes
+
+* add success column in vTransfer ([2366b79](https://github.com/softwaregroup-bg/ut-transfer/commit/2366b79))
+
+
+
 <a name="6.10.3"></a>
 ## [6.10.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.2...v6.10.3) (2017-05-11)
 
