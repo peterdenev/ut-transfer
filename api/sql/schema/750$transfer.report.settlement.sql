@@ -6,12 +6,12 @@ SELECT
     0,
     p.name [productName],
     n.itemName [transferType],
-    SUM(CASE WHEN v.issuerTxState = 2 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN 1 END) [transferCount],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END) [transferFee],
-    ISNULL(SUM(CASE WHEN v.issuerTxState = 2 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END),0)+
-    ISNULL(SUM(CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END), 0) [dueTo],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN 0 else 1 END) [deniedCount]
+    SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
+    SUM(CASE WHEN v.success = 1 THEN 1 END) [transferCount],
+    SUM(CASE WHEN v.success = 1 THEN v.acquirerFee END) [transferFee],
+    ISNULL(SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END),0)+
+    ISNULL(SUM(CASE WHEN v.success = 1 THEN v.acquirerFee END), 0) [dueTo],
+    SUM(CASE WHEN v.success = 1 THEN 0 else 1 END) [deniedCount]
 FROM
     [transfer].vTransfer v
 JOIN
@@ -32,12 +32,12 @@ UNION ALL SELECT
     1,
     'Issuer',
     'Total',
-    SUM(CASE WHEN v.issuerTxState = 2 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN 1 END) [transferCount],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END) [transferFee],
-    ISNULL(SUM(CASE WHEN v.issuerTxState = 2 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END),0)+
-    ISNULL(SUM(CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END), 0) [dueTo],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN 0 else 1 END) [deniedCount]
+    SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
+    SUM(CASE WHEN v.success = 1 THEN 1 END) [transferCount],
+    SUM(CASE WHEN v.success = 1 THEN v.acquirerFee END) [transferFee],
+    ISNULL(SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END),0)+
+    ISNULL(SUM(CASE WHEN v.success = 1 THEN v.acquirerFee END), 0) [dueTo],
+    SUM(CASE WHEN v.success = 1 THEN 0 else 1 END) [deniedCount]
 FROM
     [transfer].vTransfer v
 JOIN
@@ -55,12 +55,12 @@ UNION ALL SELECT
     2,
     p.name [Card],
     n.itemName [Tran_Desc],
-    SUM(CASE WHEN v.issuerTxState = 2 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN 1 END) [transferCount],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END) [transferFee],
-    ISNULL(SUM(CASE WHEN v.issuerTxState = 2 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END),0)+
-    ISNULL(SUM(CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END), 0) [dueTo],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN 0 else 1 END) [deniedCount]
+    SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
+    SUM(CASE WHEN v.success = 1 THEN 1 END) [transferCount],
+    SUM(CASE WHEN v.success = 1 THEN v.acquirerFee END) [transferFee],
+    ISNULL(SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END),0)+
+    ISNULL(SUM(CASE WHEN v.success = 1 THEN v.acquirerFee END), 0) [dueTo],
+    SUM(CASE WHEN v.success = 1 THEN 0 else 1 END) [deniedCount]
 FROM
     [transfer].vTransfer v
 JOIN
@@ -81,12 +81,12 @@ UNION ALL SELECT
     3,
     'Acquirer',
     'Total',
-    SUM(CASE WHEN v.issuerTxState = 2 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN 1 END) [transferCount],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END) [transferFee],
-    ISNULL(SUM(CASE WHEN v.issuerTxState = 2 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END),0)+
-    ISNULL(SUM(CASE WHEN v.issuerTxState = 2 THEN v.acquirerFee END), 0) [dueTo],
-    SUM(CASE WHEN v.issuerTxState = 2 THEN 0 else 1 END) [deniedCount]
+    SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
+    SUM(CASE WHEN v.success = 1 THEN 1 END) [transferCount],
+    SUM(CASE WHEN v.success = 1 THEN v.acquirerFee END) [transferFee],
+    ISNULL(SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END),0)+
+    ISNULL(SUM(CASE WHEN v.success = 1 THEN v.acquirerFee END), 0) [dueTo],
+    SUM(CASE WHEN v.success = 1 THEN 0 else 1 END) [deniedCount]
 FROM
     [transfer].vTransfer v
 JOIN
