@@ -14,6 +14,11 @@ endDate.setMilliseconds(999);
 
 module.exports = (gridStyle) => ({
     title: 'Transfer report',
+    export: {
+        method: 'db/transfer.report.transfer',
+        resultsetName: 'transfers',
+        maxSize: 20000
+    },
     grid: {
         fields: [
             { name: 'transferId', title: 'Trans#' },
@@ -40,10 +45,6 @@ module.exports = (gridStyle) => ({
         rowStyleField: 'style',
         externalStyle: gridStyle
     },
-    // export: {
-    //     method: 'your.exportMethod.here', // TODO replace with transfer report strored procedure
-    //     maxSize: 20000
-    // },
     toolbox: {
         showAdvanced: true,
         maxVisibleInputs: 5,

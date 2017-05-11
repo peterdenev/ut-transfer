@@ -14,6 +14,10 @@ endDate.setMilliseconds(999);
 
 module.exports = (gridStyle) => ({
     title: 'Transfer Details',
+    export: {
+        method: 'db/transfer.transferDetails.get',
+        resultsetName: 'transferDetails'
+    },
     grid: {
         fields: [
             { name: 'transferId', title: 'Trans#' },

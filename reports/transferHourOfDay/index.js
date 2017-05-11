@@ -14,6 +14,10 @@ endDate.setMilliseconds(999);
 
 module.exports = (gridStyle) => ({
     title: 'Transfer Hour of Day Statistics ',
+    export: {
+        method: 'db/transfer.report.byHourOfDay',
+        resultsetName: 'transferHourOfDay'
+    },
     grid: {
         fields: [
             { name: 'agreatepredicate', title: 'Hour of Day' },

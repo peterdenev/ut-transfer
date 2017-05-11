@@ -18,6 +18,10 @@ endDate.setMilliseconds(999);
 
 module.exports = (gridStyle) => ({
     title: 'Transfer Week of Year Statistics ',
+    export: {
+        method: 'db/transfer.report.byWeekOfYear',
+        resultsetName: 'transferWeekOfYear'
+    },
     grid: {
         fields: [
             { name: 'agreatepredicate', title: 'Week Number' },

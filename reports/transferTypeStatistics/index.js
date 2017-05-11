@@ -14,6 +14,10 @@ endDate.setMilliseconds(999);
 
 module.exports = (gridStyle) => ({
     title: 'Transfer Type Statistics ',
+    export: {
+        method: 'db/transfer.report.byTypeOfTransfer',
+        resultsetName: 'transferTransactyonType'
+    },
     grid: {
         fields: [
             { name: 'agreatepredicate', title: 'Transfer Type' },

@@ -18,6 +18,10 @@ endDate.setMilliseconds(999);
 
 module.exports = (gridStyle) => ({
     title: 'Transfer Day of Week Statistics ',
+    export: {
+        method: 'db/transfer.report.byDayOfWeek',
+        resultsetName: 'transferDayOfWeek'
+    },
     grid: {
         fields: [
             { name: 'agreatepredicate', title: 'Day Of Week' },

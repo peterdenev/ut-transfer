@@ -8,6 +8,11 @@ date.setMilliseconds(0);
 
 module.exports = (gridStyle) => ({
     title: 'Settlement Details',
+    export: {
+        method: 'db/transfer.report.settlementDetails',
+        resultsetName: 'settlementDetails',
+        maxSize: 20000
+    },
     grid: {
         fields: [
             { name: 'transferId', title: 'Trans#' },
