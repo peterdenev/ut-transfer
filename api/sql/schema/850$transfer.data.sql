@@ -47,7 +47,8 @@ MERGE INTO
     [user].[action] as target
 USING
     (VALUES
-        ('transfer.partner.fetch', 'transfer.partner.fetch', '{}')
+        ('transfer.partner.fetch', 'transfer.partner.fetch', '{}'),
+        ('db/transfer.partner.fetch', 'db/transfer.partner.fetch', '{}')
     ) AS source (actionId, description, valueMap)
 JOIN
 	[user].[actionCategory] c ON c.name = 'transfer'
