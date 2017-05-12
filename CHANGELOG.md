@@ -1,3 +1,13 @@
+<a name="6.10.7"></a>
+## [6.10.7](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.6...v6.10.7) (2017-05-12)
+
+
+### Bug Fixes
+
+* add permission ([ee4011c](https://github.com/softwaregroup-bg/ut-transfer/commit/ee4011c))
+
+
+
 <a name="6.10.6"></a>
 ## [6.10.6](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.5...v6.10.6) (2017-05-11)
 
