@@ -1,3 +1,13 @@
+<a name="6.10.9"></a>
+## [6.10.9](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.8...v6.10.9) (2017-05-15)
+
+
+### Bug Fixes
+
+* improve reports ([aa58f8b](https://github.com/softwaregroup-bg/ut-transfer/commit/aa58f8b))
+
+
+
 <a name="6.10.8"></a>
 ## [6.10.8](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.7...v6.10.8) (2017-05-15)
 
