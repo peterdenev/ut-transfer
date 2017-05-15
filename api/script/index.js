@@ -178,6 +178,9 @@ module.exports = {
                         }
                         transfer.balance = result.balance;
                         transfer.transferIdIssuer = result.transferIdIssuer;
+                        transfer.type = result.type;
+                        transfer.message = result.message;
+                        transfer.details = result.details;
                         return transfer;
                     })
                     .catch(handleError(transfer, 'Issuer'))
