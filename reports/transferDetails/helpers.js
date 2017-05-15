@@ -9,8 +9,8 @@ module.exports = {
             switch (field.name) {
                 case 'transferDateTime':
                     if (!isHeader) {
-                        if (value) {
-                            result = formatDate(value, 'DD-MM-YYYY hh:mm:ss');
+                        if (result) {
+                            result = formatDate(result, 'DD-MM-YYYY hh:mm:ss');
                         }
                     }
                     break;
@@ -19,7 +19,7 @@ module.exports = {
                 case 'amountBilling':
                 case 'transferAmount':
                     if (!isHeader) {
-                        result = formatNumber(value);
+                        result = formatNumber(result);
                         classNames.push('textColorBlue');
                     }
                     classNames.push('rightAlign');

@@ -19,6 +19,7 @@ SELECT
     t.[localDateTime],
     t.[transferIdIssuer],
     t.[acquirerFee],
+    t.[issuerFee],
     request.udfDetails [requestDetails],
     request.eventDateTime [requestDateTime],
     request.[type] [requestType],

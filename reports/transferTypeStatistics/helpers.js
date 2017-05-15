@@ -7,6 +7,7 @@ module.exports = {
             var result = value;
             switch (field.name) {
                 case 'transferCount':
+                    result = formatNumber(result);
                     classNames.push('rightAlign');
                     break;
                 case 'agreatepredicate':
@@ -14,7 +15,7 @@ module.exports = {
                     break;
                 default:
                     if (!isHeader) {
-                        result = formatNumber(value);
+                        result = formatNumber(result);
                         classNames.push('textColorBlue');
                     }
                     classNames.push('rightAlign');

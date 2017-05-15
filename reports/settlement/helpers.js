@@ -9,11 +9,12 @@ module.exports = {
             switch (field.name) {
                 case 'transferCount':
                 case 'deniedCount':
-                case 'dueTo':
+                    result = formatNumber(result);
                     classNames.push('rightAlign');
                     break;
                 case 'transferAmount':
                 case 'transferFee':
+                case 'dueTo':
                     classNames.push('rightAlign');
                     if (!isHeader) {
                         result = formatNumber(result);

@@ -19,6 +19,7 @@ module.exports = (gridStyle) => ({
             { name: 'cardNumber', title: 'Card Number' },
             { name: 'productName', title: 'Card Product' },
             { name: 'transferType', title: 'Transfer Type' },
+            { name: 'transferDateTime', title: 'Transfer Date' },
             { name: 'localDate', title: 'Date' },
             { name: 'localTime', title: 'Time' },
             { name: 'processingCode', title: 'Processing Code' },
@@ -34,7 +35,8 @@ module.exports = (gridStyle) => ({
         method: 'db/transfer.report.settlementDetails',
         resultsetName: 'settlementDetails',
         allowColumnConfig: true,
-        externalStyle: gridStyle
+        externalStyle: gridStyle,
+        rowStyleField: 'style'
     },
     toolbox: {
         showAdvanced: false,

@@ -37,6 +37,7 @@ BEGIN TRY
             v.channelType,
             v.transferId AS transferId,
             N'xxxx' + c.cardNumber AS cardNumber,
+            v.transferDateTime AS transferDateTime,
             CASE WHEN LEN(v.localDateTime) >= 14 THEN LEFT(v.localDateTime, 8) 
                  WHEN LEN(v.localDateTime) >= 10 THEN LEFT(v.localDateTime, 4) 
                  ELSE N'' END AS localDate,
@@ -55,6 +56,7 @@ BEGIN TRY
             processing.x.value(N'(terminalId)[1]', N'NVARCHAR(150)') AS deviceId,
             processing.x.value(N'(terminalName)[1]', N'NVARCHAR(150)') AS deviceName,
             v.style,
+            v.success,
             ROW_NUMBER() OVER (
                 ORDER BY CASE 
                     WHEN @sortOrder = N'ASC'
@@ -62,6 +64,7 @@ BEGIN TRY
                             WHEN @sortBy = N'channelType' THEN v.channelType
                             WHEN @sortBy = N'transferId' THEN REPLICATE('0',30-len(v.transferId)) + CAST(v.transferId AS NVARCHAR(50))
                             WHEN @sortBy = N'cardNumber' THEN c.cardNumber
+                            WHEN @sortBy = N'transferDateTime' THEN CONVERT(NVARCHAR(50), v.transferDateTime, 121)
                             WHEN @sortBy = N'localDate' THEN CASE WHEN LEN(v.localDateTime) >= 14 THEN LEFT(v.localDateTime, 8) 
                                                                   WHEN LEN(v.localDateTime) >= 10 THEN LEFT(v.localDateTime, 4) 
                                                                   ELSE N'' END 
@@ -93,6 +96,7 @@ BEGIN TRY
                             WHEN @sortBy = N'channelType' THEN v.channelType
                             WHEN @sortBy = N'transferId' THEN REPLICATE('0',30-len(v.transferId)) + CAST(v.transferId AS NVARCHAR(50))
                             WHEN @sortBy = N'cardNumber' THEN c.cardNumber
+                            WHEN @sortBy = N'transferDateTime' THEN CONVERT(NVARCHAR(50), v.transferDateTime, 121)
                             WHEN @sortBy = N'localDate' THEN CASE WHEN LEN(v.localDateTime) >= 14 THEN LEFT(v.localDateTime, 8) 
                                                                   WHEN LEN(v.localDateTime) >= 10 THEN LEFT(v.localDateTime, 4) 
                                                                   ELSE N'' END 
@@ -139,6 +143,7 @@ BEGIN TRY
         sd.channelType,
         sd.transferId,
         sd.cardNumber,
+        sd.transferDateTime,
 --      '[Trace]' AS [Trace],
         sd.localDate,
         sd.localTime,
@@ -160,6 +165,34 @@ BEGIN TRY
     INTO #settlementDetails
     FROM settlementDetails sd
     WHERE rowNum BETWEEN @startRow AND @endRow
+    UNION ALL
+    SELECT
+        NULL AS channelType,
+        NULL AS transferId,
+        NULL AS cardNumber,
+        NULL AS transferDateTime,
+--      '[Trace]' AS [Trace],
+        NULL AS localDate,
+        NULL AS localTime,
+        NULL AS transferIdAcquirer,
+        NULL AS processingCode,
+        NULL AS issuerId,
+        'Total Successfull' AS productName,
+        CAST(COUNT(sd.transferId) AS NVARCHAR(50)) AS transferType,
+        SUM(ISNULL(sd.transferAmount, 0)) AS transferAmount,
+        SUM(ISNULL(sd.transferFee, 0)) AS transferFee,
+        NULL AS dueTo,
+        sd.transferCurrency,
+        NULL AS transferIdIssuer,
+        NULL AS deviceId,
+        NULL AS deviceName,
+        NULL AS style,
+        MAX(sd.rowNum) + 1 AS rowNum,
+        MAX(sd.recordsTotal) AS recordsTotal
+    FROM settlementDetails sd
+    WHERE sd.success = 1
+    GROUP BY sd.transferCurrency
+--    WHERE rowNum BETWEEN @startRow AND @endRow
     ORDER BY rowNum
     
     SELECT 'settlementDetails' as resultSetName
@@ -168,6 +201,7 @@ BEGIN TRY
         sd.channelType,
         sd.transferId,
         sd.cardNumber,
+        CONVERT(NVARCHAR(50), sd.transferDateTime, 120) AS transferDateTime,
 --      '[Trace]' AS [Trace],
         sd.localDate,
         sd.localTime,
@@ -187,6 +221,7 @@ BEGIN TRY
         sd.rowNum,
         sd.recordsTotal
     FROM #settlementDetails sd
+    WHERE rowNum BETWEEN @startRow AND @endRow + 1
     ORDER BY rowNum
 
     SELECT 'pagination' AS resultSetName

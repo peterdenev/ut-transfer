@@ -1,18 +1,17 @@
 var {evalResult, formatNumber} = require('ut-report/assets/script/common');
 
 module.exports = {
+    rowStyleField: 'style',
     transformCellValue: function({allowHtml, nodeContext, dateFormat, locale}) {
         return (value, field, data, isHeader) => {
             var classNames = ['cell'];
             var result = value;
             switch (field.name) {
                 case 'dueTo':
-                    classNames.push('rightAlign');
-                    break;
                 case 'transferAmount':
                 case 'transferFee':
                     if (!isHeader) {
-                        result = formatNumber(value);
+                        result = formatNumber(result);
                         classNames.push('textColorBlue');
                     }
                     classNames.push('rightAlign');

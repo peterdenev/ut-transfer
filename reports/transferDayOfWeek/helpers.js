@@ -8,13 +8,14 @@ module.exports = {
             switch (field.name) {
                 case 'transferCount':
                     classNames.push('rightAlign');
+                    result = formatNumber(result);
                     break;
                 case 'agreatepredicate':
                 case 'transferCurrency':
                     break;
                 default:
                     if (!isHeader) {
-                        result = formatNumber(value);
+                        result = formatNumber(result);
                         classNames.push('textColorBlue');
                     }
                     classNames.push('rightAlign');

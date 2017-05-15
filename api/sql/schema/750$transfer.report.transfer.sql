@@ -38,6 +38,8 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
         SELECT
             t.[transferId],
             t.[transferAmount],
+            t.[acquirerFee], 
+            t.[issuerFee],
             t.[transferCurrency],
             CASE
                 WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] in (2, 8, 12)) THEN 1
@@ -67,7 +69,9 @@ SELECT
     [transferId],
     [RowNum],
     [recordsTotal],
-    [transferAmount]    AS transferAmountTotal,
+    [transferAmount] AS transferAmountTotal,
+    [acquirerFee] AS acquirerFeeTotal, 
+    [issuerFee] AS issuerFeeTotal,
     [transferCurrency]
 INTO #transfersReport
 FROM cte
@@ -78,6 +82,8 @@ SELECT
     MIN([recordsTotal]) + 1 AS [RowNum],
     COUNT([transferId]) AS [recordsTotal],
     SUM(ISNULL([transferAmount], 0)) AS transferAmountTotal,
+    SUM(ISNULL([acquirerFee], 0)) AS acquirerFeeTotal,
+    SUM(ISNULL([issuerFee], 0)) AS issuerFeeTotal,
     [transferCurrency]
 FROM cte
 WHERE success = 1
@@ -94,6 +100,8 @@ SELECT
     t.[transferType] [description],
     t.[transferIdAcquirer],
     t.[transferAmount],
+    t.[acquirerFee], 
+    t.[issuerFee],
     t.[transferCurrency],
     t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') [terminalId],
     t.[requestDetails].value('(/root/terminalName)[1]', 'varchar(40)') [terminalName],
@@ -119,8 +127,10 @@ SELECT
     NULL AS sourceAccount,
     NULL AS destinationAccount,
     'TOTAL Successful' AS [description],
-    r.recordsTotal AS transferIdAcquirer,
+    CAST(r.recordsTotal AS NVARCHAR(50)) AS transferIdAcquirer,
     r.transferAmountTotal AS transferAmount,
+    r.acquirerFeeTotal, 
+    r.issuerFeeTotal,
     r.[transferCurrency],
     NULL AS terminalId,
     NULL AS terminalName,
