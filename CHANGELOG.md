@@ -1,3 +1,13 @@
+<a name="6.10.8"></a>
+## [6.10.8](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.7...v6.10.8) (2017-05-15)
+
+
+### Bug Fixes
+
+* add event record when confirming issuer ([#45](https://github.com/softwaregroup-bg/ut-transfer/issues/45)) ([96a95ad](https://github.com/softwaregroup-bg/ut-transfer/commit/96a95ad))
+
+
+
 <a name="6.10.7"></a>
 ## [6.10.7](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.6...v6.10.7) (2017-05-12)
 
