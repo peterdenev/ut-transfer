@@ -1,3 +1,13 @@
+<a name="6.10.10"></a>
+## [6.10.10](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.9...v6.10.10) (2017-05-15)
+
+
+### Bug Fixes
+
+* remove classnames ([#46](https://github.com/softwaregroup-bg/ut-transfer/issues/46)) ([e9e590d](https://github.com/softwaregroup-bg/ut-transfer/commit/e9e590d))
+
+
+
 <a name="6.10.9"></a>
 ## [6.10.9](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.8...v6.10.9) (2017-05-15)
 
