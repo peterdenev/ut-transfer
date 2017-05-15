@@ -4,7 +4,7 @@ module.exports = {
     rowStyleField: 'style',
     transformCellValue: function({dateFormat, allowHtml, nodeContext}) {
         return function(value, field, data, isHeader) {
-            var classNames = ['cell'];
+            var classNames = [];
             var result = value;
 
             switch (field.name) {

@@ -3,7 +3,7 @@ var {evalResult, formatNumber, formatDate} = require('ut-report/assets/script/co
 module.exports = {
     transformCellValue: function({allowHtml, nodeContext, dateFormat, locale}) {
         return (value, field, data, isHeader) => {
-            var classNames = ['cell'];
+            var classNames = [];
             var result = value;
 
             switch (field.name) {
