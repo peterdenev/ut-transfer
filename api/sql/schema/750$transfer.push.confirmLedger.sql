@@ -1,6 +1,9 @@
 ALTER PROCEDURE [transfer].[push.confirmLedger]
     @transferId bigint,
-    @transferIdledger varchar(50)
+    @transferIdLedger varchar(50),
+    @type varchar(50),
+    @message varchar(250),
+    @details XML
 AS
 SET NOCOUNT ON
 
@@ -13,4 +16,17 @@ WHERE
     transferId = @transferId AND
     ledgerTxState = 1
 
-IF @@ROWCOUNT <> 1 RAISERROR('transfer.confirmLedger', 16, 1);
+DECLARE @COUNT int = @@ROWCOUNT
+
+SET @type = ISNULL (@type, 'transfer.push.confirmLedger')
+
+EXEC [transfer].[push.event]
+    @transferId = @transferId,
+    @type = @type,
+    @state = 'confirm',
+    @source = 'ledger',
+    @message = @message,
+    @udfDetails = @details
+
+IF @COUNT <> 1 RAISERROR('transfer.confirmLedger', 16, 1);
+

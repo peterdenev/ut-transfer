@@ -18,8 +18,8 @@ WHERE
 
 DECLARE @COUNT int = @@ROWCOUNT
 
-IF @type IS NOT NULL AND @message IS NOT NULL
-BEGIN
+SET @type = ISNULL (@type, 'transfer.push.confirmIssuer')
+
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
@@ -27,6 +27,5 @@ EXEC [transfer].[push.event]
     @source = 'issuer',
     @message = @message,
     @udfDetails = @details
-END
 
 IF @COUNT <> 1 RAISERROR('transfer.confirmIssuer', 16, 1);

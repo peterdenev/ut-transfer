@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[push.execute]
+ALTER PROCEDURE [transfer].[push.create]
     @transferTypeId bigint,
     @acquirerCode varchar(50),
     @transferDateTime datetime,
@@ -180,7 +180,13 @@ BEGIN TRY
             conditionId,
             splitNameId,
             [description],
-            tag
+            tag,            
+            creditActorId,
+            debitActorId,
+            creditItemId,
+            debitItemId,
+            [state],
+            [transferIdPayment]
         )
     SELECT
         @transferId,
@@ -190,7 +196,13 @@ BEGIN TRY
         conditionId,
         splitNameId,
         [description],
-        tag
+        tag,
+        creditActorId,
+        debitActorId,
+        creditItemId,
+        debitItemId,
+        [state],
+        [transferIdPayment]
     FROM
         @split
 
