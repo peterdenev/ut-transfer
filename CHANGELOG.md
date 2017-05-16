@@ -1,3 +1,13 @@
+<a name="6.11.0"></a>
+# [6.11.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.10...v6.11.0) (2017-05-16)
+
+
+### Features
+
+* record more details during transfer ([bcf454e](https://github.com/softwaregroup-bg/ut-transfer/commit/bcf454e))
+
+
+
 <a name="6.10.10"></a>
 ## [6.10.10](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.9...v6.10.10) (2017-05-15)
 
