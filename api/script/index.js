@@ -59,43 +59,47 @@ var processReversal = (bus, log) => params => {
         .catch(failReversal);
 };
 
-var ruleValidate = (bus, transfer) => bus.importMethod('db/rule.decision.lookup')({
-    channelId: transfer.channelId,
-    operation: transfer.transferType,
-    sourceAccount: transfer.sourceAccount,
-    destinationAccount: transfer.destinationAccount,
-    amount: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount,
-    currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
-    isSourceAmount: false
-}).then(decision => {
-    transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
-    transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
-    if (decision.amount) {
-        transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
-        transfer.acquirerFee = decision.amount.acquirerFee;
-        transfer.issuerFee = decision.amount.issuerFee;
-        transfer.amount.acquirerFee = currency.amount(transfer.transferCurrency, transfer.acquirerFee);
-        transfer.amount.issuerFee = currency.amount(transfer.transferCurrency, transfer.issuerFee);
-    }
-    transfer.transferDateTime = decision.amount && decision.amount.transferDateTime;
-    transfer.transferTypeId = decision.amount && decision.amount.transferTypeId;
-    transfer.split = decision.split;
-    return transfer;
-})
-.catch(error => {
-    transfer.abortAcquirer = error;
-    transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
-    transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
-    return this.bus.importMethod('db/rule.operation.lookup')({operation: transfer.transferType})
-        .then(result => {
-            transfer.transferDateTime = result && result.operation && result.operation.transferDateTime;
-            transfer.transferTypeId = result && result.operation && result.operation.transferTypeId;
-            return transfer;
-        });
-});
+var ruleValidate = (bus, transfer) => {
+    return bus.importMethod('db/rule.decision.lookup')({
+        channelId: transfer.channelId,
+        operation: transfer.transferType,
+        sourceAccount: transfer.sourceAccount,
+        destinationAccount: transfer.destinationAccount,
+        amount: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount,
+        currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
+        isSourceAmount: false
+    }).then(decision => {
+        transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
+        transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
+        if (decision.amount) {
+            transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
+            transfer.acquirerFee = decision.amount.acquirerFee;
+            transfer.issuerFee = decision.amount.issuerFee;
+            transfer.amount.acquirerFee = currency.amount(transfer.transferCurrency, transfer.acquirerFee);
+            transfer.amount.issuerFee = currency.amount(transfer.transferCurrency, transfer.issuerFee);
+        }
+        transfer.transferDateTime = decision.amount && decision.amount.transferDateTime;
+        transfer.transferTypeId = decision.amount && decision.amount.transferTypeId;
+        transfer.split = decision.split;
+        return transfer;
+    })
+    .catch(error => {
+        transfer.abortAcquirer = error;
+        transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
+        transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
+        return bus.importMethod('db/rule.operation.lookup')({operation: transfer.transferType})
+            .then(result => {
+                transfer.transferDateTime = result && result.operation && result.operation.transferDateTime;
+                transfer.transferTypeId = result && result.operation && result.operation.transferTypeId;
+                return transfer;
+            });
+    });
+};
 
 module.exports = {
-    'rule.validate': params => ruleValidate(this.bus, params),
+    'rule.validate': function(params) {
+        return ruleValidate(this.bus, params);
+    },
     'push.execute': function(params) {
         var handleError = (transfer, where) => error => {
             var method;
