@@ -1,3 +1,13 @@
+<a name="6.11.1"></a>
+## [6.11.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.0...v6.11.1) (2017-05-16)
+
+
+### Bug Fixes
+
+* change function definition of ruleValidate ([#47](https://github.com/softwaregroup-bg/ut-transfer/issues/47)) ([6fc4b66](https://github.com/softwaregroup-bg/ut-transfer/commit/6fc4b66))
+
+
+
 <a name="6.11.0"></a>
 # [6.11.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.10.10...v6.11.0) (2017-05-16)
 
