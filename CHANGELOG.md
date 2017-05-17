@@ -1,3 +1,13 @@
+<a name="6.11.4"></a>
+## [6.11.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.3...v6.11.4) (2017-05-17)
+
+
+### Bug Fixes
+
+* modularise styles handling ([f2214fc](https://github.com/softwaregroup-bg/ut-transfer/commit/f2214fc))
+
+
+
 <a name="6.11.3"></a>
 ## [6.11.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.2...v6.11.3) (2017-05-17)
 
