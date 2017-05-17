@@ -67,7 +67,11 @@ BEGIN TRY
         END else
         BEGIN
             EXEC [transfer].[push.confirmAcquirer]
-                @transferId = @lastTx
+                @transferId = @lastTx,
+                @transferIdAcquirer = NULL,
+                @type = NULL,
+                @message = NULL,
+                @details = NULL
         END
     end
 
