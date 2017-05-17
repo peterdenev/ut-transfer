@@ -1,6 +1,9 @@
 var {evalResult, formatNumber} = require('ut-report/assets/script/common');
 
 module.exports = {
+    staticResources: [
+        {rel: 'stylesheet', type: 'text/css', href: '/s/ut-transfer/repository/css/reportStyle.css'}
+    ],
     transformCellValue: function({allowHtml, nodeContext, dateFormat, locale}) {
         return (value, field, data, isHeader) => {
             var classNames = [];

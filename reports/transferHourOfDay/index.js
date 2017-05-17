@@ -1,4 +1,5 @@
-var { filterElementTypes } = require('ut-front-react/components/GridToolBox/types');
+import { filterElementTypes } from 'ut-front-react/components/GridToolBox/types';
+import reportStyle from '../../assets/static/css/reportStyle.css';
 
 var startDate = new Date();
 startDate.setHours(0);
@@ -38,7 +39,7 @@ module.exports = (gridStyle) => ({
         method: 'db/transfer.report.byHourOfDay',
         resultsetName: 'transferHourOfDay',
         allowColumnConfig: true,
-        externalStyle: gridStyle
+        externalStyle: {...reportStyle, ...gridStyle}
     },
     toolbox: {
         showAdvanced: false,

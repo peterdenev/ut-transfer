@@ -1,6 +1,7 @@
-var { filterElementTypes } = require('ut-front-react/components/GridToolBox/types');
+import { filterElementTypes } from 'ut-front-react/components/GridToolBox/types';
+import reportStyle from '../../assets/static/css/reportStyle.css';
 
-var startDate = new Date();
+let startDate = new Date();
 startDate.setDate(1);
 startDate.setMonth(0);
 startDate.setHours(0);
@@ -8,7 +9,7 @@ startDate.setMinutes(0);
 startDate.setSeconds(0);
 startDate.setMilliseconds(0);
 
-var endDate = new Date();
+let endDate = new Date();
 endDate.setDate(31);
 endDate.setMonth(11);
 endDate.setHours(23);
@@ -42,7 +43,7 @@ module.exports = (gridStyle) => ({
         method: 'db/transfer.report.byWeekOfYear',
         resultsetName: 'transferWeekOfYear',
         allowColumnConfig: true,
-        externalStyle: gridStyle
+        externalStyle: {...reportStyle, ...gridStyle}
     },
     toolbox: {
         showAdvanced: false,

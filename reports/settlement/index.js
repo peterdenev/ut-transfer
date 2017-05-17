@@ -1,6 +1,7 @@
-var { filterElementTypes } = require('ut-front-react/components/GridToolBox/types');
+import { filterElementTypes } from 'ut-front-react/components/GridToolBox/types';
+import reportStyle from '../../assets/static/css/reportStyle.css';
 
-var date = new Date();
+let date = new Date();
 date.setHours(0);
 date.setMinutes(0);
 date.setSeconds(0);
@@ -25,7 +26,7 @@ module.exports = (gridStyle) => ({
         allowColumnConfig: true,
         method: 'db/transfer.report.settlement',
         resultsetName: 'settlement',
-        externalStyle: gridStyle
+        externalStyle: {...reportStyle, ...gridStyle}
     },
     toolbox: {
         showAdvanced: false,

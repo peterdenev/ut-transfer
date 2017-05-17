@@ -1,6 +1,9 @@
 var {evalResult, formatNumber} = require('ut-report/assets/script/common');
 
 module.exports = {
+    staticResources: [
+        {rel: 'stylesheet', type: 'text/css', href: '/s/ut-transfer/repository/css/reportStyle.css'}
+    ],
     rowStyleField: 'style',
     transformCellValue: function({dateFormat, allowHtml, nodeContext}) {
         return function(value, field, data, isHeader) {
