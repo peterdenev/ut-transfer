@@ -1,3 +1,13 @@
+<a name="6.11.2"></a>
+## [6.11.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.1...v6.11.2) (2017-05-17)
+
+
+### Bug Fixes
+
+* pass expected parameters ([e893c24](https://github.com/softwaregroup-bg/ut-transfer/commit/e893c24))
+
+
+
 <a name="6.11.1"></a>
 ## [6.11.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.0...v6.11.1) (2017-05-16)
 
