@@ -1,3 +1,13 @@
+<a name="6.11.3"></a>
+## [6.11.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.2...v6.11.3) (2017-05-17)
+
+
+### Bug Fixes
+
+* use correct state name ([ac78f86](https://github.com/softwaregroup-bg/ut-transfer/commit/ac78f86))
+
+
+
 <a name="6.11.2"></a>
 ## [6.11.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.1...v6.11.2) (2017-05-17)
 
