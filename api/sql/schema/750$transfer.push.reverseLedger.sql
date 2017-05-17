@@ -18,7 +18,7 @@ DECLARE @COUNT int = @@ROWCOUNT
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
-    @state = 'reverse',
+    @state = 'unknown',
     @source = 'ledger',
     @message = @message,
     @udfDetails = @details
