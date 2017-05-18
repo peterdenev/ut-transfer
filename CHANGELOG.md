@@ -1,3 +1,13 @@
+<a name="6.11.5"></a>
+## [6.11.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.4...v6.11.5) (2017-05-18)
+
+
+### Bug Fixes
+
+* amount to cents handling ([a60b208](https://github.com/softwaregroup-bg/ut-transfer/commit/a60b208))
+
+
+
 <a name="6.11.4"></a>
 ## [6.11.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.3...v6.11.4) (2017-05-17)
 
