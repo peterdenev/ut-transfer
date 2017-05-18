@@ -673,39 +673,66 @@ var SCALE = {
     ZWL: 2
 };
 
+var errors = require('./errors');
+
+function alphabetic(code) {
+    return ALPHABETIC[code] ? code : NUMERIC[code];
+}
+
+function numeric(code) {
+    return NUMERIC[code] ? code : ALPHABETIC[code];
+}
+
+var amountObject = (cents, scale, sign, currency, string) => {
+    var result = '00000' + cents;
+    if (!Number.isInteger(parseInt(cents))) {
+        throw errors.invalidAmount({params: {amount: string, currency}});
+    } else if (scale > 0) {
+        result = result.substr(0, result.length - scale) + '.' + result.slice(-scale);
+    }
+    result = result.match(/^0*(\d+(\.\d+)?)/); // strip leading zeroes
+    return {
+        currency: alphabetic(currency),
+        amount: result && result[1],
+        scale,
+        cents: parseInt(cents) * sign
+    };
+};
+
+function roundCents(value, exp) { // based on function decimalAdjust in Mozilla JS reference for Math.round
+    if ((typeof value !== 'string' && typeof value !== 'number') || value === '') {
+        return NaN;
+    }
+    if (typeof exp === 'undefined' || +exp === 0) {
+        return Math.round(value);
+    }
+    value = +value;
+    exp = +exp;
+    if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+        return NaN;
+    }
+    if (value < 0) {
+        return -roundCents(-value, exp);
+    }
+    value = value.toString().split('e');
+    return Math.round(+(value[0] + 'e' + (value[1] ? (+value[1] + exp) : +exp)));
+}
+
+function getScale(code) {
+    var scale = SCALE[code];
+    if (scale == null || scale > 4) {
+        throw errors.invalidCurrency({params: {currency: code}});
+    }
+    return scale;
+}
+
 module.exports = {
-    numeric: function(code) {
-        return NUMERIC[code] ? code : ALPHABETIC[code];
-    },
-    alphabetic: function(code) {
-        return ALPHABETIC[code] ? code : NUMERIC[code];
-    },
-    scale: function(code) {
-        return SCALE[code];
-    },
-    cents: function(currency, cents, sign = 1) {
-        var scale = module.exports.scale(currency);
-        var result = '00000' + cents;
-        if (scale > 4) {
-            throw new Error('Invalid currency');
-        } else if (scale > 0) {
-            result = result.substr(0, result.length - scale) + '.' + result.slice(-scale);
-        }
-        result = result.match(/^0*(\d+(\.\d+)?)/); // strip leading zeroes
-        return {
-            currency: module.exports.alphabetic(currency),
-            amount: result && result[1],
-            scale,
-            cents: parseInt(cents) * sign
-        };
-    },
-    amount: function(currency, amount) {
-        var scale = module.exports.scale(currency);
-        return {
-            currency: module.exports.alphabetic(currency),
-            amount: amount + Array(scale + 1).join('0'),
-            scale,
-            cents: parseInt(amount)
-        };
+    numeric: numeric,
+    alphabetic: alphabetic,
+    scale: getScale,
+    cents: (currency, cents, sign = 1) => amountObject(cents, getScale(currency), sign, currency, cents),
+    amount: function(currency, amount, sign = 1) {
+        var scale = getScale(currency);
+        return amountObject(roundCents(amount, scale), scale, sign, currency, amount);
     }
 };

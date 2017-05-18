@@ -1,37 +1,25 @@
 'use strict';
-// transfer
 const create = require('ut-error').define;
 const Transfer = create('transfer');
-const SystemDecline = create('systemDecline', Transfer, 'System decline error');
-const InsufficientFunds = create('insufficientFunds', Transfer, 'Insufficient funds');
-const InvalidAccount = create('invalidAccount', Transfer, 'Invalid account');
-const GenericDecline = create('genericDecline', Transfer, 'Transfer declined');
-const IncorrectPin = create('incorrectPin', Transfer, 'Incorrect PIN');
-const NotFound = create('notFound', Transfer, 'Transfer not found');
-const Unknown = create('unknown', Transfer, 'Unknown error');
-// merchant
 const Merchant = create('merchant');
-const MerchantGenericDecline = create('genericDecline', Merchant, 'Merchant decline');
-const TimeOut = create('timeOut', Merchant, 'Merchant timeout');
-const InvalidPhone = create('invalidPhone', Merchant, 'Invalid phone');
-const InvalidInvoice = create('invalidInvoice', Merchant, 'Invalid invoice');
-const MerchantInsufficientFunds = create('insufficientFunds', Merchant, 'Balance not enough');
-const MerchantUnknown = create('unknown', Merchant, 'Unknown error');
+const Currency = create('currency');
 
 module.exports = {
-    transfer: cause => new Transfer(cause),
-    systemDecline: cause => new SystemDecline(cause),
-    insufficientFunds: cause => new InsufficientFunds(cause),
-    invalidAccount: cause => new InvalidAccount(cause),
-    genericDecline: cause => new GenericDecline(cause),
-    incorrectPin: cause => new IncorrectPin(cause),
-    notFound: cause => new NotFound(cause),
-    unknown: cause => new Unknown(cause),
-    merchant: cause => new Merchant(cause),
-    merchantGenericDecline: cause => new MerchantGenericDecline(cause),
-    merchantTimeOut: cause => new TimeOut(cause),
-    merchantInvalidPhone: cause => new InvalidPhone(cause),
-    merchantInvalidInvoice: cause => new InvalidInvoice(cause),
-    merchantInsufficientFunds: cause => new MerchantInsufficientFunds(cause),
-    merchantUnknown: cause => new MerchantUnknown(cause)
+    transfer: Transfer,
+    systemDecline: create('systemDecline', Transfer, 'System decline error'),
+    insufficientFunds: create('insufficientFunds', Transfer, 'Insufficient funds'),
+    invalidAccount: create('invalidAccount', Transfer, 'Invalid account'),
+    genericDecline: create('genericDecline', Transfer, 'Transfer declined'),
+    incorrectPin: create('incorrectPin', Transfer, 'Incorrect PIN'),
+    notFound: create('notFound', Transfer, 'Transfer not found'),
+    unknown: create('unknown', Transfer, 'Unknown error'),
+    merchant: Merchant,
+    merchantGenericDecline: create('genericDecline', Merchant, 'Merchant decline'),
+    merchantTimeOut: create('timeOut', Merchant, 'Merchant timeout'),
+    merchantInvalidPhone: create('invalidPhone', Merchant, 'Invalid phone'),
+    merchantInvalidInvoice: create('invalidInvoice', Merchant, 'Invalid invoice'),
+    merchantInsufficientFunds: create('insufficientFunds', Merchant, 'Balance not enough'),
+    merchantUnknown: create('unknown', Merchant, 'Unknown error'),
+    invalidCurrency: create('invalidCurrency', Currency, 'Invalid currency "{currency}"'),
+    invalidAmount: create('invalidAmount', Currency, 'Invalid amount "{amount} {currency}"')
 };
