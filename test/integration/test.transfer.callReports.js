@@ -42,6 +42,16 @@ module.exports = function(opt, cache) {
                     return {};
                 }, (result, assert) => {
                     assert.true(typeof result, 'object', 'return result');
+                }),
+                commonFunc.createStep('db/transfer.report.settlement', 'call settlement report', (context) => {
+                    return {};
+                }, (result, assert) => {
+                    assert.true(typeof result, 'object', 'return result');
+                }),
+                commonFunc.createStep('db/transfer.report.settlementDetails', 'call settlementDetails report', (context) => {
+                    return {};
+                }, (result, assert) => {
+                    assert.true(typeof result, 'object', 'return result');
                 })
             ]);
         }
