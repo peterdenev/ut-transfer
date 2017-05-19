@@ -9,31 +9,55 @@ var currency = require('../../currency');
 var processReversal = (bus, log) => params => {
     var transferId;
 
-    var portReversal = (port, reversal) => bus.importMethod(`${port}.${reversal.transferType}.${reversal.operation}`)(reversal);
+    var portReversal = (port, reversal) => {
+        if (port && reversal.transferType && reversal.operation) {
+            return bus.importMethod(`${port}.${reversal.transferType}.${reversal.operation}`)(reversal);
+        } else {
+            return Promise.resolve(reversal);
+        }
+    };
+
+    var dbPushReverse = reverse => bus.importMethod('db/transfer.push.reverse')(reverse)
+        .then(pushResult => {
+            return reverse;
+        });
 
     var reverse = reversal => {
-        reversal = reversal && reversal[0] && reversal[0][0];
-        if (reversal) {
-            transferId = reversal.transferId;
+        transferId = reversal.transferId;
+        if (reversal && !reversal.reversed) { // reverse only transaction that have NOT been reversed
             reversal.udfAcquirer && (reversal.udfAcquirer.mti = reversal.mti);
             reversal.amount = {
                 transfer: currency.amount(reversal.transferCurrency, reversal.transferAmount)
             };
-        }
-        return reversal && portReversal(reversal.issuerPort, reversal)
-        .then(result => {
-            if (reversal.issuerPort === reversal.ledgerPort) {
-                return result;
-            } else {
-                return portReversal(reversal.ledgerPort, reversal)
-                .then(() => result);
+
+            // prepare reversal object for postReversal
+            if (!reversal.operation) {
+                reversal.operation = 'reverse';
             }
-        });
+            if (!reversal.transferType) {
+                reversal.transferType = 'push';
+            }
+
+            return reversal && portReversal(reversal.issuerPort, reversal)
+            .then(result => {
+                if (reversal.issuerPort === reversal.ledgerPort) {
+                    return reversal;
+                } else {
+                    return portReversal(reversal.ledgerPort, reversal)
+                    .then(() => reversal);
+                }
+            });
+        } else {
+            throw errors.transferAlreadyReversed();
+        }
     };
 
     var confirmReversal = reversalResult => {
         return transferId && bus.importMethod('db/transfer.push.confirmReversal')({
             transferId
+        })
+        .then(function(confirmReversalResult) {
+            return reversalResult;
         });
     };
 
@@ -53,7 +77,7 @@ var processReversal = (bus, log) => params => {
         });
     };
 
-    return Promise.resolve(params)
+    return dbPushReverse(params)
         .then(reverse)
         .then(confirmReversal)
         .catch(failReversal);
@@ -229,15 +253,29 @@ module.exports = {
         return this.bus.importMethod('db/transfer.idle.execute')(params)
             .then(processReversal(this.bus, this.log));
     },
-    'push.reverse': function(params) {
-        return this.bus.importMethod('db/transfer.push.getByAcquirer')(params)
-            .then(result => {
-                if (!result || !result[0] || !result[0][0]) {
-                    throw errors.notFound();
-                } else {
-                    return result;
-                }
-            })
+    'push.reverse': function(params, $meta) {
+        var getTransfer = (params) => this.config['transfer.transfer.get']({
+            transferId: params.transferId,
+            transferIdAcquirer: params.transferIdAcquirer,
+            acquirerCode: params.acquirerCode,
+            cardId: params.cardId,
+            localDateTime: params.localDateTime
+        }, $meta)
+        .then(result => {
+            if (!result || !result.transferId) {
+                throw errors.notFound();
+            } else {
+                var transferInfo = Object.assign({
+                    message: params.message,
+                    mti: '430',
+                    operation: 'reverse',
+                    transferType: 'push'
+                }, result);
+                return transferInfo;
+            }
+        });
+
+        return getTransfer(params)
             .then(processReversal(this.bus, this.log));
     },
     'card.execute': function(params) {
@@ -290,16 +328,11 @@ module.exports = {
         return this.bus.importMethod('db/transfer.transfer.get')(msg, $meta)
             .then((dbResult) => {
                 var transferResults = dbResult.transfer;
-                var splitResults = dbResult.transferSplit;
                 var result = {};
 
                 if (transferResults && Array.isArray(transferResults) && transferResults.length > 0) {
-                    var transfer = transferResults[0];
-                    var splits = splitResults.filter(function(split) {
-                        return split.transferId === transfer.transferId;
-                    });
-                    result.transfer = transfer;
-                    result.transferSplits = splits;
+                    result = Object.assign({}, transferResults[0]);
+                    result.split = dbResult.transferSplit;
                 }
                 return result;
             });

@@ -23,6 +23,14 @@ BEGIN TRY
     WHERE
         secondTransferId=@transferId
 
+    EXEC [transfer].[push.event]
+        @transferId = @transferId,
+        @type = 'transfer.reverse',
+        @state = 'reverse',
+        @source = 'acquirer',
+        @message = 'Transaction was succesfully reversed',
+        @udfDetails = null
+
     COMMIT TRANSACTION
 END TRY
 BEGIN CATCH

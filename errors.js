@@ -21,5 +21,6 @@ module.exports = {
     merchantInsufficientFunds: create('insufficientFunds', Merchant, 'Balance not enough'),
     merchantUnknown: create('unknown', Merchant, 'Unknown error'),
     invalidCurrency: create('invalidCurrency', Currency, 'Invalid currency "{currency}"'),
-    invalidAmount: create('invalidAmount', Currency, 'Invalid amount "{amount} {currency}"')
+    invalidAmount: create('invalidAmount', Currency, 'Invalid amount "{amount} {currency}"'),
+    transferAlreadyReversed: create('transferAlreadyReversed', Transfer, 'Transfer has been already reversed')
 };
