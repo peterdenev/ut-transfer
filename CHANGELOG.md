@@ -1,3 +1,13 @@
+<a name="6.12.0"></a>
+# [6.12.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.6...v6.12.0) (2017-05-19)
+
+
+### Features
+
+* improve reversals ([39d80b3](https://github.com/softwaregroup-bg/ut-transfer/commit/39d80b3))
+
+
+
 <a name="6.11.6"></a>
 ## [6.11.6](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.11.5...v6.11.6) (2017-05-19)
 
