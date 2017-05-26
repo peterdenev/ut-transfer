@@ -251,7 +251,7 @@ module.exports = {
     'idle.execute': function(params, $meta) {
         $meta.mtid = 'discard';
         return this.bus.importMethod('db/transfer.idle.execute')(params)
-            .then(processReversal(this.bus, this.log));
+            .then(idleResult => idleResult && idleResult.transferId && processReversal(this.bus, this.log)(idleResult));
     },
     'push.reverse': function(params, $meta) {
         var getTransfer = (params) => this.config['transfer.transfer.get']({
