@@ -1,3 +1,13 @@
+<a name="6.13.0"></a>
+# [6.13.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.12.6...v6.13.0) (2017-05-26)
+
+
+### Features
+
+* remove bulk payments ([23a198d](https://github.com/softwaregroup-bg/ut-transfer/commit/23a198d))
+
+
+
 <a name="6.12.6"></a>
 ## [6.12.6](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.12.5...v6.12.6) (2017-05-26)
 
