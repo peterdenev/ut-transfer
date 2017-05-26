@@ -134,6 +134,7 @@ module.exports = {
             } else {
                 method = this.bus.importMethod('db/transfer.push.reverse' + where);
             }
+            error.transferDetails = transfer;
             return method({
                 transferId: transfer.transferId,
                 source: where,
