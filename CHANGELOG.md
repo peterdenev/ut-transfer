@@ -1,3 +1,13 @@
+<a name="6.12.6"></a>
+## [6.12.6](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.12.5...v6.12.6) (2017-05-26)
+
+
+### Bug Fixes
+
+* don't reverse if no pending reversal([#52](https://github.com/softwaregroup-bg/ut-transfer/issues/52)) ([dceed54](https://github.com/softwaregroup-bg/ut-transfer/commit/dceed54))
+
+
+
 <a name="6.12.5"></a>
 ## [6.12.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.12.4...v6.12.5) (2017-05-22)
 

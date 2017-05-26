@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.12.6-fix-idle-execute.2",
+  "version": "6.12.6",
   "main": "./index.js",
   "dependencies": {
     "joi": "10.0.6",
