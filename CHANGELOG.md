@@ -1,3 +1,13 @@
+<a name="6.13.1"></a>
+## [6.13.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.0...v6.13.1) (2017-05-26)
+
+
+### Bug Fixes
+
+* return detail in error([#53](https://github.com/softwaregroup-bg/ut-transfer/issues/53)) ([8d28bd9](https://github.com/softwaregroup-bg/ut-transfer/commit/8d28bd9))
+
+
+
 <a name="6.13.0"></a>
 # [6.13.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.12.6...v6.13.0) (2017-05-26)
 
