@@ -1,1 +1,0 @@
-export const CLEAR_BATCH_FILTER = Symbol('CLEAR_BATCH_FILTER');
