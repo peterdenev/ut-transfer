@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.13.2-sql-card-product.0",
+  "version": "6.13.2",
   "main": "./index.js",
   "dependencies": {
     "joi": "10.0.6"

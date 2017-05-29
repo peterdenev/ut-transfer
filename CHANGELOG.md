@@ -1,3 +1,13 @@
+<a name="6.13.2"></a>
+## [6.13.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.1...v6.13.2) (2017-05-29)
+
+
+### Bug Fixes
+
+* get card product name ([#54](https://github.com/softwaregroup-bg/ut-transfer/issues/54)) ([26ba2c9](https://github.com/softwaregroup-bg/ut-transfer/commit/26ba2c9))
+
+
+
 <a name="6.13.1"></a>
 ## [6.13.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.0...v6.13.1) (2017-05-26)
 
