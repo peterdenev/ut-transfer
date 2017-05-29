@@ -300,6 +300,7 @@ module.exports = {
                 return this.bus.importMethod('transfer.push.execute')(params);
             })
             .then(result => Object.assign(params, {
+                cardProductName: result.cardProductName,
                 sourceAccount: result.sourceAccountNumber,
                 sourceAccountName: result.sourceAccountName,
                 destinationAccount: result.destinationAccountNumber,
