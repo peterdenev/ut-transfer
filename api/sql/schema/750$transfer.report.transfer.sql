@@ -16,10 +16,14 @@ SET NOCOUNT ON
 DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
 DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return INT = 0
 DECLARE @totalRows INT
+DECLARE @cardNumberId BIGINT
 
 --EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
 --IF @return != 0
 --    RETURN 55555
+
+IF @cardNumber IS NOT NULL
+    SET @cardNumberId = (select numberId from [card].[number] where pan = @cardNumber)
 
 IF @pageNumber IS NULL
     SET @pageNumber = 1
@@ -57,14 +61,13 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@startDate IS NULL OR t.[transferDateTime] >= @startDate)
             AND (@endDate IS NULL OR t.[transferDateTime] <= @endDate)
             AND (@issuerTxState IS NULL OR t.[issuerTxState] = @issuerTxState)
-            AND (@cardNumber IS NULL OR c.[cardNumber] LIKE '%' + @cardNumber + '%')
+            -- AND (@cardNumber IS NULL OR c.[cardNumber] LIKE '%' + @cardNumber + '%')
+            AND (@cardNumber IS NULL OR t.cardId = @cardNumberId)
             -- AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') LIKE '%' + @deviceId + '%')
             AND (@deviceId IS NULL OR tl.terminalId LIKE '%' + @deviceId + '%')
             AND (@processingCode IS NULL OR t.[transferTypeId] = @processingCode)
             AND (@merchantName IS NULL OR t.[merchantId] LIKE '%' + @merchantName + '%')
     )
-
--- INSERT INTO #transfersReport
 SELECT
     [transferId],
     [RowNum],
