@@ -1,3 +1,14 @@
+<a name="6.13.4"></a>
+## [6.13.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.3...v6.13.4) (2017-05-31)
+
+
+### Bug Fixes
+
+* add search btn ([#56](https://github.com/softwaregroup-bg/ut-transfer/issues/56)) ([824414c](https://github.com/softwaregroup-bg/ut-transfer/commit/824414c))
+* removed abortAcquirer error circular refs ([e278537](https://github.com/softwaregroup-bg/ut-transfer/commit/e278537))
+
+
+
 <a name="6.13.3"></a>
 ## [6.13.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.2...v6.13.3) (2017-05-31)
 
