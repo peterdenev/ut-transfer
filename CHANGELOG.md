@@ -1,3 +1,13 @@
+<a name="6.13.3"></a>
+## [6.13.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.2...v6.13.3) (2017-05-31)
+
+
+### Bug Fixes
+
+* transfer.partner.fetch result validation ([#58](https://github.com/softwaregroup-bg/ut-transfer/issues/58)) ([5ee0f58](https://github.com/softwaregroup-bg/ut-transfer/commit/5ee0f58))
+
+
+
 <a name="6.13.2"></a>
 ## [6.13.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.1...v6.13.2) (2017-05-29)
 
