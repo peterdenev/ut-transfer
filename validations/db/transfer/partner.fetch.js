@@ -7,7 +7,10 @@ module.exports = {
     tags: ['transfer', 'partner', 'fetch'],
     payload: joi.any(),
     result: joi.object().keys({
-        partnerId: joi.string().required(),
-        partnerName: joi.string().required()
+        partner: joi.array().items(
+            joi.object().keys({
+                partnerId: joi.string().required(),
+                partnerName: joi.string().required()
+            }))
     }).required()
 };
