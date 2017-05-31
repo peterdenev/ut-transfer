@@ -80,6 +80,9 @@ module.exports = (gridStyle) => ({
             labelTo: 'Transfer To',
             nameMap: {from: 'startDate', to: 'endDate'},
             type: filterElementTypes.dateTimePickerBetween
+        },
+        {
+            type: filterElementTypes.searchBtn, validateFilter: false
         }
     ],
     order: {

@@ -107,6 +107,9 @@ module.exports = (gridStyle) => ({
         },
         {
             type: filterElementTypes.clear, validateFilter: false
+        },
+        {
+            type: filterElementTypes.searchBtn, validateFilter: false
         }
     ],
     order: {

@@ -42,7 +42,7 @@ module.exports = (gridStyle) => ({
     toolbox: {
         showAdvanced: false,
         maxVisibleInputs: 3,
-        filterAutoFetch: true
+        filterAutoFetch: false
     },
     filters: [
         {
@@ -50,6 +50,9 @@ module.exports = (gridStyle) => ({
             name: 'settlementDate',
             type: filterElementTypes.datePicker,
             defaultValue: date
+        },
+        {
+            type: filterElementTypes.searchBtn, validateFilter: false
         }
     ],
     order: {

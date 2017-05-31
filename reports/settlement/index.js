@@ -31,7 +31,7 @@ module.exports = (gridStyle) => ({
     toolbox: {
         showAdvanced: false,
         maxVisibleInputs: 5,
-        filterAutoFetch: true
+        filterAutoFetch: false
     },
     filters: [
         {
@@ -42,6 +42,9 @@ module.exports = (gridStyle) => ({
         },
         {
             type: filterElementTypes.clear, validateFilter: false
+        },
+        {
+            type: filterElementTypes.searchBtn, validateFilter: false
         }
     ],
     order: {

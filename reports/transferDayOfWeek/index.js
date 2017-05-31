@@ -74,6 +74,9 @@ module.exports = (gridStyle) => ({
                 from: startDate,
                 to: endDate
             }
+        },
+        {
+            type: filterElementTypes.searchBtn, validateFilter: false
         }
     ],
     order: {
