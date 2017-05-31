@@ -1,3 +1,13 @@
+<a name="6.13.5"></a>
+## [6.13.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.4...v6.13.5) (2017-05-31)
+
+
+### Bug Fixes
+
+* encrypt card number ([4202012](https://github.com/softwaregroup-bg/ut-transfer/commit/4202012))
+
+
+
 <a name="6.13.4"></a>
 ## [6.13.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.3...v6.13.4) (2017-05-31)
 
