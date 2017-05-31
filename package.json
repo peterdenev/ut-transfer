@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.13.3",
+  "version": "6.13.4-circular-ref-error.0",
   "main": "./index.js",
   "dependencies": {
     "joi": "10.0.6"

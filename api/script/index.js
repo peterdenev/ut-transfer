@@ -134,13 +134,12 @@ module.exports = {
             } else {
                 method = this.bus.importMethod('db/transfer.push.reverse' + where);
             }
-            error.transferDetails = transfer;
             return method({
                 transferId: transfer.transferId,
                 source: where,
                 type: error.type || (where + '.error'),
                 message: error.message,
-                details: error
+                details: Object.assign({}, error, {transferDetails: transfer})
             })
             .catch(x => {
                 this.log.error && this.log.error(x);
