@@ -1,3 +1,13 @@
+<a name="6.13.6"></a>
+## [6.13.6](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.5...v6.13.6) (2017-06-07)
+
+
+### Bug Fixes
+
+* handle ledger reversals ([2bdfc10](https://github.com/softwaregroup-bg/ut-transfer/commit/2bdfc10))
+
+
+
 <a name="6.13.5"></a>
 ## [6.13.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.4...v6.13.5) (2017-05-31)
 
