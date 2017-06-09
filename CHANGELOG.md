@@ -1,3 +1,13 @@
+<a name="6.14.0"></a>
+# [6.14.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.6...v6.14.0) (2017-06-09)
+
+
+### Features
+
+* pending transactions and permissions ([#59](https://github.com/softwaregroup-bg/ut-transfer/issues/59)) ([4a7b4ce](https://github.com/softwaregroup-bg/ut-transfer/commit/4a7b4ce))
+
+
+
 <a name="6.13.6"></a>
 ## [6.13.6](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.5...v6.13.6) (2017-06-07)
 
