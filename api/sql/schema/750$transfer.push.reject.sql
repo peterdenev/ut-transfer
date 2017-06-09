@@ -1,8 +1,7 @@
-ALTER PROCEDURE [transfer].[push.reverse]
-    @transferId bigint,
-    @message varchar(250) = 'Reverse created',
-    @udfAcquirer XML,
-    @meta core.metaDataTT READONLY
+ALTER PROCEDURE [transfer].[push.reject] --this SP will trigger event for pending transaction reject request
+    @transferId bigint, -- the id of the transfer to be rejected
+    @message varchar(250) = 'Reject created', -- message type
+    @meta core.metaDataTT READONLY -- the id of the user performing the operation
 AS
 
 -- checks if the user has a right to make the operation
@@ -15,9 +14,8 @@ END
 
 EXEC [transfer].[push.event]
     @transferId = @transferId,
-    @type = 'transfer.reverse',
+    @type = 'transfer.reject',
     @state = 'request',
     @source = 'acquirer',
     @message = @message,
-    @udfDetails = @udfAcquirer
-
+    @udfDetails = NULL

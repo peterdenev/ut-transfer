@@ -120,11 +120,21 @@ var ruleValidate = (bus, transfer) => {
     });
 };
 
+var hashTransferPendingSecurityCode = (bus, transfer) => {
+    if (transfer.transferPending && transfer.pullTransfer && transfer.pullTransfer.pending && transfer.pullTransfer.pending.params && transfer.transferPending.securityCode) {
+        return bus.importMethod('user.genHash')(transfer.transferPending.securityCode, JSON.parse(transfer.pullTransfer.pending.params));
+    } else if (transfer.transferPending && transfer.transferPending.securityCode) {
+        return bus.importMethod('user.getHash')({ value: transfer.transferPending.securityCode });
+    } else {
+        return Promise.resolve(null);
+    }
+};
+
 module.exports = {
     'rule.validate': function(params) {
         return ruleValidate(this.bus, params);
     },
-    'push.execute': function(params) {
+    'push.execute': function(params, $meta) {
         var handleError = (transfer, where) => error => {
             var method;
             if (where === 'Acquirer') {
@@ -147,7 +157,7 @@ module.exports = {
             }) // .this is intentionally after catch as we do not want to this.log the original error
             .then(x => Promise.reject(error));
         };
-        var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.create')(transfer)
+        var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.create')(transfer, Object.assign($meta, {method: 'db/transfer.push.create'}))
             .then(pushResult => {
                 pushResult = pushResult && pushResult[0] && pushResult[0][0];
                 if (pushResult && pushResult.transferId) {
@@ -159,6 +169,11 @@ module.exports = {
                     transfer.merchantPort = pushResult.merchantPort;
                     transfer.issuerPort = pushResult.issuerPort;
                     transfer.ledgerPort = pushResult.ledgerPort;
+
+                    // Add splits for pending transaction
+                    if (transfer.pullTransferId) {
+                        transfer.split = transfer.split.concat(transfer.pullTransfer.split);
+                    }
                     if (transfer.abortAcquirer) {
                         return handleError(transfer, 'Acquirer')(transfer.abortAcquirer);
                     } else {
@@ -248,6 +263,105 @@ module.exports = {
             .then(issuerPushExecute)
             .then(merchantTransferExecute);
     },
+    'pending.pullExecute': function(params, $meta) {
+        var preparePushExecuteParams = (securityCode) => {
+            var transfer = Object.assign({}, params);
+            transfer.isPending = true;
+            transfer.transferPending.securityCode = securityCode && securityCode.value;
+            transfer.transferPending.params = securityCode && securityCode.params;
+
+            return transfer;
+        };
+
+        var pushExecute = (transfer) => this.config['transfer.push.execute'](transfer, $meta);
+
+        return hashTransferPendingSecurityCode(this.bus, params)
+            .then(preparePushExecuteParams)
+            .then(pushExecute);
+    },
+    'pending.pushExecute': function(params, $meta) {
+        var dbPendingPushExecute = (transfer) => {
+            var method = `db/transfer.push.${transfer.pullTransferStatus}`;
+            var $pendingPushExecuteMeta = Object.assign($meta, { method });
+            return this.bus.importMethod($pendingPushExecuteMeta.method)({
+                transferId: transfer.pullTransferId
+            }, $pendingPushExecuteMeta)
+                .then(() => {
+                    return transfer;
+                });
+        };
+        var getPullTransferInfo = (transfer, securityCode) => {
+            return this.config['transfer.transfer.get']({ transferId: transfer.pullTransferId }, $meta)
+                .then(pullTransfer => {
+                    if (!pullTransfer || !pullTransfer.transferId) {
+                        throw errors.notFound();
+                    } else {
+                        transfer.pullTransfer = pullTransfer;
+                        transfer.sourceAccount = pullTransfer.sourceAccount;
+                        transfer.destinationAccount = pullTransfer.destinationAccount;
+                        transfer.amount = {
+                            transfer: {
+                                amount: pullTransfer.transferAmount,
+                                currency: pullTransfer.transferCurrency
+                            }
+                        };
+
+                        return transfer;
+                    }
+                });
+        };
+        var prepareParams = (transfer) => {
+            return hashTransferPendingSecurityCode(this.bus, params)
+                .then(securityCode => {
+                    transfer.transferPending.securityCode = securityCode;
+                    return transfer;
+                });
+        };
+        var handlePendingTransfer = (transfer) => {
+            transfer.pullTransferApprove = params.pullTransferApprove;
+            if (transfer.pullTransferStatus === 'approve') { // Confirm pending transfer
+                return this.config['transfer.push.execute'](transfer, $meta);
+            } else if (transfer.pullTransferStatus === 'reject') { // Reject pending transfer
+                var $transferRejectMeta = Object.assign($meta, { method: 'db/transfer.pending.reject' });
+                return this.bus.importMethod($transferRejectMeta.method)({
+                    transferId: params.pullTransferId,
+                    userAvailableAccounts: params.userAvailableAccounts,
+                    message: transfer.description,
+                    reasonId: transfer.reasonId
+                }, $transferRejectMeta)
+                    .then(rejectResult => {
+                        return transfer;
+                    });
+            } else if (transfer.pullTransferStatus === 'cancel') { // Cancel pending transfer
+                var $transferCancelMeta = Object.assign($meta, {method: 'db/transfer.pending.cancel'});
+                return this.bus.importMethod($transferCancelMeta.method)({
+                    transferId: params.pullTransferId,
+                    message: transfer.description,
+                    reasonId: transfer.reasonsId
+                }, $transferCancelMeta)
+                    .then(rejectResult => {
+                        return transfer;
+                    });
+            } else {
+                throw errors.transferInvalidPendingTransfer();
+            }
+        };
+        var handleError = (transfer) => error => {
+            var $transferPushFailMeta = Object.assign($meta, {method: 'db/transfer.push.fail'});
+            return this.bus.importMethod($transferPushFailMeta.method)({
+                transferId: transfer.pullTransferId,
+                type: error.type,
+                message: error.message
+            }, $transferPushFailMeta)
+                .then(() => Promise.reject(error));
+        };
+
+        return dbPendingPushExecute(params)
+            .then(getPullTransferInfo)
+            .then(prepareParams)
+            .then(handlePendingTransfer)
+            .catch(handleError(params));
+    },
     'idle.execute': function(params, $meta) {
         $meta.mtid = 'discard';
         return this.bus.importMethod('db/transfer.idle.execute')(params)
@@ -326,17 +440,25 @@ module.exports = {
         }
     },
     'transfer.get': function(msg, $meta) {
-        return this.bus.importMethod('db/transfer.transfer.get')(msg, $meta)
+        var $getTransferMeta = Object.assign($meta, { method: 'db/transfer.transfer.get' });
+        return this.bus.importMethod($getTransferMeta.method)(msg, $getTransferMeta)
             .then((dbResult) => {
                 var transferResults = dbResult.transfer;
+                var transferPending = dbResult.transferPending;
                 var result = {};
 
                 if (transferResults && Array.isArray(transferResults) && transferResults.length > 0) {
                     result = Object.assign({}, transferResults[0]);
                     result.split = dbResult.transferSplit;
                 }
+                if (transferResults && Array.isArray(transferPending) && transferPending.length > 0) {
+                    result.pending = transferPending[0];
+                }
                 return result;
             });
+    },
+    'pendingUserTransfers.fetch': function(msg, $meta) {
+        return this.bus.importMethod('db/transfer.pendingUserTransfers.fetch')(msg, $meta);
     }
 };
 // todo handle timeout from destination port

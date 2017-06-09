@@ -26,6 +26,9 @@ ALTER PROCEDURE [transfer].[push.create]
     @description varchar(250),
     @udfAcquirer XML,
     @split transfer.splitTT READONLY,
+    @isPending BIT,
+    @transferPending transfer.pendingTT READONLY,
+    @userAvailableAccounts [core].[arrayList] READONLY,
     @meta core.metaDataTT READONLY
 AS
 DECLARE @callParams XML
@@ -41,10 +44,21 @@ DECLARE @merchantPort varchar(50),
     @issuerSettings XML,
     @ledgerPort varchar(50),
     @ledgerMode varchar(20),
-    @ledgerSerialNumber bigint
+    @ledgerSerialNumber bigint,
+    @userId bigint
 
 BEGIN TRY
-    -- todo check permission
+
+    -- checks if the user has a right to make the operation
+    DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
+    EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
+    IF @return != 0
+    BEGIN
+        RETURN 55555
+    END
+
+    SET @userId = (SELECT [auth.actorId] FROM @meta)
+
     BEGIN TRANSACTION
 
     UPDATE
@@ -171,6 +185,55 @@ BEGIN TRY
         @udfDetails = @udfAcquirer,
         @message = 'Transfer created'
 
+    IF @isPending = 1
+    BEGIN
+        INSERT INTO
+            [transfer].[pending](
+                pullTransactionId,
+                securityCode,
+                expireTime,
+                attempts,
+                [status],
+                approvalAccountNumber,
+                params,
+                createdBy
+            )
+        SELECT
+            @transferId,
+            securityCode,
+            expireTime,
+            0,
+            1,
+            approvalAccountNumber,
+            params,
+            @userId
+        FROM
+            @transferPending
+    END ELSE IF EXISTS (SELECT * FROM [transfer].[pending] tp JOIN @transferPending s on s.pullTransactionId = tp.pullTransactionId)
+    BEGIN
+        UPDATE
+            tp
+        SET
+            pushTransactionId = @transferId,
+            tp.[status] = 2,
+            updatedBy = @userId,
+            updatedOn = GETDATE()
+        FROM
+            [transfer].[pending] tp
+        JOIN
+            @transferPending s ON s.pullTransactionId = tp.pullTransactionId AND ISNULL (s.securityCode, 0) = ISNULL (tp.securityCode, 0)
+        JOIN
+            @userAvailableAccounts uaa ON uaa.value = tp.approvalAccountNumber
+        JOIN
+            [transfer].[transfer] t ON t.transferId = tp.pullTransactionId
+        WHERE
+            tp.expireTime >= GETDATE() AND
+            t.reversed = 0 AND
+            tp.[status] = 1
+        IF @@ROWCOUNT = 0
+            RAISERROR ('transfer.unauthorizedTransfer', 16, 1)
+    END
+
     INSERT INTO
         [transfer].[split](
             transferId,
@@ -180,7 +243,7 @@ BEGIN TRY
             conditionId,
             splitNameId,
             [description],
-            tag,            
+            tag,
             creditActorId,
             debitActorId,
             creditItemId,
@@ -211,7 +274,18 @@ BEGIN TRY
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
 BEGIN CATCH
-    if @@TRANCOUNT > 0 ROLLBACK TRANSACTION
-    EXEC core.error
-    RETURN 55555
+    IF @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION
+
+    IF error_number() not in (2627)
+        BEGIN
+            EXEC [core].[error]
+        END
+    ELSE
+    BEGIN TRY
+        RAISERROR('transfer.idAlreadyExists', 16, 1);
+    END TRY
+    BEGIN CATCH
+        EXEC [core].[error]
+    END CATCH
 END CATCH

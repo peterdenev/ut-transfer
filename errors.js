@@ -8,6 +8,7 @@ module.exports = {
     transfer: Transfer,
     systemDecline: create('systemDecline', Transfer, 'System decline error'),
     insufficientFunds: create('insufficientFunds', Transfer, 'Insufficient funds'),
+    transferIdAlreadyExists: create('idAlreadyExists', Transfer, 'Transfer ID already exists'),
     invalidAccount: create('invalidAccount', Transfer, 'Invalid account'),
     genericDecline: create('genericDecline', Transfer, 'Transfer declined'),
     incorrectPin: create('incorrectPin', Transfer, 'Incorrect PIN'),
@@ -22,5 +23,9 @@ module.exports = {
     merchantUnknown: create('unknown', Merchant, 'Unknown error'),
     invalidCurrency: create('invalidCurrency', Currency, 'Invalid currency "{currency}"'),
     invalidAmount: create('invalidAmount', Currency, 'Invalid amount "{amount} {currency}"'),
-    transferAlreadyReversed: create('transferAlreadyReversed', Transfer, 'Transfer has been already reversed')
+    invalidTransferId: create('invalidTransferId', Transfer, 'Invalid transfer id'),
+    unauthorizedPullTransfer: create('unauthorizedTransfer', Transfer, 'Unauthorized pull transfer'),
+    reasonNameExists: create('reasonNameExists', Transfer, 'Transfer reasons name already exists'),
+    transferAlreadyReversed: create('transferAlreadyReversed', Transfer, 'Transfer has been already reversed'),
+    transferInvalidPendingTransfer: create('transferInvalidPendingTransfer', Transfer, 'Invalid pending transfer status')
 };

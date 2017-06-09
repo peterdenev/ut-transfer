@@ -13,8 +13,12 @@ BEGIN TRY
     SET DATEFIRST 1                         -- set first day of week to be Monday (default is Sunday)
 
      -- checks if the user has a right to make the operation
-    DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return INT = 0
---    EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
+    DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
+    EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
+    IF @return != 0
+    BEGIN
+        RETURN 55555
+    END
 
     SELECT TOP 1 @sortOrder = dir, @sortBy = field FROM @orderBy  
 

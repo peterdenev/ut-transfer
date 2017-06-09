@@ -14,13 +14,16 @@ AS
 SET NOCOUNT ON
 
 DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
-DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return INT = 0
 DECLARE @totalRows INT
 DECLARE @cardNumberId BIGINT
 
---EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
---IF @return != 0
---    RETURN 55555
+-- checks if the user has a right to make the operation
+DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
+EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
+IF @return != 0
+BEGIN
+    RETURN 55555
+END
 
 IF @cardNumber IS NOT NULL
     SET @cardNumberId = (select numberId from [card].[number] where pan = @cardNumber)

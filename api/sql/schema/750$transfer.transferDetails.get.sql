@@ -16,8 +16,12 @@ AS
     DECLARE @sortBy NVARCHAR(50) = 'transferDateTime'
 BEGIN TRY
      -- checks if the user has a right to make the operation
-    DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return INT = 0
---    EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
+    DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
+    EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
+    IF @return != 0
+    BEGIN
+        RETURN 55555
+    END
 
     IF OBJECT_ID('tempdb..#transferDetails') IS NOT NULL
     BEGIN

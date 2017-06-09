@@ -112,7 +112,7 @@ BEGIN TRY
                 FROM
                     [transfer].[pending] cc
                 JOIN
-                    [transfer].[transfer] d ON d.transferId = cc.firstTransferId
+                    [transfer].[transfer] d ON d.transferId = cc.pullTransactionId
                 JOIN
                     [transfer].[partner] p ON p.partnerId = d.issuerId AND p.port = @issuerPort
                 WHERE

@@ -47,8 +47,28 @@ MERGE INTO
     [user].[action] as target
 USING
     (VALUES
-        ('transfer.partner.fetch', 'transfer.partner.fetch', '{}'),
-        ('db/transfer.partner.fetch', 'db/transfer.partner.fetch', '{}')
+        ('transfer.partner.fetch', 'transfer.partner.fetch', '{}'),      
+        ('db/transfer.partner.fetch', 'db/transfer.partner.fetch', '{}'),
+       
+        ('transfer.pending.cancel', 'transfer.pending.cancel', '{}'),
+        ('transfer.pending.reject', 'transfer.pending.reject', '{}'),
+        ('transfer.pendingUserTransfers.fetch', 'transfer.pendingUserTransfers.fetch', '{}'),        
+        ('transfer.push.create', 'transfer.push.create', '{}'),        
+        ('transfer.push.reverse', 'transfer.push.reverse', '{}'),
+        ('transfer.push.approve', 'transfer.push.approve', '{}'),         
+        ('transfer.report.byDayOfWeek', 'transfer.report.byDayOfWeek', '{}'),
+        ('transfer.report.byHourOfDay', 'transfer.report.byHourOfDay', '{}'),
+        ('transfer.report.byTypeOfTransfer', 'transfer.report.byTypeOfTransfer', '{}'),
+        ('transfer.report.byWeekOfYear', 'transfer.report.byWeekOfYear', '{}'),
+        ('transfer.report.settlement', 'transfer.report.settlement', '{}'),
+        ('transfer.report.settlementDetails', 'transfer.report.settlementDetails', '{}'),
+        ('transfer.report.transfer', 'transfer.report.transfer', '{}'),
+        ('transfer.transfer.get', 'transfer.transfer.get', '{}'),
+        ('transfer.transferDetails.get', 'transfer.transferDetails.get', '{}'),
+        ('transfer.push.reject', 'transfer.push.reject', '{}'),
+        ('transfer.push.cancel', 'transfer.push.cancel', '{}'),
+        ('transfer.view.foreignAccounts', 'transfer.view.foreignAccounts', '{}')
+
     ) AS source (actionId, description, valueMap)
 JOIN
 	[user].[actionCategory] c ON c.name = 'transfer'

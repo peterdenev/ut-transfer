@@ -19,9 +19,9 @@ BEGIN TRY
         [transfer].[pending]
     SET
         [status] = NULL,
-        secondTransferId = NULL
+        pushTransactionId = NULL
     WHERE
-        secondTransferId=@transferId
+        pushTransactionId=@transferId
 
     EXEC [transfer].[push.event]
         @transferId = @transferId,

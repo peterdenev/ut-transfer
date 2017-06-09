@@ -54,5 +54,79 @@ IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'fkTransferSplit_cred
 BEGIN
     ALTER TABLE [transfer].[split] ADD CONSTRAINT fkTransferSplit_creditItemId FOREIGN KEY ([creditItemId]) REFERENCES [core].[itemName] ([itemNameId])
 END
-----
 
+---transfer.pending/FKs
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'fkTransferPending_FirstTransferId')
+BEGIN
+    ALTER TABLE [transfer].[pending] DROP CONSTRAINT fkTransferPending_FirstTransferId
+END
+
+IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'fkTransferPending_SecondTransferId')
+BEGIN
+    ALTER TABLE [transfer].[pending] DROP CONSTRAINT fkTransferPending_SecondTransferId
+END
+
+IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'firstTransferId' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    EXEC sp_rename 'transfer.pending.firstTransferId', 'pullTransactionId', 'Column'
+END
+
+IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'secondTransferId' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    EXEC sp_rename 'transfer.pending.secondTransferId', 'pushTransactionId', 'Column'
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'fkTransferPending_PullTransactionId')
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD CONSTRAINT fkTransferPending_PullTransactionId FOREIGN KEY([pullTransactionId]) REFERENCES [transfer].[transfer] ([transferId])
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'fkTransferPending_PushTransactionId')
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD CONSTRAINT fkTransferPending_PushTransactionId FOREIGN KEY([pushTransactionId]) REFERENCES [transfer].[transfer] ([transferId])
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'approvalAccountNumber' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD approvalAccountNumber VARCHAR (50)
+END
+
+IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'securityCode' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    ALTER TABLE [transfer].[pending] ALTER COLUMN securityCode VARCHAR (max)
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'reasonId' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD reasonId BIGINT
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'fkTransferPending_ReasonId')
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD CONSTRAINT fkTransferPending_ReasonId FOREIGN KEY([reasonId]) REFERENCES [core].[itemName] ([itemNameId])
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'description' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD [description] NVARCHAR (255)
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'params' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD params NVARCHAR (max)
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'createdBy' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD createdBy BIGINT
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'updatedBy' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD updatedBy BIGINT
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'updatedOn' AND Object_ID = Object_ID(N'transfer.pending') )
+BEGIN
+    ALTER TABLE [transfer].[pending] ADD updatedOn datetime2
+END
