@@ -1,3 +1,13 @@
+<a name="6.14.1"></a>
+## [6.14.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.14.0...v6.14.1) (2017-06-12)
+
+
+### Bug Fixes
+
+* vb1 ([8f035de](https://github.com/softwaregroup-bg/ut-transfer/commit/8f035de))
+
+
+
 <a name="6.14.0"></a>
 # [6.14.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.13.6...v6.14.0) (2017-06-09)
 
