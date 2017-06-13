@@ -12,6 +12,7 @@ USING
         ('ministatement','Mini statement enquiry'),
         ('topup', 'Top up'),
         ('bill', 'Bill payment'),
+		('tvLicense', 'TV License'),
         --('sale', 'Sale'),
         --('sms', 'SMS registration'),
         --('changePin', 'PIN change'),
