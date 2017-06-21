@@ -392,9 +392,9 @@ module.exports = {
         return getTransfer(params)
             .then(processReversal(this.bus, this.log));
     },
-    'card.execute': function(params) {
+    'card.execute': function(params, $meta) {
         if (params.abortAcquirer) {
-            return this.bus.importMethod('transfer.push.execute')(params);
+            return this.bus.importMethod('transfer.push.execute')(params, $meta);
         } else {
             return this.bus.importMethod('db/atm.card.check')({
                 cardId: params.cardId,
@@ -410,7 +410,7 @@ module.exports = {
             })
             .catch(error => {
                 params.abortAcquirer = error;
-                return this.bus.importMethod('transfer.push.execute')(params);
+                return this.bus.importMethod('transfer.push.execute')(params, $meta);
             })
             .then(result => Object.assign(params, {
                 cardProductName: result.cardProductName,
@@ -436,7 +436,7 @@ module.exports = {
                 params.transferIdAcquirer = result[0][0].tsn;
                 return params;
             })
-            .then(this.bus.importMethod('transfer.push.execute'));
+            .then(params => this.bus.importMethod('transfer.push.execute')(params, $meta));
         }
     },
     'transfer.get': function(msg, $meta) {
