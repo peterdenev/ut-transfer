@@ -1,3 +1,13 @@
+<a name="6.14.2"></a>
+## [6.14.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.14.1...v6.14.2) (2017-06-21)
+
+
+### Bug Fixes
+
+* pass $meta ([bcbc8c3](https://github.com/softwaregroup-bg/ut-transfer/commit/bcbc8c3))
+
+
+
 <a name="6.14.1"></a>
 ## [6.14.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.14.0...v6.14.1) (2017-06-12)
 
