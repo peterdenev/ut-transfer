@@ -1,0 +1,6 @@
+#paginationWrap {
+    width: 100%;
+    position: absolute;
+    bottom: 34px;
+    padding: 0 40px 0 20px;
+}

@@ -1,0 +1,5 @@
+export const OPEN_CREATE_PARTNER_POPUP = Symbol('OPEN_CREATE_PARTNER_POPUP');
+export const CLOSE_CREATE_PARTNER_POPUP = Symbol('CLOSE_CREATE_PARTNER_POPUP');
+export const CHANGE_FIELD = Symbol('CHANGE_FIELD');
+export const SET_ERRORS = Symbol('SET_ERRORS');
+export const CREATE_PARTNER = Symbol('CREATE_PARTNER');

@@ -2,9 +2,9 @@
 var joi = require('joi');
 
 module.exports = {
-    description: 'fetch partners',
-    notes: ['fetch partners'],
-    tags: ['transfer', 'partner', 'fetch'],
+    description: 'list partners for dropdowns',
+    notes: ['list partners'],
+    tags: ['transfer', 'partner', 'list'],
     payload: joi.any(),
     result: joi.object().keys({
         partner: joi.array().items(

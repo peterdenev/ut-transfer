@@ -1,0 +1,5 @@
+export const FETCH_PARTNER_DETAILS = Symbol('FETCH_PARTNER_DETAILS');
+export const CHANGE_FIELD = Symbol('CHANGE_FIELD');
+export const SET_ERRORS = Symbol('SET_ERRORS');
+export const EDIT_PARTNER_DETAILS = Symbol('EDIT_PARTNER_DETAILS');
+export const CLOSE_DETAILS_POPUP = Symbol('CLOSE_DETAILS_POPUP');

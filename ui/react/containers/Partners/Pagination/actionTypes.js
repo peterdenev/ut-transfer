@@ -1,0 +1,1 @@
+export const UPDATE_PAGINATION = Symbol('UPDATE_PAGINATION');

@@ -1,0 +1,30 @@
+.filterCustomSearchSeparated{
+    margin-right: 20px;
+    flex-shrink: 1;
+    flex-grow: 1;
+    flex-basis: auto;
+    max-width: 420px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.filterSeparated{
+    margin-right: 20px;
+    flex-shrink: 1;
+    flex-grow: 1;
+    flex-basis: auto;
+    min-width: 135px;
+    max-width: 240px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.filterWrap, .buttonWrap {
+    display: flex;
+    width: auto;
+    justify-content: flex-end;
+}
+.cardProductToolboxButtons {
+    text-align: right;
+}
+.cardProductButton {
+    margin: 0 5px 0 0;
+}

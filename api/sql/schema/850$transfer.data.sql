@@ -47,8 +47,11 @@ MERGE INTO
     [user].[action] as target
 USING
     (VALUES
-        ('transfer.partner.fetch', 'transfer.partner.fetch', '{}'),      
-        ('db/transfer.partner.fetch', 'db/transfer.partner.fetch', '{}'),
+        ('transfer.partner.fetch', 'transfer.partner.fetch', '{}'),
+        ('transfer.partner.list', 'transfer.partner.list', '{}'),
+        ('transfer.partner.get', 'transfer.partner.get', '{}'),
+        ('transfer.partner.add', 'transfer.partner.add', '{}'),
+        ('transfer.partner.edit', 'transfer.partner.edit', '{}'),
        
         ('transfer.pending.cancel', 'transfer.pending.cancel', '{}'),
         ('transfer.pending.reject', 'transfer.pending.reject', '{}'),
@@ -68,7 +71,6 @@ USING
         ('transfer.push.reject', 'transfer.push.reject', '{}'),
         ('transfer.push.cancel', 'transfer.push.cancel', '{}'),
         ('transfer.view.foreignAccounts', 'transfer.view.foreignAccounts', '{}')
-
     ) AS source (actionId, description, valueMap)
 JOIN
 	[user].[actionCategory] c ON c.name = 'transfer'
