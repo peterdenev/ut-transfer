@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.14.3-front-end.6",
+  "version": "6.15.0",
   "main": "./index.js",
   "dependencies": {
     "immutable": "^3.8.1",
