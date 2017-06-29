@@ -5,5 +5,6 @@ module.exports = {
     'partner.list': require('./partner.list'),
     'partner.add': require('./partner.add'),
     'partner.edit': require('./partner.edit'),
-    'partner.get': require('./partner.get')
+    'partner.get': require('./partner.get'),
+    'reason.list': require('./reason.list')
 };

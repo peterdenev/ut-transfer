@@ -6,21 +6,25 @@ const DECLINED = {
 var errors = require('../../errors');
 var currency = require('../../currency');
 
-var processReversal = (bus, log) => params => {
+var processReversal = (bus, log, $meta) => params => {
     var transferId;
 
     var portReversal = (port, reversal) => {
         if (port && reversal.transferType && reversal.operation) {
-            return bus.importMethod(`${port}.${reversal.transferType}.${reversal.operation}`)(reversal);
+            var $postReversalMeta = Object.assign($meta, {method: `${port}.${reversal.transferType}.${reversal.operation}`});
+            return bus.importMethod($postReversalMeta.method)(reversal, $postReversalMeta);
         } else {
             return Promise.resolve(reversal);
         }
     };
 
-    var dbPushReverse = reverse => bus.importMethod('db/transfer.push.reverse')(reverse)
-        .then(pushResult => {
-            return reverse;
-        });
+    var dbPushReverse = reverse => {
+        var $pushReverseMeta = Object.assign($meta, {method: 'db/transfer.push.reverse'});
+        return bus.importMethod($pushReverseMeta.method)(reverse, $pushReverseMeta)
+            .then(pushResult => {
+                return reverse;
+            });
+    };
 
     var reverse = reversal => {
         transferId = reversal.transferId;
@@ -53,9 +57,7 @@ var processReversal = (bus, log) => params => {
     };
 
     var confirmReversal = reversalResult => {
-        return transferId && bus.importMethod('db/transfer.push.confirmReversal')({
-            transferId
-        })
+        return transferId && bus.importMethod('db/transfer.push.confirmReversal')({transferId})
         .then(function(confirmReversalResult) {
             return reversalResult;
         });
@@ -365,7 +367,7 @@ module.exports = {
     'idle.execute': function(params, $meta) {
         $meta.mtid = 'discard';
         return this.bus.importMethod('db/transfer.idle.execute')(params)
-            .then(idleResult => idleResult && idleResult.transferId && processReversal(this.bus, this.log)(idleResult));
+            .then(idleResult => idleResult && idleResult.transferId && processReversal(this.bus, this.log, $meta)(idleResult));
     },
     'push.reverse': function(params, $meta) {
         var getTransfer = (params) => this.config['transfer.transfer.get']({
@@ -390,7 +392,7 @@ module.exports = {
         });
 
         return getTransfer(params)
-            .then(processReversal(this.bus, this.log));
+            .then(processReversal(this.bus, this.log, $meta));
     },
     'card.execute': function(params, $meta) {
         if (params.abortAcquirer) {
