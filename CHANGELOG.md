@@ -1,3 +1,13 @@
+<a name="6.15.1"></a>
+## [6.15.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.0...v6.15.1) (2017-06-29)
+
+
+### Bug Fixes
+
+* pass metadata ([b829c71](https://github.com/softwaregroup-bg/ut-transfer/commit/b829c71))
+
+
+
 <a name="6.15.0"></a>
 # [6.15.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.14.2...v6.15.0) (2017-06-22)
 
