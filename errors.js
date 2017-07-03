@@ -27,5 +27,6 @@ module.exports = {
     unauthorizedPullTransfer: create('unauthorizedTransfer', Transfer, 'Unauthorized pull transfer'),
     reasonNameExists: create('reasonNameExists', Transfer, 'Transfer reasons name already exists'),
     transferAlreadyReversed: create('transferAlreadyReversed', Transfer, 'Transfer has been already reversed'),
-    transferInvalidPendingTransfer: create('transferInvalidPendingTransfer', Transfer, 'Invalid pending transfer status')
+    transferInvalidPendingTransfer: create('transferInvalidPendingTransfer', Transfer, 'Invalid pending transfer status'),
+    merchantRejectFailure: create('rejectFailure', Transfer, 'Merchant payment reject failure')
 };
