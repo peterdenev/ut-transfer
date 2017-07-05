@@ -1,3 +1,13 @@
+<a name="6.15.2"></a>
+## [6.15.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.1...v6.15.2) (2017-07-05)
+
+
+### Bug Fixes
+
+* disable edit btn when no changes are made and improve serial number validation ([c1e69d4](https://github.com/softwaregroup-bg/ut-transfer/commit/c1e69d4))
+
+
+
 <a name="6.15.1"></a>
 ## [6.15.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.0...v6.15.1) (2017-06-29)
 

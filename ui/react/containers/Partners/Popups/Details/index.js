@@ -32,9 +32,11 @@ export class Create extends Component {
         }
     }
     getPopupFooter() {
+        let isEditDisable = this.props.initialPartnerData.equals(this.props.partnerData);
         return {
             actionButtons: [{
                 label: 'Edit',
+                disabled: isEditDisable,
                 styleType: 'primaryDialog',
                 onClick: this.editPartner
             }, {
@@ -61,6 +63,7 @@ export class Create extends Component {
 Create.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     partnerData: PropTypes.object,
+    initialPartnerData: PropTypes.object,
     closeDetailsDialog: PropTypes.func.isRequired,
     editPartner: PropTypes.func.isRequired,
     setErrors: PropTypes.func.isRequired
@@ -69,7 +72,8 @@ Create.propTypes = {
 function mapStateToProps(state, ownProps) {
     return {
         isOpen: state.transferPartnerDetails.get('open'),
-        partnerData: state.transferPartnerDetails.get('data')
+        partnerData: state.transferPartnerDetails.get('data'),
+        initialPartnerData: state.transferPartnerDetails.get('remoteData')
     };
 }
 

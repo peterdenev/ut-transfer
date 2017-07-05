@@ -16,7 +16,11 @@ export function transferPartnerDetails(state = defaultState, action) {
             return defaultState;
         case actionTypes.FETCH_PARTNER_DETAILS:
             if (action.methodRequestState === methodRequestState.FINISHED && action.result) {
-                let newData = immutable.fromJS(action.result.partner[0]);
+                let newData = immutable
+                    .fromJS(action.result.partner[0])
+                    .update('serialNumber', (number) => {
+                        return number === null ? '' : number;
+                    });
                 let newState = defaultState
                     .set('open', true)
                     .set('data', newData)
