@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.15.1",
+  "version": "6.15.2-editing-partner.0",
   "main": "./index.js",
   "dependencies": {
     "immutable": "^3.8.1",
