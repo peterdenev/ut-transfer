@@ -276,7 +276,9 @@ module.exports = function(opt, cache) {
                     userMethods.approveUser('approve first user', context => context['add teller'].person.actorId),
                     // Product setup
                     commonFunc.createStep('ledger.productGroup.fetch', 'fetch product groups', (context) => {
-                        return {};
+                        return {
+                            isForCustomer: 1
+                        };
                     }, (result, assert) => {
                         productGroupId = (result.productGroup.find((group) => group.name === productGroup)).productGroupId;
                     }),
