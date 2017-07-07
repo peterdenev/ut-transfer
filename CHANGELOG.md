@@ -1,3 +1,13 @@
+<a name="6.15.5"></a>
+## [6.15.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.4...v6.15.5) (2017-07-07)
+
+
+### Bug Fixes
+
+* paging issues ([7ae967c](https://github.com/softwaregroup-bg/ut-transfer/commit/7ae967c))
+
+
+
 <a name="6.15.4"></a>
 ## [6.15.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.3...v6.15.4) (2017-07-06)
 
