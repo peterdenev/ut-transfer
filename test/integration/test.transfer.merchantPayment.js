@@ -70,7 +70,7 @@ var conditionId, orgId1, organizationDepthArray;
 var currencyName1, priority;
 var operationIdMerchantPayment, operationIdMerchantPullRequest, operationeCodeMerchantPayment, operationeCodeMerchantPullRequest, operationNameMerchantPayment, operationNameMerchantPullRequest;
 var customerTypeIndividual, customer1ActorId, currencyId, category1, category2, productType, productTypeId, periodicFeeId, productGroup, productGroupId, roleTellerId, roleMerchantId, roleMobileClientId;
-var accountCustomer1Id, accountMerchantId1, accountMerchantId2, accountCustomer1Number, accountMerchantNumber1;
+var accountCustomer1Id, accountMerchantId1, accountMerchantId2, accountCustomer1Number, accountMerchantNumber1, accountMerchantNumber2;
 var stdPolicy;
 // var phonePrefix;
 var rejectReasonId, cancelReasonId;
@@ -318,7 +318,9 @@ module.exports = function(opt, cache) {
                     userMethods.approveUser('approve first user', context => context['add teller'].person.actorId),
                     // Product setup
                     commonFunc.createStep('ledger.productGroup.fetch', 'fetch product groups', (context) => {
-                        return {};
+                        return {
+                            isForCustomer: 1
+                        };
                     }, (result, assert) => {
                         productGroupId = (result.productGroup.find((group) => group.name === productGroup)).productGroupId;
                     }),
@@ -425,7 +427,7 @@ module.exports = function(opt, cache) {
                             accountPerson: {
                                 accountId: -1,
                                 personId: context['add merchant'].person.actorId,
-                                isDefault: 1
+                                isDefault: 0
                             }
                         };
                     }, (result, assert) => {
@@ -450,13 +452,13 @@ module.exports = function(opt, cache) {
                             accountPerson: {
                                 accountId: -1,
                                 personId: context['add merchant'].person.actorId,
-                                isDefault: 0
+                                isDefault: 1
                             }
                         };
                     }, (result, assert) => {
                         assert.equals(accountJoiValidation.validateAddAccount(result).error, null, 'Return all details after adding an account');
                         accountMerchantId2 = result.account[0].accountId;
-                        // accountMerchantNumber2 = result.account[0].accountNumber;
+                        accountMerchantNumber2 = result.account[0].accountNumber;
                     }),
                     accountMethods.approveAccount('approve adding of merchant account 2', context => {
                         return {
@@ -620,35 +622,36 @@ module.exports = function(opt, cache) {
                     userMethods.login('login merchant 1', userConstants.USERNAME, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
                     /** Scenarios with product without min and max account balance */
                     transferMethods.setBalance('set default balance in all accounts',
-                        context => [accountCustomer1Id, accountMerchantId1,
+                        context => [accountCustomer1Id, accountMerchantId2,
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    commonFunc.createStep('transaction.validate', 'successfully validate merchant pull request 1', (context) => {
+                    // merchant pull request without destination account - merchant defaut account is selected automatically
+                    commonFunc.createStep('transaction.validate', 'successfully validate merchant pull request 1 - without destination account', (context) => {
                         return {
                             transferType: operationeCodeMerchantPullRequest,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountCustomer1Number,
-                            destinationAccount: accountMerchantNumber1,
+                            // destinationAccount: accountMerchantNumber2,
                             description: operationNameMerchantPullRequest
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after executing transaction');
                         assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
                         assert.equals(result.sourceAccount.accountNumber, accountCustomer1Number, 'return correct customer account number');
-                        assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber1, 'return correct merchant account number');
+                        assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber2, 'return correct merchant account number');
                         assert.equals(result.fee, 0, 'return zero fee');
                         assert.equals(result.otherFee, 0, 'return zero otherFee');
                         assert.equals(result.vat, 0, 'return zero vat');
                         assert.equals(result.transferType, operationeCodeMerchantPullRequest, 'return correct transferType');
                         assert.equals(result.description, operationNameMerchantPullRequest, 'return correct description');
                     }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute merchant pull request 1', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute merchant pull request 1 - without destination account', (context) => {
                         return {
                             transferType: operationeCodeMerchantPullRequest,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountCustomer1Number,
-                            destinationAccount: accountMerchantNumber1,
+                            // destinationAccount: accountMerchantNumber2,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 1,
                             description: operationNameMerchantPullRequest
                         };
@@ -656,7 +659,7 @@ module.exports = function(opt, cache) {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
                         assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
                         assert.equals(result.sourceAccount.accountNumber, accountCustomer1Number, 'return correct customer account number');
-                        assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber1, 'return correct merchant account number');
+                        assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber2, 'return correct merchant account number');
                         assert.equals(result.fee, 0, 'return zero fee');
                         assert.equals(result.otherFee, 0, 'return zero otherFee');
                         assert.equals(result.vat, 0, 'return zero vat');
@@ -675,7 +678,7 @@ module.exports = function(opt, cache) {
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     // verify that the balances of the accounts are unchanged
                     accountMethods.getAccountBalance('get customer account balance 1', context => accountCustomer1Id, DEFAULTCREDIT),
-                    accountMethods.getAccountBalance('get merchant account balance 1', context => accountMerchantId1, DEFAULTCREDIT),
+                    accountMethods.getAccountBalance('get merchant default account balance 1', context => accountMerchantId2, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get fee account balance 1', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 1', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 1', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
@@ -703,13 +706,13 @@ module.exports = function(opt, cache) {
                     commonFunc.createStep('transaction.validate', 'successfully validate merchant payment 1 by customer', (context) => {
                         return {
                             transferType: operationeCodeMerchantPayment,
-                            pullTransferId: context['successfully execute merchant pull request 1'].transferId
+                            pullTransferId: context['successfully execute merchant pull request 1 - without destination account'].transferId
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after executing transaction');
                         assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
                         assert.equals(result.sourceAccount.accountNumber, accountCustomer1Number, 'return correct customer account number');
-                        assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber1, 'return correct merchant account number');
+                        assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber2, 'return correct merchant account number');
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
@@ -718,7 +721,7 @@ module.exports = function(opt, cache) {
                     commonFunc.createStep('transaction.execute', 'successfully reject merchant payment', (context) => {
                         return {
                             transferType: operationeCodeMerchantPayment,
-                            pullTransferId: context['successfully execute merchant pull request 1'].transferId,
+                            pullTransferId: context['successfully execute merchant pull request 1 - without destination account'].transferId,
                             transferIdAcquirer: TRANSFERIDACQUIRER + '1a',
                             pullTransferStatus: REJECTTRANSACTION,
                             description: operationNameMerchantPayment,
@@ -728,7 +731,7 @@ module.exports = function(opt, cache) {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
                         assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
                         assert.equals(result.sourceAccount.accountNumber, accountCustomer1Number, 'return correct customer account number');
-                        assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber1, 'return correct merchant account number');
+                        assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber2, 'return correct merchant account number');
                         assert.equals(result.pullTransferStatus, REJECTEDSTATUS, 'return rejected status');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + '1a', 'return correct transferIdAcquirer');
                         assert.equals(result.transferType, operationeCodeMerchantPayment, 'return correct transferType');
@@ -742,7 +745,7 @@ module.exports = function(opt, cache) {
                     }),
                     commonFunc.createStep('transfer.transfer.get', 'get rejected pull request information', (context) => {
                         return {
-                            transferIdAcquirer: context['successfully execute merchant pull request 1'].transferIdAcquirer
+                            transferIdAcquirer: context['successfully execute merchant pull request 1 - without destination account'].transferIdAcquirer
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateGetTransaction(result).error, null, 'return transaction information');
@@ -752,7 +755,7 @@ module.exports = function(opt, cache) {
                     commonFunc.createStep('transaction.execute', 'unsuccessfully approve rejected merchant payment', (context) => {
                         return {
                             transferType: operationeCodeMerchantPayment,
-                            pullTransferId: context['successfully execute merchant pull request 1'].transferId,
+                            pullTransferId: context['successfully execute merchant pull request 1 - without destination account'].transferId,
                             transferIdAcquirer: TRANSFERIDACQUIRER + '1b',
                             pullTransferStatus: APPROVETRANSACTION,
                             description: operationNameMerchantPayment
@@ -764,7 +767,7 @@ module.exports = function(opt, cache) {
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     // verify that the balances of the accounts are unchanged
                     accountMethods.getAccountBalance('get customer account balance 2', context => accountCustomer1Id, DEFAULTCREDIT),
-                    accountMethods.getAccountBalance('get merchant account balance 2', context => accountMerchantId1, DEFAULTCREDIT),
+                    accountMethods.getAccountBalance('get default merchant account balance 2', context => accountMerchantId2, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get fee account balance 2', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 2', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 2', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
@@ -781,7 +784,8 @@ module.exports = function(opt, cache) {
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    commonFunc.createStep('transaction.validate', 'successfully validate merchant pull request 2', (context) => {
+                    // requests with destination account
+                    commonFunc.createStep('transaction.validate', 'successfully validate merchant pull request 2 - with destination account', (context) => {
                         return {
                             transferType: operationeCodeMerchantPullRequest,
                             amount: TRANSFERAMOUNT,
@@ -804,7 +808,7 @@ module.exports = function(opt, cache) {
                         assert.equals(result.transferType, operationeCodeMerchantPullRequest, 'return correct transferType');
                         assert.equals(result.description, operationNameMerchantPullRequest, 'return correct description');
                     }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute merchant pull request 2', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute merchant pull request 2 - with destinaition account', (context) => {
                         return {
                             transferType: operationeCodeMerchantPullRequest,
                             amount: TRANSFERAMOUNT,
@@ -828,7 +832,7 @@ module.exports = function(opt, cache) {
                     commonFunc.createStep('transaction.execute', 'unsuccessfully cancel merchant payment 2 by a customer', (context) => {
                         return {
                             transferType: operationeCodeMerchantPayment,
-                            pullTransferId: context['successfully execute merchant pull request 2'].transferId,
+                            pullTransferId: context['successfully execute merchant pull request 2 - with destinaition account'].transferId,
                             transferIdAcquirer: TRANSFERIDACQUIRER + '2cancel',
                             pullTransferStatus: CANCELTRANSACTION
                         };
@@ -838,7 +842,7 @@ module.exports = function(opt, cache) {
                     commonFunc.createStep('transaction.execute', 'successfully approve merchant payment', (context) => {
                         return {
                             transferType: operationeCodeMerchantPayment,
-                            pullTransferId: context['successfully execute merchant pull request 2'].transferId,
+                            pullTransferId: context['successfully execute merchant pull request 2 - with destinaition account'].transferId,
                             transferIdAcquirer: TRANSFERIDACQUIRER + '2a',
                             pullTransferStatus: APPROVETRANSACTION,
                             description: operationNameMerchantPayment
@@ -864,7 +868,7 @@ module.exports = function(opt, cache) {
                     }),
                     commonFunc.createStep('transfer.transfer.get', 'get approved pull request information', (context) => {
                         return {
-                            transferIdAcquirer: context['successfully execute merchant pull request 2'].transferIdAcquirer
+                            transferIdAcquirer: context['successfully execute merchant pull request 2 - with destinaition account'].transferIdAcquirer
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateGetTransaction(result).error, null, 'return transaction information');
@@ -874,7 +878,7 @@ module.exports = function(opt, cache) {
                     commonFunc.createStep('transaction.execute', 'unsuccessfully reject approved merchant payment', (context) => {
                         return {
                             transferType: operationeCodeMerchantPayment,
-                            pullTransferId: context['successfully execute merchant pull request 2'].transferId,
+                            pullTransferId: context['successfully execute merchant pull request 2 - with destinaition account'].transferId,
                             transferIdAcquirer: TRANSFERIDACQUIRER + '2b',
                             pullTransferStatus: REJECTTRANSACTION
                         };
