@@ -1012,7 +1012,7 @@ module.exports = function(opt, cache) {
                         assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber1, 'return correct merchant account number');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 4, 'return correct transferIdAcquirer');
                     }),
-                    // execute pull request - the amount is set so that after executing the transaction the customer will with account balance = 0
+                    // execute pull request - the amount is set so that after executing the transaction the customer will be with account balance = 0
                     commonFunc.createStep('transaction.execute', 'successfully execute merchant pull request 5', (context) => {
                         return {
                             transferType: operationeCodeMerchantPullRequest,
@@ -1061,6 +1061,21 @@ module.exports = function(opt, cache) {
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, INSUFFICIENTBALANCEERROR, 'return failure  - insufficient balance');
+                    }),
+                    commonFunc.createStep('transaction.validate', 'successfully validate merchant payment - minimum sufficient balance in customer account', (context) => {
+                        return {
+                            transferType: operationeCodeMerchantPayment,
+                            pullTransferId: context['successfully execute merchant pull request 5'].transferId
+                        };
+                    }, (result, assert) => {
+                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after executing transaction');
+                        assert.equals(result.amount, commonFunc.roundNumber(DEFAULTCREDIT - TRANSACTIONFEEVALUE, PRECISION), 'return correct amount');
+                        assert.equals(result.sourceAccount.accountNumber, accountCustomer1Number, 'return correct customer account number');
+                        assert.equals(result.destinationAccount.accountNumber, accountMerchantNumber1, 'return correct merchant account number');
+                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
+                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
+                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
+                        assert.equals(result.transferType, operationeCodeMerchantPayment, 'return correct transferType');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully approve merchant payment - minimum sufficient balance in customer account', (context) => {
                         return {
@@ -1135,7 +1150,7 @@ module.exports = function(opt, cache) {
                             transferIdAcquirer: TRANSFERIDACQUIRER + 6,
                             description: operationNameMerchantPullRequest
                         };
-                    }, (error, assert) => {
+                    }, null, (error, assert) => {
                         assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'merchat account status does not allow transactions');
                     }),
                     userMethods.logout('logout merchant 5', context => context['login merchant 5']['identity.check'].sessionId),

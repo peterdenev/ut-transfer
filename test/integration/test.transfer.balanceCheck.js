@@ -1385,6 +1385,14 @@ module.exports = function(opt, cache) {
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
                     }),
+                    // commonFunc.createStep('transaction.reverse', 'unsuccessfully reverse transaction - not reversible transaction', (context) => {
+                    //     return {
+                    //         transferId: context['successfully check balance - by teller user'].transferId,
+                    //         message: transferConstants.REVERSALMESSAGE
+                    //     };
+                    // }, null, (assert, error) => {
+                    //     return error;
+                    // }),
                     userMethods.logout('logout teller', context => context['login teller']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get customer account balance 6', context => accountId1, DEFAULTCREDIT - TRANSACTIONFEE),
