@@ -313,7 +313,9 @@ module.exports = function(opt, cache) {
                     userMethods.approveUser('approve first user', context => context['add teller'].person.actorId),
                     // Product setup
                     commonFunc.createStep('ledger.productGroup.fetch', 'fetch product groups', (context) => {
-                        return {};
+                        return {
+                            isForCustomer: 1
+                        };
                     }, (result, assert) => {
                         productGroupId = (result.productGroup.find((group) => group.name === productGroup)).productGroupId;
                     }),
@@ -3054,6 +3056,11 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get vat account balance 19', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 19', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.closeAccount('close receiver account 2', context => [accountReceiverId2]),
+                    accountMethods.approveAccount('approve closing of account', context => {
+                        return {
+                            accountId: accountReceiverId2
+                        };
+                    }),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login user 20', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - closed account', (context) => {

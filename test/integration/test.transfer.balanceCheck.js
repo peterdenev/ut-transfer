@@ -186,7 +186,9 @@ module.exports = function(opt, cache) {
                     }),
                     // Product setup
                     commonFunc.createStep('ledger.productGroup.fetch', 'fetch product groups', (context) => {
-                        return {};
+                        return {
+                            isForCustomer: 1
+                        };
                     }, (result, assert) => {
                         productGroupId = (result.productGroup.find((group) => group.isForCustomer === true)).productGroupId;
                     }),
@@ -1229,6 +1231,11 @@ module.exports = function(opt, cache) {
                     transferMethods.setBalance('set sufficient balance in customer account 2',
                         context => [accountId2], DEFAULTCREDIT),
                     accountMethods.closeAccount('close account 2', context => [accountId2]),
+                    accountMethods.approveAccount('approve close of account', context => {
+                        return {
+                            accountId: accountId2
+                        };
+                    }),
                     userMethods.logout('logout admin 7', context => context.login['identity.check'].sessionId),
                     userMethods.login('login user 8', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - correct account with missing rule conditionItem for product', (context) => {
@@ -1339,7 +1346,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - missing permission, account closed');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - closed account', (context) => {
                         return {
@@ -1349,7 +1356,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - missing permission, account closed');
                     })
                     /** TODO Scenarios for state - transactions cannot be processed for account in state Blocked */
                 ])

@@ -276,7 +276,9 @@ module.exports = function(opt, cache) {
                     userMethods.approveUser('approve first user', context => context['add teller'].person.actorId),
                     // Product setup
                     commonFunc.createStep('ledger.productGroup.fetch', 'fetch product groups', (context) => {
-                        return {};
+                        return {
+                            isForCustomer: 1
+                        };
                     }, (result, assert) => {
                         productGroupId = (result.productGroup.find((group) => group.name === productGroup)).productGroupId;
                     }),
@@ -2397,6 +2399,11 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get otherTax account balance 15', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
                     /** Scenarios for state */
                     accountMethods.closeAccount('close account 1', context => [accountId1]),
+                    accountMethods.approveAccount('approve closing of account', context => {
+                        return {
+                            accountId: accountId1
+                        };
+                    }),
                     userMethods.logout('logout admin 16', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller 17', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - closed account', (context) => {

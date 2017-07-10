@@ -14,7 +14,6 @@ AS
 SET NOCOUNT ON
 
 DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
-DECLARE @totalRows INT
 DECLARE @cardNumberId BIGINT
 
 -- checks if the user has a right to make the operation
@@ -45,7 +44,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
         SELECT
             t.[transferId],
             t.[transferAmount],
-            t.[acquirerFee], 
+            t.[acquirerFee],
             t.[issuerFee],
             t.[transferCurrency],
             CASE
@@ -58,7 +57,8 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             [transfer].[transfer] t
         INNER JOIN
             [card].[card] c ON c.cardId = t.cardId
-        LEFT JOIN [atm].[terminal] tl ON tl.actorId = t.channelId
+        LEFT JOIN
+            [atm].[terminal] tl ON tl.actorId = t.channelId
         WHERE
             (@accountNumber IS NULL OR t.[sourceAccount] LIKE '%' + @accountNumber + '%')
             AND (@startDate IS NULL OR t.[transferDateTime] >= @startDate)
@@ -76,24 +76,31 @@ SELECT
     [RowNum],
     [recordsTotal],
     [transferAmount] AS transferAmountTotal,
-    [acquirerFee] AS acquirerFeeTotal, 
+    [acquirerFee] AS acquirerFeeTotal,
     [issuerFee] AS issuerFeeTotal,
-    [transferCurrency]
-INTO #transfersReport
-FROM cte
-WHERE (RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize))
-UNION ALL
-SELECT
+    [transferCurrency],
+    NULL AS recordsTotalSuccessfull
+INTO
+    #transfersReport
+FROM
+    cte
+WHERE
+    (RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize))
+UNION ALL SELECT
     NULL AS [transferId],
-    MIN([recordsTotal]) + 1 AS [RowNum],
-    COUNT([transferId]) AS [recordsTotal],
-    SUM(ISNULL([transferAmount], 0)) AS transferAmountTotal,
-    SUM(ISNULL([acquirerFee], 0)) AS acquirerFeeTotal,
-    SUM(ISNULL([issuerFee], 0)) AS issuerFeeTotal,
-    [transferCurrency]
-FROM cte
-WHERE success = 1
-GROUP BY transferCurrency
+    MIN([recordsTotal]) + ROW_NUMBER() OVER(ORDER BY [transferCurrency]) AS [RowNum],
+    MIN([recordsTotal]) + COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal],
+    SUM(CASE WHEN success = 1 THEN ISNULL([transferAmount], 0) ELSE 0.0 END) AS transferAmountTotal,
+    SUM(CASE WHEN success = 1 THEN ISNULL([acquirerFee], 0) ELSE 0.0 END) AS acquirerFeeTotal,
+    SUM(CASE WHEN success = 1 THEN ISNULL([issuerFee], 0) ELSE 0.0 END) AS issuerFeeTotal,
+    [transferCurrency],
+    COUNT(CASE WHEN success = 1 THEN 1 END) AS [recordsTotalSuccessfull]
+FROM
+    cte
+GROUP BY
+    transferCurrency
+
+DECLARE @lastPageSize INT = @@ROWCOUNT      -- we need to know if the page become bigger than max size when add totals
 
 SELECT 'transfers' AS resultSetName
 
@@ -106,7 +113,7 @@ SELECT
     t.[transferType] [description],
     t.[transferIdAcquirer],
     t.[transferAmount],
-    t.[acquirerFee], 
+    t.[acquirerFee],
     t.[issuerFee],
     t.[transferCurrency],
     t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') [terminalId],
@@ -125,17 +132,19 @@ JOIN
     transfer.vTransferEvent t ON t.transferId = r.transferId
 JOIN
     [card].[card] c ON c.cardId = t.cardId
-UNION ALL
-SELECT
+WHERE
+-- if last page transactions + totals is bigger than pageSize we don't want to show transacions
+    (RowNum BETWEEN @startRow AND @endRow) OR ((@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize) AND @lastPageSize <= @pageSize))
+UNION ALL SELECT
     NULL AS transferId,
     NULL AS cardNumber,
     NULL AS transferDateTime,
     NULL AS sourceAccount,
     NULL AS destinationAccount,
     'TOTAL Successful' AS [description],
-    CAST(r.recordsTotal AS NVARCHAR(50)) AS transferIdAcquirer,
+    CAST(r.recordsTotalSuccessfull AS NVARCHAR(50)) AS transferIdAcquirer,
     r.transferAmountTotal AS transferAmount,
-    r.acquirerFeeTotal, 
+    r.acquirerFeeTotal,
     r.issuerFeeTotal,
     r.[transferCurrency],
     NULL AS terminalId,
@@ -144,24 +153,31 @@ SELECT
     NULL AS issuerTxStateName,
     NULL AS reversalCode,
     NULL AS merchantName,
-    NULL [additionalInfo],
+    NULL AS [additionalInfo],
     NULL AS style,
     NULL AS alerts,
     r.rowNum
 FROM
     #transfersReport r
-WHERE   r.[transferId] IS NULL
-AND     (RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize))
+WHERE
+    r.[transferId] IS NULL AND
+    ((RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize)))
 ORDER BY
-    r.rowNum, transferId desc
+    r.rowNum, transferId DESC
 
 SELECT 'pagination' AS resultSetName
 
 SELECT TOP 1
     @pageSize AS pageSize,
     recordsTotal AS recordsTotal,
-    CASE WHEN @pageNumber < (recordsTotal - 1) / @pageSize + 1 THEN @pageNumber ELSE (recordsTotal - 1) / @pageSize + 1 END AS pageNumber,
+    CASE
+        WHEN @pageNumber < (recordsTotal - 1) / @pageSize  + 1 THEN @pageNumber
+        ELSE (recordsTotal - 1) / @pageSize + 1
+    END AS pageNumber,
     (recordsTotal - 1) / @pageSize + 1 AS pagesTotal
-FROM #transfersReport
+FROM
+    #transfersReport
+ORDER BY
+    rowNum DESC
 
 DROP TABLE #transfersReport
