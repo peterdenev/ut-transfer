@@ -2349,7 +2349,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - source account in status pending', (context) => {
                         return {
@@ -2361,7 +2361,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout user 13', context => context['login user 13']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2427,7 +2427,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - source account in status rejected', (context) => {
                         return {
@@ -2439,7 +2439,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout user 14', context => context['login user 14']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),

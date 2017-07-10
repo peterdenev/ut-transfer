@@ -50,7 +50,6 @@ const ACCOUNTBALANCERESTRICTIONFAILURE = 'ledger.accountBalanceRestrictionFailur
 const INSUFFICIENTBALANCEFAILURE = 'ledger.insufficientBalance';
 const TRANSACTIONPERMISSIONERROR = 'transaction.noPermissions';
 const DAILYLIMITCOUNTERROR = 'rule.exceedDailyLimitCount';
-const ACCOUNTSTATUSFAILURE = 'ledger.accountStatusFailure';
 const TRANSFERIDALREADYEXISTS = 'transfer.idAlreadyExists';
 const ACCOUNTNOTFOUNDERROR = 'transaction.accountNotFound';
 // Balance parameters
@@ -1043,7 +1042,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'account status does not allow transactions');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account in status pending', (context) => {
                         return {
@@ -1053,7 +1052,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'account status does not allow transactions');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout user 5', context => context['login user 5']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1070,7 +1069,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'account status does not allow transactions');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account in status rejected', (context) => {
                         return {
@@ -1080,7 +1079,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'account status does not allow transactions');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - account in status new', (context) => {
                         return {
