@@ -1379,7 +1379,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
+                        assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after validating transaction');
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
