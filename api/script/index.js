@@ -172,13 +172,13 @@ module.exports = {
                     transfer.issuerPort = pushResult.issuerPort;
                     transfer.ledgerPort = pushResult.ledgerPort;
 
-                    // Add splits for pending transaction
-                    if (transfer.pullTransferId) {
-                        transfer.split = transfer.split.concat(transfer.pullTransfer.split);
-                    }
                     if (transfer.abortAcquirer) {
                         return handleError(transfer, 'Acquirer')(transfer.abortAcquirer);
                     } else {
+                        // Add splits for pending transaction
+                        if (transfer.pullTransferId) {
+                            transfer.split = transfer.split.concat(transfer.pullTransfer.split);
+                        }
                         return transfer;
                     }
                 } else {
