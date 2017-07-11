@@ -58,6 +58,7 @@ const IMEI = (Math.floor(100000000000000 + Math.random() * 999999999999999)).toS
 const IMEI1 = (Math.floor(100000000000000 + Math.random() * 999999999999999)).toString();
 const ACCOUNTNAME = 'TestAccount' + commonFunc.generateRandomNumber();
 // Errors
+const TRANSACTIONPERMISSIONERROR = 'transaction.noPermissions';
 const INSUFFICIENTBALANCEERROR = 'ledger.insufficientBalance';
 const ACCOUNTBALANCERESTRICTIONFAILURE = 'ledger.accountBalanceRestrictionFailure';
 const MINLIMITAMOUNTFAILURE = 'rule.exceedMinLimitAmount';
@@ -70,7 +71,7 @@ var conditionId, orgId1, organizationDepthArray;
 var currencyName1, priority;
 var operationIdMerchantPayment, operationIdMerchantPullRequest, operationeCodeMerchantPayment, operationeCodeMerchantPullRequest, operationNameMerchantPayment, operationNameMerchantPullRequest;
 var customerTypeIndividual, customer1ActorId, currencyId, category1, category2, productType, productTypeId, periodicFeeId, productGroup, productGroupId, roleTellerId, roleMerchantId, roleMobileClientId;
-var accountCustomer1Id, accountMerchantId1, accountMerchantId2, accountCustomer1Number, accountMerchantNumber1, accountMerchantNumber2;
+var accountCustomer1Id, accountMerchantId1, accountMerchantId2, accountMerchantId3, accountCustomer1Number, accountMerchantNumber1, accountMerchantNumber2, accountMerchantNumber3;
 var stdPolicy;
 // var phonePrefix;
 var rejectReasonId, cancelReasonId;
@@ -472,6 +473,54 @@ module.exports = function(opt, cache) {
                     accountMethods.approveAccount('approve adding of merchant account 2', context => {
                         return {
                             accountId: accountMerchantId2
+                        };
+                    }),
+                    commonFunc.createStep('ledger.account.add', 'add merchant account 3', context => {
+                        return {
+                            account: {
+                                accountId: -1,
+                                ownerId: context['add merchant'].person.actorId,
+                                productId: context['add merchant product'].product[0].productId,
+                                businessUnitId: orgId1,
+                                accountName: ACCOUNTNAME + 4
+                            },
+                            accountPerson: {
+                                accountId: -1,
+                                personId: context['add merchant'].person.actorId,
+                                isDefault: 1
+                            }
+                        };
+                    }, (result, assert) => {
+                        assert.equals(accountJoiValidation.validateAddAccount(result).error, null, 'Return all details after adding an account');
+                        accountMerchantId3 = result.account[0].accountId;
+                        accountMerchantNumber3 = result.account[0].accountNumber;
+                    }),
+                    accountMethods.approveAccount('approve adding of merchant account 3', context => {
+                        return {
+                            accountId: accountMerchantId3
+                        };
+                    }),
+                    commonFunc.createStep('ledger.account.add', 'add merchant 2 account', context => {
+                        return {
+                            account: {
+                                accountId: -1,
+                                ownerId: context['add merchant 2'].person.actorId,
+                                productId: context['add merchant product'].product[0].productId,
+                                businessUnitId: orgId1,
+                                accountName: ACCOUNTNAME + 5
+                            },
+                            accountPerson: {
+                                accountId: -1,
+                                personId: context['add merchant 2'].person.actorId,
+                                isDefault: 1
+                            }
+                        };
+                    }, (result, assert) => {
+                        assert.equals(accountJoiValidation.validateAddAccount(result).error, null, 'Return all details after adding an account');
+                    }),
+                    accountMethods.approveAccount('approve adding of merchant 2 account', context => {
+                        return {
+                            accountId: context['add merchant 2 account'].account[0].accountId
                         };
                     }),
                     accountMethods.fetchAccount('fetch fee account id', context => {
@@ -1132,7 +1181,6 @@ module.exports = function(opt, cache) {
                         assert.equals(accountJoiValidation.validateEditAccount(result).error, null, 'return all detais after editing an account');
                     }),
                     /** Scenarios for merchant pull request - only the merchant account's state and status are validated */
-                    // TODO add step for closed state
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login merchant 5', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 4',
@@ -1165,6 +1213,12 @@ module.exports = function(opt, cache) {
                     userMethods.logout('logout merchant 5', context => context['login merchant 5']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.rejectAccount('reject sender account 2', context => accountMerchantId1),
+                    accountMethods.closeAccount('close merchant account 3', context => [accountMerchantId3]),
+                    accountMethods.approveAccount('approve closing of merchant account 3', context => {
+                        return {
+                            accountId: accountMerchantId3
+                        };
+                    }),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login merchant 6', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'unsuccessfully validate merchant pull request - merchant account in status rejected', (context) => {
@@ -1188,6 +1242,29 @@ module.exports = function(opt, cache) {
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'merchat account status does not allow transactions');
+                    }),
+                    // closed account
+                    commonFunc.createStep('transaction.validate', 'unsuccessfully validate merchant pull request - merchant account in state closed', (context) => {
+                        return {
+                            transferType: operationeCodeMerchantPullRequest,
+                            amount: TRANSFERAMOUNT,
+                            sourceAccount: accountCustomer1Number,
+                            destinationAccount: accountMerchantNumber3
+                        };
+                    }, null, (error, assert) => {
+                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'return failure - merchat account closed');
+                    }),
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute merchant pull request - merchant account in state closed', (context) => {
+                        return {
+                            transferType: operationeCodeMerchantPullRequest,
+                            amount: TRANSFERAMOUNT,
+                            sourceAccount: accountCustomer1Number,
+                            destinationAccount: accountMerchantNumber3,
+                            transferIdAcquirer: TRANSFERIDACQUIRER + 'closed',
+                            description: operationNameMerchantPullRequest
+                        };
+                    }, null, (error, assert) => {
+                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'eturn failure - merchat account closed');
                     }),
                     userMethods.logout('logout merchant 6', context => context['login merchant 6']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1689,7 +1766,36 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get fee account balance 3', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 3', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 3', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
-                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId)
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login second merchant', userConstants.USERNAME + 2, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
+                    // Negative scenario - execute merchant pull request with destination account which does not belong to the logged merchant
+                    transferMethods.setBalance('set default balance in all accounts 5',
+                        context => [accountCustomer1Id, accountMerchantId1,
+                            context['fetch fee account id'].account[0].accountId,
+                            context['fetch vat account id'].account[0].accountId,
+                            context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
+                    commonFunc.createStep('transaction.validate', 'unsuccessfully validate merchant pull request - merchant account does not belong to the logged merchant', (context) => {
+                        return {
+                            transferType: operationeCodeMerchantPullRequest,
+                            amount: TRANSFERAMOUNT,
+                            sourceAccount: accountCustomer1Number,
+                            destinationAccount: accountMerchantNumber1
+                        };
+                    }, null, (error, assert) => {
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                    }),
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute merchant pull request - merchant account does not belong to the logged merchant', (context) => {
+                        return {
+                            transferType: operationeCodeMerchantPullRequest,
+                            amount: TRANSFERAMOUNT,
+                            sourceAccount: accountCustomer1Number,
+                            destinationAccount: accountMerchantNumber1,
+                            transferIdAcquirer: TRANSFERIDACQUIRER + 14,
+                            description: operationNameMerchantPullRequest
+                        };
+                    }, null, (error, assert) => {
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                    })
                 ])
             );
         }
