@@ -697,7 +697,7 @@ module.exports = function(opt, cache) {
                             currentVersion: context['get second product 3'].product[0].currentVersion
                         };
                     }),
-                    userMethods.logout('logout admin 1', context => context.login['identity.check'].sessionId),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login user 2', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set sender account balance less than product min account balance + wallet to wallet fee + transfer amount',
                         context => [accountSenderId1], commonFunc.roundNumber(MINACCOUNTBALANCE + TRANSACTIONFEEVALUE + TRANSFERAMOUNT - SMALLESTNUM, PRECISION)),
@@ -789,7 +789,7 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get fee account balance 2', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT + TRANSACTIONFEEVALUE - FEETOVATVALUE - FEETOOTHERTAXVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 2', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 2', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
-                    userMethods.logout('logout admin 2', context => context.login['identity.check'].sessionId),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login user 3', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     // product max account balance
                     transferMethods.setBalance('set receiver account balance more than product max account balance - transfer amount',
@@ -972,7 +972,7 @@ module.exports = function(opt, cache) {
                         assert.equals(ruleJoiValidation.validateEditRule(result).error, null, 'Return all detals after edit rule');
                         assert.equals(result.limit[0].maxCountDaily, (successfulTransactionsCount + 1).toString(), 'return correct maxCountDaily limit');
                     }),
-                    userMethods.logout('logout admin 3', context => context.login['identity.check'].sessionId),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login user 4', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('db/rule.decision.lookup', 'get rule for user', (context) => {
                         return {
@@ -1050,6 +1050,43 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get fee account balance 4', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT + TRANSACTIONFEEVALUE - FEETOVATVALUE - FEETOOTHERTAXVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 4', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 4', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login teller', userConstants.USERNAME, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
+                    // reverse
+                    commonFunc.createStep('transaction.reverse', 'successfully reverse transaction', (context) => {
+                        return {
+                            transferId: context['successfully execute wallet-to-wallet transaction - within the limits of rule maxCountDaily'].transferId
+                        };
+                    }, (result, assert) => {
+                        assert.equals(result.success, true, 'return successs');
+                    }),
+                    userMethods.logout('logout tellet', context => context['login teller']['identity.check'].sessionId),
+                    userMethods.login('login user 5', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    commonFunc.createStep('transaction.execute', 'successfully execute wallet-to-wallet transaction - within the limits of rule maxCountDaily after reversal', (context) => {
+                        return {
+                            transferType: operationeCodeWalletToWallet,
+                            amount: TRANSFERAMOUNT,
+                            sourceAccount: accountSenderNumber1,
+                            destinationAccount: accountReceiverNumber1,
+                            transferIdAcquirer: TRANSFERIDACQUIRER + '8a',
+                            description: operationNameWalletToWallet
+                        };
+                    }, (result, assert) => {
+                        assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
+                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
+                        assert.equals(result.sourceAccount.accountName, ACCOUNTNAME, 'return correct source account name');
+                        assert.equals(result.destinationAccount.accountName, ACCOUNTNAME + 2, 'return correct destination account name');
+                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
+                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
+                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
+                    }),
+                    userMethods.logout('logout user 5', context => context['login user 5']['identity.check'].sessionId),
+                    userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    accountMethods.getAccountBalance('get sender account balance 4r', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get receiver account balance 4r', context => accountReceiverId1, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
+                    accountMethods.getAccountBalance('get fee account balance 4r', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT + TRANSACTIONFEEVALUE - FEETOVATVALUE - FEETOOTHERTAXVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get vat account balance 4r', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get otherTax account balance 4r', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
                     commonFunc.createStep('db/rule.rule.edit', 'edit rule - add minAmount, maxAmount limits', (context) => {
                         return {
                             condition: {
@@ -1142,8 +1179,8 @@ module.exports = function(opt, cache) {
                         assert.equals(result.limit[0].minAmount, TRANSFERAMOUNT, 'return correct minAmount limit');
                         assert.equals(result.limit[0].maxAmount, TRANSFERAMOUNT, 'return correct maxAmount limit');
                     }),
-                    userMethods.logout('logout admin 4', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 5', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 6', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 1',
                         context => [accountSenderId1,
                             accountReceiverId1,
@@ -1225,11 +1262,9 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 12, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
-                    userMethods.logout('logout user 5', context => context['login user 5']['identity.check'].sessionId),
+                    userMethods.logout('logout user 6', context => context['login user 6']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 5', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get receiver account balance 5', context => accountReceiverId1, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
@@ -1326,8 +1361,8 @@ module.exports = function(opt, cache) {
                         assert.equals(ruleJoiValidation.validateEditRule(result).error, null, 'Return all detals after edit rule');
                         assert.equals(result.limit[0].maxAmountDaily, (successfulTransactionsCount + 1) * TRANSFERAMOUNT, 'return correct maxAmountDaily limit');
                     }),
-                    userMethods.logout('logout admin 5', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 6', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 7', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 2',
                         context => [accountSenderId1,
                             accountReceiverId1,
@@ -1380,11 +1415,9 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 14, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
-                    userMethods.logout('logout user 6', context => context['login user 6']['identity.check'].sessionId),
+                    userMethods.logout('logout user 7', context => context['login user 7']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 6', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get receiver account balance 6', context => accountReceiverId1, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
@@ -1487,8 +1520,8 @@ module.exports = function(opt, cache) {
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    userMethods.logout('logout admin 6', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 7', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 8', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - weekly amount more than rule maxAmountWeekly limit', (context) => {
                         return {
                             transferType: operationeCodeWalletToWallet,
@@ -1539,7 +1572,7 @@ module.exports = function(opt, cache) {
                         // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
-                    userMethods.logout('logout user 7', context => context['login user 7']['identity.check'].sessionId),
+                    userMethods.logout('logout user 8', context => context['login user 8']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 7', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get receiver account balance 7', context => accountReceiverId1, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
@@ -1642,8 +1675,8 @@ module.exports = function(opt, cache) {
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    userMethods.logout('logout admin 7', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 8', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 9', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.execute', 'successfully execute wallet-to-wallet transaction - within the limits of rule maxCountWeekly limit', (context) => {
                         return {
                             transferType: operationeCodeWalletToWallet,
@@ -1694,7 +1727,7 @@ module.exports = function(opt, cache) {
                     }, null, (error, assert) => {
                         assert.equals(error.type, WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
                     }),
-                    userMethods.logout('logout user 8', context => context['login user 8']['identity.check'].sessionId),
+                    userMethods.logout('logout user 9', context => context['login user 9']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 8', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get receiver account balance 8', context => accountReceiverId1, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
@@ -1797,8 +1830,8 @@ module.exports = function(opt, cache) {
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    userMethods.logout('logout admin 8', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 9', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 10', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - monthly amount more than rule maxAmountMonthly limit', (context) => {
                         return {
                             transferType: operationeCodeWalletToWallet,
@@ -1849,7 +1882,7 @@ module.exports = function(opt, cache) {
                         // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
-                    userMethods.logout('logout user 9', context => context['login user 9']['identity.check'].sessionId),
+                    userMethods.logout('logout user 10', context => context['login user 10']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 9', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get receiver account balance 9', context => accountReceiverId1, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
@@ -1952,8 +1985,8 @@ module.exports = function(opt, cache) {
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    userMethods.logout('logout admin 9', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 10', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 11', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.execute', 'successfully execute wallet-to-wallet transaction - within the limits of rule maxCountMonthly limit', (context) => {
                         return {
                             transferType: operationeCodeWalletToWallet,
@@ -2004,7 +2037,7 @@ module.exports = function(opt, cache) {
                     }, null, (error, assert) => {
                         assert.equals(error.type, MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
                     }),
-                    userMethods.logout('logout user 10', context => context['login user 10']['identity.check'].sessionId),
+                    userMethods.logout('logout user 11', context => context['login user 11']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 10', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get receiver account balance 10', context => accountReceiverId1, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
@@ -2143,8 +2176,8 @@ module.exports = function(opt, cache) {
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    userMethods.logout('logout admin 10', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 11', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 12', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     /** Negative scenarios for status - transactions can be processed only for accounts in status approved */
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - destination account in status new', (context) => {
                         return {
@@ -2204,7 +2237,7 @@ module.exports = function(opt, cache) {
                     }, null, (error, assert) => {
                         assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
-                    userMethods.logout('logout user 11', context => context['login user 11']['identity.check'].sessionId),
+                    userMethods.logout('logout user 12', context => context['login user 12']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     // verify that the balances are unchanged in all accounts
                     accountMethods.getAccountBalance('get sender account balance 11', context => accountSenderId1, DEFAULTCREDIT),
@@ -2262,8 +2295,8 @@ module.exports = function(opt, cache) {
                         assert.equals(result.unapprovedAccount[0].accountName, ACCOUNTNAME + 4, 'return correct accountName');
                         assert.equals(accountJoiValidation.validateEditAccount(result).error, null, 'return all detais after editing an account');
                     }),
-                    userMethods.logout('logout admin 11', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 12', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 13', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 8',
                         context => [accountSenderId1,
                             accountSenderId2,
@@ -2316,7 +2349,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - source account in status pending', (context) => {
                         return {
@@ -2328,9 +2361,9 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
-                    userMethods.logout('logout user 12', context => context['login user 12']['identity.check'].sessionId),
+                    userMethods.logout('logout user 13', context => context['login user 13']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     // verify that the balances are unchanged in all accounts
                     accountMethods.getAccountBalance('get sender account balance 12', context => accountSenderId1, DEFAULTCREDIT),
@@ -2340,8 +2373,8 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get otherTax account balance 12', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.rejectAccount('reject sender account 2', context => accountSenderId2),
                     accountMethods.rejectAccount('reject receiver account 2', context => accountReceiverId2),
-                    userMethods.logout('logout admin 12', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 13', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 14', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 9',
                         context => [accountSenderId1,
                             accountSenderId2,
@@ -2394,7 +2427,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - source account in status rejected', (context) => {
                         return {
@@ -2406,9 +2439,9 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
-                    userMethods.logout('logout user 13', context => context['login user 13']['identity.check'].sessionId),
+                    userMethods.logout('logout user 14', context => context['login user 14']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     // verify that the balances are unchanged in all accounts
                     accountMethods.getAccountBalance('get sender account balance 13', context => accountSenderId1, DEFAULTCREDIT),
@@ -2427,8 +2460,8 @@ module.exports = function(opt, cache) {
                             ownerId: customerActorId2
                         };
                     }),
-                    userMethods.logout('logout admin 13', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 14', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 15', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 10',
                         context => [accountSenderId1,
                             accountReceiverId1,
@@ -2458,7 +2491,7 @@ module.exports = function(opt, cache) {
                         // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 28, 'return correct transferIdAcquirer');
                         // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                     }),
-                    userMethods.logout('logout user 14', context => context['login user 14']['identity.check'].sessionId),
+                    userMethods.logout('logout user 15', context => context['login user 15']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 14', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get receiver account balance 14', context => accountReceiverId1, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
@@ -2500,8 +2533,8 @@ module.exports = function(opt, cache) {
                         assert.equals(accountJoiValidation.validateGetUserAccountByPhoneNumber(result).error, null, 'return correct details for customer accounts by phone number');
                         assert.true(result.customerAccount.some(account => account.accountName === ACCOUNTNAME + '5'), 'return default account');
                     }),
-                    userMethods.logout('logout admin 14', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 15', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 16', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 11',
                         context => [accountSenderId1,
                             context['get default receiver account'].account[0].accountId,
@@ -2576,15 +2609,15 @@ module.exports = function(opt, cache) {
                     }, null, (error, assert) => {
                         assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
-                    userMethods.logout('logout user 15', context => context['login user 14']['identity.check'].sessionId),
+                    userMethods.logout('logout user 16', context => context['login user 16']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 15', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get default account balance 15', context => context['get default receiver account'].account[0].accountId, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 15', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT + TRANSACTIONFEEVALUE - FEETOVATVALUE - FEETOOTHERTAXVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 15', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 15', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
-                    userMethods.logout('logout admin 15', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 16', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 17', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 12',
                         context => [accountSenderId1,
                             accountReceiverId1,
@@ -2844,15 +2877,15 @@ module.exports = function(opt, cache) {
                     }, null, (error, assert) => {
                         assert.equals(error.type, 'PortHTTP', 'return joi failure');
                     }),
-                    userMethods.logout('logout user 16', context => context['login user 15']['identity.check'].sessionId),
+                    userMethods.logout('logout user 17', context => context['login user 17']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 16', context => accountSenderId1, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get receiver account balance 16', context => accountReceiverId1, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get fee account balance 16', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 16', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 16', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
-                    userMethods.logout('logout admin 16', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 17', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 18', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     /** Reversal scenarios */
                     transferMethods.setBalance('set default balance in all accounts 13',
                         context => [accountSenderId2,
@@ -2877,7 +2910,7 @@ module.exports = function(opt, cache) {
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 'reverse', 'return correct transferIdAcquirer');
                     }),
-                    userMethods.logout('logout user 17', context => context['login user 15']['identity.check'].sessionId),
+                    userMethods.logout('logout user 18', context => context['login user 18']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('ledger.account.edit', 'edit sender account 2', context => {
                         return {
@@ -2899,8 +2932,8 @@ module.exports = function(opt, cache) {
                         assert.equals(result.unapprovedAccount[0].accountName, ACCOUNTNAME + 3, 'return correct accountName');
                         assert.equals(accountJoiValidation.validateEditAccount(result).error, null, 'return all detais after editing an account');
                     }),
-                    userMethods.logout('logout admin 17', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login teller 1', userConstants.USERNAME, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login teller 1', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.reverse', 'unsuccessfully reverse transaction - source account in status pending', (context) => {
                         return {
                             transferId: context['successfully execute wallet-to-wallet transaction - to be reversed'].transferId
@@ -2935,7 +2968,7 @@ module.exports = function(opt, cache) {
                         assert.equals(result.unapprovedAccount[0].accountName, ACCOUNTNAME + 4, 'return correct accountName');
                         assert.equals(accountJoiValidation.validateEditAccount(result).error, null, 'return all detais after editing an account');
                     }),
-                    userMethods.logout('logout admin 18', context => context.login['identity.check'].sessionId),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller 2', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.reverse', 'unsuccessfully reverse transaction - destination account in status pending', (context) => {
                         return {
@@ -2956,7 +2989,7 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get fee account balance 17', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT + TRANSACTIONFEEVALUE - FEETOVATVALUE - FEETOOTHERTAXVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 17', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 17', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
-                    userMethods.logout('logout admin 19', context => context.login['identity.check'].sessionId),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller 3', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set balance in sender account > product MAXACCOUNTBALANCE - REVERSALAMOUNTSENDER',
                         context => [accountSenderId2], commonFunc.roundNumber(MAXACCOUNTBALANCE - REVERSALAMOUNTSENDER + SMALLESTNUM, PRECISION)),
@@ -2981,8 +3014,8 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get fee account balance 18', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT + TRANSACTIONFEEVALUE - FEETOVATVALUE - FEETOOTHERTAXVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 18', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 18', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
-                    userMethods.logout('logout admin 20', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 18', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 19', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 13',
                         context => [accountSenderId2,
                             accountReceiverId2,
@@ -3005,7 +3038,7 @@ module.exports = function(opt, cache) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                     }),
-                    userMethods.logout('logout user 18', context => context['login user 18']['identity.check'].sessionId),
+                    userMethods.logout('logout user 19', context => context['login user 19']['identity.check'].sessionId),
                     userMethods.login('login teller 4', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.reverse', 'successfully reverse transaction', (context) => {
                         return {
@@ -3022,14 +3055,16 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get fee account balance 19', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 19', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 19', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
+                    transferMethods.setBalance('set receiver account 2 balance to 0',
+                        context => [accountReceiverId2], 0),
                     accountMethods.closeAccount('close receiver account 2', context => [accountReceiverId2]),
                     accountMethods.approveAccount('approve closing of account', context => {
                         return {
                             accountId: accountReceiverId2
                         };
                     }),
-                    userMethods.logout('logout admin 21', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 19', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login user 20', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - closed account', (context) => {
                         return {
                             transferType: operationeCodeWalletToWallet,

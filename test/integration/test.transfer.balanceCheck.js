@@ -19,6 +19,7 @@ var productConstants = require('ut-test/lib/constants/product').constants();
 var ruleConstants = require('ut-test/lib/constants/rule').constants();
 var transferConstants = require('ut-test/lib/constants/transfer').constants();
 var userConstants = require('ut-test/lib/constants/user').constants();
+const TELLER = 'Teller';
 const CURRENCY = 'currency';
 const OPERATION = 'operation';
 const MOBILECLIENT = 'MobileClient';
@@ -49,7 +50,6 @@ const ACCOUNTBALANCERESTRICTIONFAILURE = 'ledger.accountBalanceRestrictionFailur
 const INSUFFICIENTBALANCEFAILURE = 'ledger.insufficientBalance';
 const TRANSACTIONPERMISSIONERROR = 'transaction.noPermissions';
 const DAILYLIMITCOUNTERROR = 'rule.exceedDailyLimitCount';
-const ACCOUNTSTATUSFAILURE = 'ledger.accountStatusFailure';
 const TRANSFERIDALREADYEXISTS = 'transfer.idAlreadyExists';
 const ACCOUNTNOTFOUNDERROR = 'transaction.accountNotFound';
 // Balance parameters
@@ -60,9 +60,10 @@ var SMALLESTNUM = 0.0001;
 var conditionId, orgId1, organizationDepthArray;
 var currencyName1, priority;
 var operationIdBalanceCheck, operationeCodeBalanceCheck, operationNameBalanceCheck;
-var customerTypeIndividual, customerActorId1, customerActorId2, currencyId, category1, category2, productType1, periodicFeeId, productGroupId, roleMobileClientId;
+var customerTypeIndividual, customerActorId1, customerActorId2, currencyId, category1, category2, productType1, periodicFeeId, productGroupId, roleMobileClientId, roleTellerId;
 var accountId1, accountId2, accountId3, stateId1, accountNumber1, accountNumber2, accountNumber3;
 var phonePrefix;
+var stdPolicy;
 // TODO for successful transactions - change the precision when the logic is implemented in the backend/db
 
 module.exports = function(opt, cache) {
@@ -84,6 +85,16 @@ module.exports = function(opt, cache) {
                     orgId1 = result.memberOF[0].object;
                 }),
                 accountMethods.disableAccountMCH('enable account M/C', context => {}, 0),
+                commonFunc.createStep('policy.policy.fetch', 'get std input by admin policy', (context) => {
+                    return {
+                        searchString: 'STD'
+                    };
+                }, (result, assert) => {
+                    var policy = result.policy.find(
+                        (singlePolicy) => singlePolicy.name.indexOf('STD_input') > -1
+                    );
+                    stdPolicy = policy.policyId;
+                }),
                 commonFunc.createStep('core.itemTranslation.fetch', 'fetch currencies', (context) => {
                     return {
                         itemTypeName: CURRENCY
@@ -260,6 +271,7 @@ module.exports = function(opt, cache) {
                         assert.equals(customerJoiValidation.validateGetPerson(result.person, customerConstants.FIRSTNAME).error, null, 'return person');
                         assert.equals(result['user.hash'][0].identifier, PHONENUMBER, 'return username = customer phone number in user.hash');
                         roleMobileClientId = result.rolesPossibleForAssign.find(role => role.name === MOBILECLIENT && role.isAssigned === 1).roleId;
+                        roleTellerId = result.rolesPossibleForAssign.find(role => role.name === TELLER).roleId;
                     }),
                     commonFunc.createStep('ledger.userAccountByPhoneNumber.get', 'get account by phone number', context => {
                         return {
@@ -290,6 +302,16 @@ module.exports = function(opt, cache) {
                         customerActorId2 = result.actorId;
                         assert.equals(result.success, true, 'return success: true');
                     }),
+                    // Teller user setup
+                    userMethods.addUser('add teller', context => {
+                        return {
+                            object: context['get admin details'].memberOF[0].object,
+                            policyId: stdPolicy,
+                            roles: [roleTellerId],
+                            defaultRoleId: roleTellerId
+                        };
+                    }, userConstants.USERNAME),
+                    userMethods.approveUser('approve first user', context => context['add teller'].person.actorId),
                     // Accounts setup
                     commonFunc.createStep('ledger.account.add', 'add account 1', context => {
                         return {
@@ -1020,7 +1042,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'account status does not allow transactions');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account in status pending', (context) => {
                         return {
@@ -1030,7 +1052,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'account status does not allow transactions');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout user 5', context => context['login user 5']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1047,7 +1069,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'account status does not allow transactions');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account in status rejected', (context) => {
                         return {
@@ -1057,7 +1079,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'account status does not allow transactions');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - account in status new', (context) => {
                         return {
@@ -1223,19 +1245,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.conditionItem.find(item => item.factor === 'sc'), undefined, 'conditionItem for product is not defined');
                         assert.equals(ruleJoiValidation.validateEditRule(result).error, null, 'Return all detals after edit rule');
                     }),
-                    accountMethods.approveAccount('approve new account 2', context => {
-                        return {
-                            accountId: accountId2
-                        };
-                    }),
-                    transferMethods.setBalance('set sufficient balance in customer account 2',
-                        context => [accountId2], DEFAULTCREDIT),
-                    accountMethods.closeAccount('close account 2', context => [accountId2]),
-                    accountMethods.approveAccount('approve close of account', context => {
-                        return {
-                            accountId: accountId2
-                        };
-                    }),
                     userMethods.logout('logout admin 7', context => context.login['identity.check'].sessionId),
                     userMethods.login('login user 8', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - correct account with missing rule conditionItem for product', (context) => {
@@ -1270,7 +1279,7 @@ module.exports = function(opt, cache) {
                     }),
                     userMethods.logout('logout user 8', context => context['login user 7']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    commonFunc.createStep('db/rule.rule.edit', 'edit rule - restore product conditionItem', (context) => {
+                    commonFunc.createStep('db/rule.rule.edit', 'edit rule - restore product conditionItem, add role teller to conditionActor', (context) => {
                         return {
                             condition: {
                                 conditionId: conditionId,
@@ -1289,6 +1298,10 @@ module.exports = function(opt, cache) {
                                 conditionId: conditionId,
                                 factor: 'co', // role
                                 actorId: roleMobileClientId
+                            }, {
+                                conditionId: conditionId,
+                                factor: 'co', // role
+                                actorId: roleTellerId
                             }],
                             split: {
                                 data: {
@@ -1335,6 +1348,68 @@ module.exports = function(opt, cache) {
                         assert.equals(ruleJoiValidation.validateEditRule(result).error, null, 'Return all detals after edit rule');
                     }),
                     userMethods.logout('logout admin 8', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login teller', userConstants.USERNAME, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
+                    transferMethods.setBalance('set default balance in all accounts 3',
+                         context => [accountId1,
+                             context['fetch fee account id'].account[0].accountId,
+                             context['fetch vat account id'].account[0].accountId,
+                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
+                    commonFunc.createStep('transaction.validate', 'successful transaction validation - by teller user', (context) => {
+                        return {
+                            transferType: operationeCodeBalanceCheck,
+                            sourceAccount: {
+                                type: transferConstants.ACCOUNTNUMBER,
+                                value: accountNumber1
+                            },
+                            description: operationNameBalanceCheck
+                        };
+                    }, (result, assert) => {
+                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
+                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
+                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
+                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
+                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
+                    }),
+                    commonFunc.createStep('transaction.execute', 'successfully check balance - by teller user', (context) => {
+                        return {
+                            transferType: operationeCodeBalanceCheck,
+                            sourceAccount: accountNumber1,
+                            transferIdAcquirer: TRANSFERIDACQUIRER + 20,
+                            description: operationNameBalanceCheck
+                        };
+                    }, (result, assert) => {
+                        assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after validating transaction');
+                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
+                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
+                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
+                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
+                    }),
+                    // commonFunc.createStep('transaction.reverse', 'unsuccessfully reverse transaction - not reversible transaction', (context) => {
+                    //     return {
+                    //         transferId: context['successfully check balance - by teller user'].transferId,
+                    //         message: transferConstants.REVERSALMESSAGE
+                    //     };
+                    // }, null, (assert, error) => {
+                    //     return error;
+                    // }),
+                    userMethods.logout('logout teller', context => context['login teller']['identity.check'].sessionId),
+                    userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    accountMethods.getAccountBalance('get customer account balance 6', context => accountId1, DEFAULTCREDIT - TRANSACTIONFEE),
+                    accountMethods.getAccountBalance('get fee account balance 6', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT + TRANSACTIONFEEVALUE - FEETOVATVALUE - FEETOOTHERTAXVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get vat account balance 6', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get otherTax account balance 6', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
+                    accountMethods.approveAccount('approve adding of account 2', context => {
+                        return {
+                            accountId: accountId2
+                        };
+                    }),
+                    accountMethods.closeAccount('close account 2', context => [accountId2]),
+                    accountMethods.approveAccount('approve close of account', context => {
+                        return {
+                            accountId: accountId2
+                        };
+                    }),
+                    userMethods.logout('logout admin 9', context => context.login['identity.check'].sessionId),
                     userMethods.login('login user 9', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - closed account', (context) => {
                         return {

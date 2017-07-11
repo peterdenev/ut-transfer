@@ -64,7 +64,6 @@ const MONTHLYLIMITCOUNTERROR = 'rule.exceedMonthlyLimitCount';
 const DAILYLIMITAMOUNTERROR = 'rule.exceedDailyLimitAmount';
 const WEEKLYLIMITAMOUNTERROR = 'rule.exceedWeeklyLimitAmount';
 const MONTHLYLIMITAMOUNTERROR = 'rule.exceedMonthlyLimitAmount';
-const ACCOUNTSTATUSFAILURE = 'ledger.accountStatusFailure';
 const TRANSFERIDALREADYEXISTS = 'transfer.idAlreadyExists';
 const ACCOUNTNOTFOUNDERROR = 'transaction.accountNotFound';
 const ALREADYREVERSEDTRANSACTIONERROR = 'transfer.transferAlreadyReversed';
@@ -2147,7 +2146,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashInBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - source account in status pending', (context) => {
                         return {
@@ -2158,7 +2157,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashInBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout teller 12', context => context['login teller 12']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2185,7 +2184,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashInBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - source account in status rejected', (context) => {
                         return {
@@ -2196,7 +2195,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashInBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout teller 13', context => context['login teller 13']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2398,6 +2397,8 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get vat account balance 15', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 15', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
                     /** Scenarios for state */
+                    transferMethods.setBalance('set account 1 balance to 0',
+                        context => [accountId1], 0),
                     accountMethods.closeAccount('close account 1', context => [accountId1]),
                     accountMethods.approveAccount('approve closing of account', context => {
                         return {
@@ -2417,7 +2418,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashInBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute transaction - closed account', (context) => {
                         return {
@@ -2428,7 +2429,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashInBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     })
                 ])
             );
