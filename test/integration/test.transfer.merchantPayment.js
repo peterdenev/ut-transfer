@@ -306,6 +306,15 @@ module.exports = function(opt, cache) {
                         };
                     }, userConstants.USERNAME),
                     userMethods.approveUser('approve adding of merchant', context => context['add merchant'].person.actorId),
+                    userMethods.addUser('add merchant 2', context => {
+                        return {
+                            object: context['get admin details'].memberOF[0].object,
+                            policyId: stdPolicy,
+                            roles: [roleMerchantId],
+                            defaultRoleId: roleMerchantId
+                        };
+                    }, userConstants.USERNAME + 2),
+                    userMethods.approveUser('approve adding of merchant 2', context => context['add merchant 2'].person.actorId),
                     // Teller user setup
                     userMethods.addUser('add teller', context => {
                         return {
@@ -990,7 +999,7 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get otherTax account balance 4', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login merchant 4', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
-                    transferMethods.setBalance('set default balance in all accounts',
+                    transferMethods.setBalance('set default balance in all accounts 3',
                         context => [accountCustomer1Id, accountMerchantId1,
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
@@ -1126,7 +1135,7 @@ module.exports = function(opt, cache) {
                     // TODO add step for closed state
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login merchant 5', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
-                    transferMethods.setBalance('set default balance in all accounts',
+                    transferMethods.setBalance('set default balance in all accounts 4',
                         context => [accountCustomer1Id, accountMerchantId1,
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
@@ -1216,7 +1225,7 @@ module.exports = function(opt, cache) {
                     }),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login merchant 7', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
-                    transferMethods.setBalance('set default balance in all accounts',
+                    transferMethods.setBalance('set default balance in all accounts 5',
                         context => [accountCustomer1Id, accountMerchantId1,
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
@@ -1679,7 +1688,8 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get merchant account balance 3', context => accountMerchantId1, MAXACCOUNTBALANCE - TRANSFERAMOUNT + SMALLESTNUM, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 3', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 3', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
-                    accountMethods.getAccountBalance('get otherTax account balance 3', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT)
+                    accountMethods.getAccountBalance('get otherTax account balance 3', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
+                    userMethods.logout('logout admin', context => context.login['identity.check'].sessionId)
                 ])
             );
         }
