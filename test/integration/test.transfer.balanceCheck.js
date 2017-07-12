@@ -633,7 +633,7 @@ module.exports = function(opt, cache) {
                         };
                     }),
                     userMethods.logout('logout admin 1', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 2', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.loginMobile('login user 2', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set customer account balance less than product min account balance + balance check fee',
                         context => [accountId1], MINACCOUNTBALANCE - SMALLESTNUM),
                     transferMethods.setBalance('set default balance in fee, vat and otherTax accounts 1',
@@ -704,7 +704,7 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get vat account balance 2', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 2', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
                     userMethods.logout('logout admin 2', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 3', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.loginMobile('login user 3', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set customer account balance more than product max account balance + balance check fee',
                         context => [accountId1], MAXACCOUNTBALANCE + TRANSACTIONFEE + SMALLESTNUM),
                     transferMethods.setBalance('set default balance in fee, vat and otherTax accounts 2',
@@ -844,7 +844,7 @@ module.exports = function(opt, cache) {
                         assert.equals(result.limit[0].maxCountDaily, (successfulTransactionsCount + 1).toString(), 'return correct maxCountDaily limit');
                     }),
                     userMethods.logout('logout admin 3', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 4', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.loginMobile('login user 4', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('db/rule.decision.lookup', 'get rule for user 1', (context) => {
                         return {
                             channelId: context['self register customer'].actorId,
@@ -1031,7 +1031,7 @@ module.exports = function(opt, cache) {
                              context['fetch vat account id'].account[0].accountId,
                              context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     userMethods.logout('logout admin 4', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 5', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.loginMobile('login user 5', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - account in status pending', (context) => {
                         return {
                             transferType: operationeCodeBalanceCheck,
@@ -1058,7 +1058,7 @@ module.exports = function(opt, cache) {
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.rejectAccount('reject account', context => accountId1),
                     userMethods.logout('logout admin 5', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 6', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.loginMobile('login user 6', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - account in status rejected', (context) => {
                         return {
                             transferType: operationeCodeBalanceCheck,
@@ -1116,7 +1116,7 @@ module.exports = function(opt, cache) {
                         };
                     }),
                     userMethods.logout('logout admin 6', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 7', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.loginMobile('login user 7', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     /** Check balance for account which is not the customer's account */
                     transferMethods.setBalance('set default balance in all accounts 2',
                         context => [accountId1,
@@ -1246,7 +1246,7 @@ module.exports = function(opt, cache) {
                         assert.equals(ruleJoiValidation.validateEditRule(result).error, null, 'Return all detals after edit rule');
                     }),
                     userMethods.logout('logout admin 7', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 8', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.loginMobile('login user 8', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - correct account with missing rule conditionItem for product', (context) => {
                         return {
                             transferType: operationeCodeBalanceCheck,
@@ -1410,7 +1410,7 @@ module.exports = function(opt, cache) {
                         };
                     }),
                     userMethods.logout('logout admin 9', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login user 9', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    userMethods.loginMobile('login user 9', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - closed account', (context) => {
                         return {
                             transferType: operationeCodeBalanceCheck,
