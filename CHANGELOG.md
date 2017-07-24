@@ -1,3 +1,13 @@
+<a name="6.16.0"></a>
+# [6.16.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.7...v6.16.0) (2017-07-24)
+
+
+### Features
+
+* teller initiated audit ([ec77da3](https://github.com/softwaregroup-bg/ut-transfer/commit/ec77da3))
+
+
+
 <a name="6.15.8"></a>
 ## [6.15.8](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.7...v6.15.8) (2017-07-20)
 
