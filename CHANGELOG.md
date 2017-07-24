@@ -1,3 +1,13 @@
+<a name="6.17.1"></a>
+## [6.17.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.17.0...v6.17.1) (2017-07-24)
+
+
+### Bug Fixes
+
+* header button type to make it highlighted ([#73](https://github.com/softwaregroup-bg/ut-transfer/issues/73)) ([dcb0a94](https://github.com/softwaregroup-bg/ut-transfer/commit/dcb0a94))
+
+
+
 <a name="6.17.0"></a>
 # [6.17.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.16.0...v6.17.0) (2017-07-24)
 
