@@ -172,6 +172,7 @@ SELECT 'transfer' AS resultSetName
 SELECT
     transferId,
     transferTypeId,
+    cin.itemCode,
     acquirerCode,
     transferIdAcquirer,
     transferIdLedger ,
@@ -211,7 +212,9 @@ SELECT
     ledgerPort,
     udfAcquirer
 FROM
-    @transfer
+    @transfer t
+JOIN
+    core.itemName cin ON cin.itemNameId = t.transferTypeId
 
 SELECT 'transferSplit' AS resultSetName
 SELECT

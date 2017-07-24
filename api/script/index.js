@@ -368,7 +368,13 @@ module.exports = {
     'idle.execute': function(params, $meta) {
         $meta.mtid = 'discard';
         return this.bus.importMethod('db/transfer.idle.execute')(params)
-            .then(idleResult => idleResult && idleResult.transferId && processReversal(this.bus, this.log, $meta)(idleResult));
+            .then(idleResult => {
+                if (idleResult && idleResult.transferInfo && Array.isArray(idleResult.transferInfo) && idleResult.transferInfo.length > 0) {
+                    let reversObj = Object.assign(idleResult.transferInfo[0], {split: idleResult.split});
+                    return reversObj && reversObj.transferId && processReversal(this.bus, this.log, $meta)(reversObj);
+                }
+                return Promise.resolve();
+            });
     },
     'push.reverse': function(params, $meta) {
         var getTransfer = (params) => this.config['transfer.transfer.get']({

@@ -13,23 +13,19 @@ var ruleJoiValidation = require('ut-test/lib/joiValidations/rule');
 var transferJoiValidation = require('ut-test/lib/joiValidations/transfer');
 var userJoiValidation = require('ut-test/lib/joiValidations/user');
 var productParams = require('ut-test/lib/requestParams/product');
+var coreConstants = require('ut-test/lib/constants/core').constants();
+var accountConstants = require('ut-test/lib/constants/account').constants();
 var customerConstants = require('ut-test/lib/constants/customer').constants();
 var documentConstants = require('ut-test/lib/constants/document').constants();
 var productConstants = require('ut-test/lib/constants/product').constants();
 var ruleConstants = require('ut-test/lib/constants/rule').constants();
 var transferConstants = require('ut-test/lib/constants/transfer').constants();
 var userConstants = require('ut-test/lib/constants/user').constants();
-const TELLER = 'Teller';
-const CURRENCY = 'currency';
-const OPERATION = 'operation';
-const MOBILECLIENT = 'MobileClient';
 const TRANSFERIDACQUIRER = transferConstants.TRANSFERIDACQUIRER;
 // Customer parameters
 const PHONENUMBER = customerConstants.PHONENUMBER.slice(3);
-const IMEI = (Math.floor(100000000000000 + Math.random() * 999999999999999)).toString();
 const IMEI1 = (Math.floor(100000000000000 + Math.random() * 999999999999999)).toString();
-const CHANNELMOBILE = 'mobile';
-const ACCOUNTNAME1 = 'TestAccount' + commonFunc.generateRandomNumber();
+const ACCOUNTNAME = accountConstants.ACCOUNTNAME;
 // Product parameters
 const PRODUCTNAME = productConstants.PRODUCTNAME;
 const STARTDATE = productConstants.STARTDATE;
@@ -45,23 +41,16 @@ const FEETOVATPERCENT = 10;
 const FEETOVATVALUE = TRANSACTIONFEE * FEETOVATPERCENT / 100;
 const FEETOOTHERTAXPERCENT = 15;
 const FEETOOTHERTAXVALUE = TRANSACTIONFEE * FEETOOTHERTAXPERCENT / 100;
-// Errors
-const ACCOUNTBALANCERESTRICTIONFAILURE = 'ledger.accountBalanceRestrictionFailure';
-const INSUFFICIENTBALANCEFAILURE = 'ledger.insufficientBalance';
-const TRANSACTIONPERMISSIONERROR = 'transaction.noPermissions';
-const DAILYLIMITCOUNTERROR = 'rule.exceedDailyLimitCount';
-const TRANSFERIDALREADYEXISTS = 'transfer.idAlreadyExists';
-const ACCOUNTNOTFOUNDERROR = 'transaction.accountNotFound';
 // Balance parameters
 const DEFAULTCREDIT = 2000;
-const PRECISION = 4; // the number of digits after the decimal point
+const PRECISION = transferConstants.PRECISION; // the number of digits after the decimal point
 var successfulTransactionsCount = 0;
-var SMALLESTNUM = 0.0001;
+var SMALLESTNUM = transferConstants.SMALLESTNUM;
 var conditionId, orgId1, organizationDepthArray;
 var currencyName1, priority;
 var operationIdBalanceCheck, operationeCodeBalanceCheck, operationNameBalanceCheck;
 var customerTypeIndividual, customerActorId1, customerActorId2, currencyId, category1, category2, productType1, periodicFeeId, productGroupId, roleMobileClientId, roleTellerId;
-var accountId1, accountId2, accountId3, stateId1, accountNumber1, accountNumber2, accountNumber3;
+var accountId1, accountId2, accountId3, accountNumber1, accountNumber2, accountNumber3;
 var phonePrefix;
 var stdPolicy;
 // TODO for successful transactions - change the precision when the logic is implemented in the backend/db
@@ -97,7 +86,7 @@ module.exports = function(opt, cache) {
                 }),
                 commonFunc.createStep('core.itemTranslation.fetch', 'fetch currencies', (context) => {
                     return {
-                        itemTypeName: CURRENCY
+                        itemTypeName: coreConstants.CURRENCY
                     };
                 }, (result, assert) => {
                     assert.equals(coreJoiValidation.validateFetchItemTranslation(result.itemTranslationFetch[0]).error, null, 'Return all details after listing itemName');
@@ -107,7 +96,7 @@ module.exports = function(opt, cache) {
                 }),
                 commonFunc.createStep('core.itemTranslation.fetch', 'fetch operations', (context) => {
                     return {
-                        itemTypeName: OPERATION
+                        itemTypeName: coreConstants.OPERATION
                     };
                 }, (result, assert) => {
                     assert.equals(coreJoiValidation.validateFetchItemTranslation(result.itemTranslationFetch[0]).error, null, 'Return all details after listing itemName');
@@ -256,7 +245,7 @@ module.exports = function(opt, cache) {
                             lng: customerConstants.LNG,
                             actorDevice: {
                                 installationId: customerConstants.INSTALLATIONID,
-                                imei: IMEI
+                                imei: customerConstants.IMEI
                             }
                         };
                     }, (result, assert) => {
@@ -270,8 +259,8 @@ module.exports = function(opt, cache) {
                     }, (result, assert) => {
                         assert.equals(customerJoiValidation.validateGetPerson(result.person, customerConstants.FIRSTNAME).error, null, 'return person');
                         assert.equals(result['user.hash'][0].identifier, PHONENUMBER, 'return username = customer phone number in user.hash');
-                        roleMobileClientId = result.rolesPossibleForAssign.find(role => role.name === MOBILECLIENT && role.isAssigned === 1).roleId;
-                        roleTellerId = result.rolesPossibleForAssign.find(role => role.name === TELLER).roleId;
+                        roleMobileClientId = result.rolesPossibleForAssign.find(role => role.name === transferConstants.MOBILECLIENT && role.isAssigned === 1).roleId;
+                        roleTellerId = result.rolesPossibleForAssign.find(role => role.name === transferConstants.TELLER).roleId;
                     }),
                     commonFunc.createStep('ledger.userAccountByPhoneNumber.get', 'get account by phone number', context => {
                         return {
@@ -320,7 +309,7 @@ module.exports = function(opt, cache) {
                                 ownerId: customerActorId1,
                                 productId: context['add product'].product[0].productId,
                                 businessUnitId: orgId1,
-                                accountName: ACCOUNTNAME1
+                                accountName: ACCOUNTNAME
                             },
                             accountPerson: {
                                 accountId: -1,
@@ -330,7 +319,6 @@ module.exports = function(opt, cache) {
                     }, (result, assert) => {
                         assert.equals(accountJoiValidation.validateAddAccount(result).error, null, 'Return all details after adding an account');
                         accountId1 = result.account[0].accountId;
-                        stateId1 = result.account[0].stateId;
                         accountNumber1 = result.account[0].accountNumber;
                     }),
                     accountMethods.approveAccount('approve adding of account 1', context => {
@@ -345,7 +333,7 @@ module.exports = function(opt, cache) {
                                 ownerId: customerActorId1,
                                 productId: context['add product'].product[0].productId,
                                 businessUnitId: orgId1,
-                                accountName: ACCOUNTNAME1 + 2
+                                accountName: ACCOUNTNAME + 2
                             },
                             accountPerson: {
                                 accountId: -1,
@@ -364,7 +352,7 @@ module.exports = function(opt, cache) {
                                 ownerId: customerActorId2,
                                 productId: context['add product'].product[0].productId,
                                 businessUnitId: orgId1,
-                                accountName: ACCOUNTNAME1 + 3
+                                accountName: ACCOUNTNAME + 3
                             },
                             accountPerson: {
                                 accountId: -1,
@@ -408,14 +396,14 @@ module.exports = function(opt, cache) {
                                 priority: priority - 1 // mandatory
                             },
                             conditionItem: [{
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdBalanceCheck
                             }, {
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }],
                             split: {
@@ -423,7 +411,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Balance check',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -434,7 +422,7 @@ module.exports = function(opt, cache) {
                                         splitAssignment: [{
                                             // Pulls funds from the customer account and sends them to the GL fee account.
                                             // The sent amount is percent of the amount defined in the split range (TRANSACTIONFEEPERCENT * TRANSACTIONFEE / 100)
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeBalanceCheck,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Balance check'
@@ -446,8 +434,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             // Pulls funds from the GL fee account and sends them to the GL other tax account.
@@ -457,8 +445,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -477,7 +465,7 @@ module.exports = function(opt, cache) {
                             newPassword: userConstants.ADMINPASSWORD,
                             uri: userConstants.URI,
                             timezone: userConstants.TIMEZONE,
-                            channel: CHANNELMOBILE
+                            channel: userConstants.MOBCHANNEL
                         };
                     }, (result, assert) => {
                         assert.equals(userJoiValidation.validateLogin(result['identity.check']).error, null, 'Return all details after login a user');
@@ -507,7 +495,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, INSUFFICIENTBALANCEFAILURE, 'Insufficient balance');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccesfully check balance - no money in the customer account', (context) => {
                         return {
@@ -517,7 +505,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, INSUFFICIENTBALANCEFAILURE, 'Insufficient balance');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance');
                     }),
                     transferMethods.setBalance('set insufficient balance in customer account - less than balance check fee',
                         context => [accountId1], TRANSACTIONFEE - SMALLESTNUM),
@@ -534,7 +522,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, INSUFFICIENTBALANCEFAILURE, 'Insufficient balance');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccesfully check balance - customer account balance is less than balance check fee', (context) => {
                         return {
@@ -544,7 +532,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, INSUFFICIENTBALANCEFAILURE, 'Insufficient balance');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance');
                     }),
                     transferMethods.setBalance('set customer account balance same as balance check fee',
                         context => [accountId1], TRANSACTIONFEE),
@@ -564,7 +552,7 @@ module.exports = function(opt, cache) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                        assert.equals(result.sourceAccount.accountName, ACCOUNTNAME1, 'return correct account name');
+                        assert.equals(result.sourceAccount.accountName, ACCOUNTNAME, 'return correct account name');
                         assert.equals(result.sourceAccount.msisdn, phonePrefix + PHONENUMBER, 'return correct msisdn');
                         assert.equals(result.sourceAccount.customerName, customerConstants.FIRSTNAME + ' ' + customerConstants.LASTNAME, 'return correct customer name');
                         assert.equals(result.transferType, operationeCodeBalanceCheck, 'return correct transferType');
@@ -604,7 +592,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transcton');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transcton');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - missing permission', (context) => {
                         return {
@@ -615,7 +603,7 @@ module.exports = function(opt, cache) {
                         };
                     }, null,
                         (error, assert) => {
-                            assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transcton');
+                            assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transcton');
                         }),
                     /** Scenarios with product which is with min and max account balance */
                     productMethods.editProduct('edit product - set min and max account balances', context => {
@@ -651,7 +639,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'return failure - insufficient balance');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - customer balance less than the product minAccountBalance limit', (context) => {
                         return {
@@ -661,7 +649,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'return failure - insufficient balance');
                     }),
                     transferMethods.setBalance('set customer account balance equal to product min account balance + balance check fee',
                         context => [accountId1], MINACCOUNTBALANCE + TRANSACTIONFEE),
@@ -721,7 +709,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'return failure - insufficient balance');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - customer balance more than the product maxAccountBalance limit', (context) => {
                         return {
@@ -731,7 +719,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'return failure - insufficient balance');
                     }),
                     transferMethods.setBalance('set customer account balance same as product max account balance + balance check fee',
                         context => [accountId1], MAXACCOUNTBALANCE + TRANSACTIONFEE),
@@ -781,16 +769,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdBalanceCheck
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }],
                             limit: [{
@@ -803,7 +791,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Balance check',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -812,7 +800,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeBalanceCheck,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Balance check'
@@ -822,8 +810,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeBalanceCheck,
@@ -831,8 +819,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -871,7 +859,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSFERIDALREADYEXISTS, 'transferIdAcquirer must be unique');
+                        assert.equals(error.type, transferConstants.TRANSFERIDALREADYEXISTS, 'transferIdAcquirer must be unique');
                     }),
                     commonFunc.createStep('transaction.validate', 'successful transaction validation - within the limits of rule maxCountDaily transactions', (context) => {
                         return {
@@ -922,7 +910,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
+                        assert.equals(error.type, transferConstants.DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - exceeding the limits of rule maxCountDaily transactions', (context) => {
                         return {
@@ -932,7 +920,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
+                        assert.equals(error.type, transferConstants.DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
                     }),
                     userMethods.logout('logout user 4', context => context['login user 4']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -949,16 +937,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdBalanceCheck
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }],
                             split: {
@@ -966,7 +954,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Balance check',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -975,7 +963,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeBalanceCheck,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Balance check'
@@ -985,8 +973,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeBalanceCheck,
@@ -994,8 +982,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1009,11 +997,10 @@ module.exports = function(opt, cache) {
                         return {
                             account: {
                                 accountId: accountId1,
-                                accountName: ACCOUNTNAME1 + 'update',
+                                accountName: ACCOUNTNAME + 'update',
                                 accountNumber: accountNumber1,
                                 ownerId: customerActorId1,
                                 productId: context['add product'].product[0].productId,
-                                stateId: stateId1,
                                 businessUnitId: orgId1
                             },
                             accountPerson: {
@@ -1022,7 +1009,7 @@ module.exports = function(opt, cache) {
                             }
                         };
                     }, (result, assert) => {
-                        assert.equals(result.unapprovedAccount[0].accountName, ACCOUNTNAME1 + 'update', 'return correct accountName');
+                        assert.equals(result.unapprovedAccount[0].accountName, ACCOUNTNAME + 'update', 'return correct accountName');
                         assert.equals(accountJoiValidation.validateEditAccount(result).error, null, 'return all detais after editing an account');
                     }),
                     transferMethods.setBalance('set default balance in all accounts 1',
@@ -1042,9 +1029,9 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account in status pending', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account in status pending, account pending', (context) => {
                         return {
                             transferType: operationeCodeBalanceCheck,
                             sourceAccount: accountNumber1,
@@ -1052,7 +1039,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission, account pending');
                     }),
                     userMethods.logout('logout user 5', context => context['login user 5']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1069,7 +1056,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission, account rejected');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account in status rejected', (context) => {
                         return {
@@ -1079,7 +1066,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission, account rejected');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - account in status new', (context) => {
                         return {
@@ -1091,7 +1078,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
+                        assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account in status new', (context) => {
                         return {
@@ -1101,7 +1088,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
+                        assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
                     userMethods.logout('logout user 6', context => context['login user 6']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1134,7 +1121,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account which does not belong to the logged user', (context) => {
                         return {
@@ -1144,7 +1131,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - account which does not belong to the logged user - GL account', (context) => {
                         return {
@@ -1156,7 +1143,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - account which does not belong to the logged user - GL account', (context) => {
                         return {
@@ -1166,7 +1153,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - destination account is used instead of source', (context) => {
                         return {
@@ -1192,12 +1179,12 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdBalanceCheck
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }],
                             split: {
@@ -1205,7 +1192,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Balance check',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1214,7 +1201,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeBalanceCheck,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Balance check'
@@ -1224,8 +1211,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeBalanceCheck,
@@ -1233,8 +1220,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1242,7 +1229,7 @@ module.exports = function(opt, cache) {
                             }
                         };
                     }, (result, assert) => {
-                        assert.equals(result.conditionItem.find(item => item.factor === 'sc'), undefined, 'conditionItem for product is not defined');
+                        assert.equals(result.conditionItem.find(item => item.factor === ruleConstants.SOURCECATEGORY), undefined, 'conditionItem for product is not defined');
                         assert.equals(ruleJoiValidation.validateEditRule(result).error, null, 'Return all detals after edit rule');
                     }),
                     userMethods.logout('logout admin 7', context => context.login['identity.check'].sessionId),
@@ -1255,7 +1242,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - missing permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - missing permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - GL account with missing rule conditionItem for product', (context) => {
                         return {
@@ -1265,7 +1252,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - missing permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - missing permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - another customer account with missing rule conditionItem for product', (context) => {
                         return {
@@ -1275,7 +1262,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - missing permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - missing permission');
                     }),
                     userMethods.logout('logout user 8', context => context['login user 7']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1287,20 +1274,20 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdBalanceCheck
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }, {
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             split: {
@@ -1308,7 +1295,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Balance check',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1317,7 +1304,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeBalanceCheck,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Balance check'
@@ -1327,8 +1314,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeBalanceCheck,
@@ -1336,8 +1323,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax -  Balance check',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1384,14 +1371,14 @@ module.exports = function(opt, cache) {
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
                     }),
-                    // commonFunc.createStep('transaction.reverse', 'unsuccessfully reverse transaction - not reversible transaction', (context) => {
-                    //     return {
-                    //         transferId: context['successfully check balance - by teller user'].transferId,
-                    //         message: transferConstants.REVERSALMESSAGE
-                    //     };
-                    // }, null, (assert, error) => {
-                    //     return error;
-                    // }),
+                    commonFunc.createStep('transaction.reverse.execute', 'unsuccessfully reverse transaction - not reversible transaction', (context) => {
+                        return {
+                            transferId: context['successfully check balance - by teller user'].transferId,
+                            message: transferConstants.REVERSALMESSAGE
+                        };
+                    }, null, (error, assert) => {
+                        assert.equals(error.type, transferConstants.UNSUPPORTEDREVERSETYPEERROR, 'return failure - unsupported reverse type');
+                    }),
                     userMethods.logout('logout teller', context => context['login teller']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get customer account balance 6', context => accountId1, DEFAULTCREDIT - TRANSACTIONFEE),
@@ -1421,7 +1408,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - missing permission, account closed');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - missing permission, account closed');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - closed account', (context) => {
                         return {
@@ -1431,7 +1418,7 @@ module.exports = function(opt, cache) {
                             description: operationNameBalanceCheck
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - missing permission, account closed');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - missing permission, account closed');
                     })
                     /** TODO Scenarios for state - transactions cannot be processed for account in state Blocked */
                 ])

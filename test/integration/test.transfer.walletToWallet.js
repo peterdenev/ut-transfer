@@ -13,31 +13,21 @@ var ruleJoiValidation = require('ut-test/lib/joiValidations/rule');
 var transferJoiValidation = require('ut-test/lib/joiValidations/transfer');
 var userJoiValidation = require('ut-test/lib/joiValidations/user');
 var productParams = require('ut-test/lib/requestParams/product');
+var accountConstants = require('ut-test/lib/constants/account').constants();
+var coreConstants = require('ut-test/lib/constants/core').constants();
 var customerConstants = require('ut-test/lib/constants/customer').constants();
 var documentConstants = require('ut-test/lib/constants/document').constants();
 var productConstants = require('ut-test/lib/constants/product').constants();
 var ruleConstants = require('ut-test/lib/constants/rule').constants();
 var transferConstants = require('ut-test/lib/constants/transfer').constants();
 var userConstants = require('ut-test/lib/constants/user').constants();
-const GETBYDEPTHORGANIZATION = customerConstants.GETBYDEPTHORGANIZATION;
-const RANDOMCONDITIONID = customerConstants.RANDOMCONDITIONID;
-const KYCDESCRIPTION = customerConstants.KYCDESCRIPTION;
 const TRANSFERIDACQUIRER = transferConstants.TRANSFERIDACQUIRER;
-const ORGNAME = customerConstants.ORGNAME;
-const CURRENCY = 'currency';
-const OPERATION = 'operation';
-const MOBILECLIENT = 'MobileClient';
-const TELLER = 'Teller';
-// CUstomer parameters
+// Customer parameters
 const PHONENUMBER = customerConstants.PHONENUMBER.slice(3);
-const CHANNELMOBILE = 'mobile';
-const IMEI = (Math.floor(100000000000000 + Math.random() * 999999999999999)).toString();
 const IMEI1 = (Math.floor(100000000000000 + Math.random() * 999999999999999)).toString();
-const ACCOUNTNAME = 'TestAccount' + commonFunc.generateRandomNumber();
+const ACCOUNTNAME = accountConstants.ACCOUNTNAME;
 // Product parameters
 const PRODUCTNAME = productConstants.PRODUCTNAME;
-const STARTDATE = productConstants.STARTDATE;
-const ENDDATE = productConstants.ENDDATE;
 const MINACCOUNTBALANCE = 200.50;
 const MAXACCOUNTBALANCE = 10000.50;
 const MINACCOUNTOPENINGBALANCE = 200;
@@ -51,28 +41,14 @@ const FEETOVATVALUE = TRANSACTIONFEE * FEETOVATPERCENT / 100;
 const FEETOOTHERTAXPERCENT = 40;
 const FEETOOTHERTAXVALUE = TRANSACTIONFEE * FEETOOTHERTAXPERCENT / 100;
 // Balance parameters
-const PRECISION = 4; // the number of digits after the decimal point
+const PRECISION = transferConstants.PRECISION; // the number of digits after the decimal point
 var successfulTransactionsCount = 0;
-var SMALLESTNUM = 0.0001;
+var SMALLESTNUM = transferConstants.SMALLESTNUM;
 const TRANSFERAMOUNT = 200;
 const TRANSFERAMOUNTNEGATIVE = -200;
 const DEFAULTCREDIT = 2000;
 const REVERSALAMOUNTSENDER = TRANSFERAMOUNT + TRANSACTIONFEEVALUE;
 const REVERSALAMOUNTRECEIVER = TRANSFERAMOUNT;
-// Errors
-const INSUFFICIENTBALANCEFAILURE = 'ledger.insufficientBalance';
-const ACCOUNTBALANCERESTRICTIONFAILURE = 'ledger.accountBalanceRestrictionFailure';
-const MINLIMITAMOUNTFAILURE = 'rule.exceedMinLimitAmount';
-const MAXLIMITAMOUNTFAILURE = 'rule.exceedMaxLimitAmount';
-const DAILYLIMITCOUNTERROR = 'rule.exceedDailyLimitCount';
-const WEEKLYLIMITCOUNTERROR = 'rule.exceedWeeklyLimitCount';
-const MONTHLYLIMITCOUNTERROR = 'rule.exceedMonthlyLimitCount';
-const DAILYLIMITAMOUNTERROR = 'rule.exceedDailyLimitAmount';
-const WEEKLYLIMITAMOUNTERROR = 'rule.exceedWeeklyLimitAmount';
-const MONTHLYLIMITAMOUNTERROR = 'rule.exceedMonthlyLimitAmount';
-const ACCOUNTSTATUSFAILURE = 'ledger.accountStatusFailure';
-const TRANSACTIONPERMISSIONERROR = 'transaction.noPermissions';
-const ACCOUNTNOTFOUNDERROR = 'transaction.accountNotFound';
 const INVALIDSTRING = commonFunc.generateRandomChars();
 const NONEXISTINGACCOUNT = 'test123';
 var conditionId, orgId1, organizationDepthArray;
@@ -80,7 +56,6 @@ var currencyName1, priority;
 var customerTypeIndividual, customerActorId1, customerActorId2, currencyId, category1, category2, productType, productTypeId, periodicFeeId, productGroup, productGroupId, roleMobileClientId, roleTellerId;
 var operationIdWalletToWallet, operationeCodeWalletToWallet, operationNameWalletToWallet;
 var accountSenderId1, accountReceiverId1, accountSenderNumber1, accountReceiverNumber1, accountSenderId2, accountReceiverId2, accountSenderNumber2, accountReceiverNumber2;
-var accountSenderState2, accountReceiverState2;
 var phonePrefix;
 var stdPolicy;
 
@@ -115,7 +90,7 @@ module.exports = function(opt, cache) {
                 accountMethods.disableAccountMCH('enable account M/C', context => {}, 0),
                 commonFunc.createStep('core.itemTranslation.fetch', 'fetch currencies', (context) => {
                     return {
-                        itemTypeName: CURRENCY
+                        itemTypeName: coreConstants.CURRENCY
                     };
                 }, (result, assert) => {
                     assert.equals(coreJoiValidation.validateFetchItemTranslation(result.itemTranslationFetch[0]).error, null, 'Return all details after listing itemName');
@@ -125,7 +100,7 @@ module.exports = function(opt, cache) {
                 }),
                 commonFunc.createStep('core.itemTranslation.fetch', 'fetch operations', (context) => {
                     return {
-                        itemTypeName: OPERATION
+                        itemTypeName: coreConstants.OPERATION
                     };
                 }, (result, assert) => {
                     assert.equals(coreJoiValidation.validateFetchItemTranslation(result.itemTranslationFetch[0]).error, null, 'Return all details after listing itemName');
@@ -152,7 +127,7 @@ module.exports = function(opt, cache) {
                 }),
                 commonFunc.createStep('core.configuration.fetch', 'fetch defaultBu setting', (context) => {
                     return {
-                        key: GETBYDEPTHORGANIZATION
+                        key: customerConstants.GETBYDEPTHORGANIZATION
                     };
                 }, (result, assert) => {
                     var orgDepth = result[0][0].value;
@@ -167,7 +142,7 @@ module.exports = function(opt, cache) {
                                 commonFunc.createStep('customer.organization.add', 'add organization', context2 => {
                                     return {
                                         organization: {
-                                            organizationName: ORGNAME
+                                            organizationName: customerConstants.ORGNAME
                                         },
                                         parent: [orgId1]
                                     };
@@ -202,11 +177,11 @@ module.exports = function(opt, cache) {
                             customerTypeId: customerTypeIndividual,
                             organizationId: orgId1,
                             itemNameId: context['get levels for creating kyc 1'].levels[0].itemNameId,
-                            conditionId: RANDOMCONDITIONID,
+                            conditionId: customerConstants.RANDOMCONDITIONID,
                             attributeId: context['list kyc attributes 1'].kycAttributes[0].itemNameId
 
                         };
-                    }, KYCDESCRIPTION),
+                    }, customerConstants.KYCDESCRIPTION),
                     commonFunc.createStep('customer.customerCategory.fetch', 'fetch customer categories', (context) => {
                         return {};
                     }, (result, assert) => {
@@ -228,7 +203,7 @@ module.exports = function(opt, cache) {
                             lng: customerConstants.LNG,
                             actorDevice: {
                                 installationId: customerConstants.INSTALLATIONID,
-                                imei: IMEI
+                                imei: customerConstants.IMEI
                             }
                         };
                     }, (result, assert) => {
@@ -242,8 +217,8 @@ module.exports = function(opt, cache) {
                     }, (result, assert) => {
                         assert.equals(customerJoiValidation.validateGetPerson(result.person, customerConstants.FIRSTNAME).error, null, 'return person');
                         assert.equals(result['user.hash'][0].identifier, PHONENUMBER, 'return username = customer phone number in user.hash');
-                        roleMobileClientId = result.rolesPossibleForAssign.find(role => role.name === MOBILECLIENT && role.isAssigned === 1).roleId;
-                        roleTellerId = result.rolesPossibleForAssign.find(role => role.name === TELLER).roleId;
+                        roleMobileClientId = result.rolesPossibleForAssign.find(role => role.name === transferConstants.MOBILECLIENT && role.isAssigned === 1).roleId;
+                        roleTellerId = result.rolesPossibleForAssign.find(role => role.name === transferConstants.TELLER).roleId;
                     }),
                     commonFunc.createStep('ledger.userAccountByPhoneNumber.get', 'get account by phone number', context => {
                         return {
@@ -293,14 +268,6 @@ module.exports = function(opt, cache) {
                         productGroup = result.account[0].productGroup;
                         productType = result.account[0].productType;
                     }),
-                    // get state id - to be removed later
-                    commonFunc.createStep('ledger.account.get', 'get default receiver account', context => {
-                        return {
-                            accountId: context['fetch default receiver account'].account[0].accountId
-                        };
-                    }, (result, assert) => {
-                        // console.log(result);
-                    }),
                     // Teller user setup
                     userMethods.addUser('add teller', context => {
                         return {
@@ -336,8 +303,8 @@ module.exports = function(opt, cache) {
                             customerTypeId: customerTypeIndividual,
                             businessUnitId: orgId1,
                             currencyId: currencyId,
-                            startDate: STARTDATE,
-                            endDate: ENDDATE,
+                            startDate: productConstants.STARTDATE,
+                            endDate: productConstants.ENDDATE,
                             minAccountOpeningBalance: MINACCOUNTOPENINGBALANCE,
                             kyc: [context['add kyc 1'].kyc[0].kycId],
                             customerCategory: [category1, category2],
@@ -362,8 +329,8 @@ module.exports = function(opt, cache) {
                             customerTypeId: customerTypeIndividual,
                             businessUnitId: orgId1,
                             currencyId: currencyId,
-                            startDate: STARTDATE,
-                            endDate: ENDDATE,
+                            startDate: productConstants.STARTDATE,
+                            endDate: productConstants.ENDDATE,
                             minAccountOpeningBalance: MINACCOUNTOPENINGBALANCE,
                             kyc: [context['add kyc 1'].kyc[0].kycId],
                             customerCategory: [category1, category2],
@@ -461,26 +428,29 @@ module.exports = function(opt, cache) {
                                 priority: priority - 1 // mandatory
                             },
                             conditionItem: [{
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdWalletToWallet
                             }, {
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get first product 2'].product[0].itemNameId
                             },
                             {
-                                factor: 'dc', // destination.account.product
+                                factor: ruleConstants.DESTINATIONCATEGORY, // destination.account.product
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
+                            }, {
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
+                                actorId: roleTellerId
                             }],
                             split: {
                                 data: {
                                     rows: [{
                                         splitName: {
                                             name: 'Wallet to wallet',
-                                            tag: '|acquirer|amount|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -491,15 +461,15 @@ module.exports = function(opt, cache) {
                                         splitAssignment: [{
                                             // Pulls funds from the sender customer account and sends them to the receiver account.
                                             // The sent amount is percent(SOURCETODESTINATIONPERCENT) of the transferred amount defined in transaction.execute
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
-                                            credit: transferConstants.DESTINATIONACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: ruleConstants.DESTINATIONACCOUNTNUMBER,
                                             description: 'Agent amount - Transfer',
                                             percent: SOURCETODESTINATIONPERCENT
                                         }]
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -510,7 +480,7 @@ module.exports = function(opt, cache) {
                                         splitAssignment: [{
                                             // Pulls funds from the sender customer account and sends them to the GL fee account.
                                             // The sent amount is percent of the amount defined in the split range (TRANSACTIONFEEPERCENT * TRANSACTIONFEE / 100)
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeWalletToWallet,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Wallet to wallet'
@@ -522,8 +492,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             // Pulls funds from the GL fee account and sends them to the GL other tax account.
@@ -533,8 +503,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -553,7 +523,7 @@ module.exports = function(opt, cache) {
                             newPassword: userConstants.ADMINPASSWORD,
                             uri: userConstants.URI,
                             timezone: userConstants.TIMEZONE,
-                            channel: CHANNELMOBILE
+                            channel: userConstants.MOBCHANNEL
                         };
                     }, (result, assert) => {
                         assert.equals(userJoiValidation.validateLogin(result['identity.check']).error, null, 'Return all details after login a user');
@@ -592,7 +562,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, INSUFFICIENTBALANCEFAILURE, 'Insufficient balance in sender account');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance in sender account');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet to wallet transaction - insufficient balance in sender account', (context) => {
                         return {
@@ -604,7 +574,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, INSUFFICIENTBALANCEFAILURE, 'Insufficient balance in sender account');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance in sender account');
                     }),
                     transferMethods.setBalance('set sender balance equal to TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
                         context => [accountSenderId1], TRANSFERAMOUNT + TRANSACTIONFEEVALUE),
@@ -722,7 +692,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'return failure - insufficient balance');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet trans - sender account balance less than product min account balance + wallet to wallet fee + transfer amount', (context) => {
                         return {
@@ -734,7 +704,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'return failure - insufficient balance');
                     }),
                     transferMethods.setBalance('set sender account balance equal to product min account balance + wallet to wallet fee + transfer amount',
                         context => [accountSenderId1], commonFunc.roundNumber(MINACCOUNTBALANCE + TRANSACTIONFEEVALUE + TRANSFERAMOUNT, PRECISION)),
@@ -778,8 +748,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 4, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     userMethods.logout('logout user 2', context => context['login user 2']['identity.check'].sessionId),
@@ -814,7 +782,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits - receiver balance more than max product limit');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits - receiver balance more than max product limit');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet trans - receiver account balance more than product max account balance - transfer amount', (context) => {
                         return {
@@ -826,7 +794,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits - receiver balance more than max product limit');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits - receiver balance more than max product limit');
                     }),
                     transferMethods.setBalance('set receiver account balance equal to product max account balance - transfer amount',
                         context => [accountReceiverId1], commonFunc.roundNumber(MAXACCOUNTBALANCE - TRANSFERAMOUNT, PRECISION)),
@@ -870,8 +838,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 6, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     userMethods.logout('logout user 3', context => context['login user 3']['identity.check'].sessionId),
@@ -890,20 +856,23 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdWalletToWallet
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get first product 2'].product[0].itemNameId
                             }, {
                                 conditionId: conditionId,
-                                factor: 'dc', // destination.account.product
+                                factor: ruleConstants.DESTINATIONCATEGORY, // destination.account.product
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
+                            }, {
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
+                                actorId: roleTellerId
                             }],
                             limit: [{
                                 conditionId: conditionId,
@@ -915,7 +884,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Wallet to wallet',
-                                            tag: '|acquirer|amount|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -924,15 +893,15 @@ module.exports = function(opt, cache) {
                                             percent: SOURCETODESTINATIONPERCENT
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
-                                            credit: transferConstants.DESTINATIONACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: ruleConstants.DESTINATIONACCOUNTNUMBER,
                                             description: 'Agent amount - Transfer',
                                             percent: SOURCETODESTINATIONPERCENT
                                         }]
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -941,7 +910,7 @@ module.exports = function(opt, cache) {
                                             minValue: TRANSACTIONFEE
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeWalletToWallet,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Wallet to wallet'
@@ -951,8 +920,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeWalletToWallet,
@@ -960,8 +929,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1010,8 +979,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 8, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - rule maxCountDaily limit already reached', (context) => {
@@ -1029,7 +996,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITCOUNTERROR, 'daily transaction count limit reached');
+                        assert.equals(error.type, transferConstants.DAILYLIMITCOUNTERROR, 'daily transaction count limit reached');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - rule maxCountDaily limit already reached', (context) => {
                         return {
@@ -1041,7 +1008,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITCOUNTERROR, 'daily transaction count limit reached');
+                        assert.equals(error.type, transferConstants.DAILYLIMITCOUNTERROR, 'daily transaction count limit reached');
                     }),
                     userMethods.logout('logout user 4', context => context['login user 4']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1053,16 +1020,16 @@ module.exports = function(opt, cache) {
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller', userConstants.USERNAME, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
                     // reverse
-                    commonFunc.createStep('transaction.reverse', 'successfully reverse transaction', (context) => {
+                    commonFunc.createStep('transaction.reverse.execute', 'successfully reverse transaction', (context) => {
                         return {
                             transferId: context['successfully execute wallet-to-wallet transaction - within the limits of rule maxCountDaily'].transferId
                         };
                     }, (result, assert) => {
                         assert.equals(result.success, true, 'return successs');
                     }),
-                    userMethods.logout('logout tellet', context => context['login teller']['identity.check'].sessionId),
+                    userMethods.logout('logout teller', context => context['login teller']['identity.check'].sessionId),
                     userMethods.loginMobile('login user 5', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    commonFunc.createStep('transaction.execute', 'successfully execute wallet-to-wallet transaction - within the limits of rule maxCountDaily after reversal', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute wallet-to-wallet transaction by teller - within the limits of rule maxCountDaily after reversal', (context) => {
                         return {
                             transferType: operationeCodeWalletToWallet,
                             amount: TRANSFERAMOUNT,
@@ -1095,20 +1062,23 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdWalletToWallet
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get first product 2'].product[0].itemNameId
                             }, {
                                 conditionId: conditionId,
-                                factor: 'dc', // destination.account.product
+                                factor: ruleConstants.DESTINATIONCATEGORY, // destination.account.product
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
+                            }, {
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
+                                actorId: roleTellerId
                             }],
                             limit: [{
                                 conditionId: conditionId,
@@ -1121,7 +1091,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Wallet to wallet',
-                                            tag: '|acquirer|amount|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1130,15 +1100,15 @@ module.exports = function(opt, cache) {
                                             percent: SOURCETODESTINATIONPERCENT
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
-                                            credit: transferConstants.DESTINATIONACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: ruleConstants.DESTINATIONACCOUNTNUMBER,
                                             description: 'Agent amount - Transfer',
                                             percent: SOURCETODESTINATIONPERCENT
                                         }]
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1147,7 +1117,7 @@ module.exports = function(opt, cache) {
                                             minValue: TRANSACTIONFEE
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeWalletToWallet,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Wallet to wallet'
@@ -1157,8 +1127,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeWalletToWallet,
@@ -1166,8 +1136,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1202,7 +1172,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MINLIMITAMOUNTFAILURE, 'Transaction amount is below minimum');
+                        assert.equals(error.type, transferConstants.MINLIMITAMOUNTERROR, 'Transaction amount is below minimum');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - amount less than rule minAmount limit', (context) => {
                         return {
@@ -1214,7 +1184,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MINLIMITAMOUNTFAILURE, 'Transaction amount is below minimum');
+                        assert.equals(error.type, transferConstants.MINLIMITAMOUNTERROR, 'Transaction amount is below minimum');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - amount more than rule maxAmount limit', (context) => {
                         return {
@@ -1231,7 +1201,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MAXLIMITAMOUNTFAILURE, 'Transaction amount is above maximum');
+                        assert.equals(error.type, transferConstants.MAXLIMITAMOUNTERROR, 'Transaction amount is above maximum');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - amount more than rule maxAmount limit', (context) => {
                         return {
@@ -1243,7 +1213,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MAXLIMITAMOUNTFAILURE, 'Transaction amount is above maximum');
+                        assert.equals(error.type, transferConstants.MAXLIMITAMOUNTERROR, 'Transaction amount is above maximum');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully execute wallet-to-wallet transaction - within the limits of min and max amount', (context) => {
                         return {
@@ -1279,20 +1249,23 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdWalletToWallet
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get first product 2'].product[0].itemNameId
                             }, {
                                 conditionId: conditionId,
-                                factor: 'dc', // destination.account.product
+                                factor: ruleConstants.DESTINATIONCATEGORY, // destination.account.product
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
+                            }, {
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
+                                actorId: roleTellerId
                             }],
                             limit: [{
                                 conditionId: conditionId,
@@ -1304,7 +1277,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Wallet to wallet',
-                                            tag: '|acquirer|amount|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1313,15 +1286,15 @@ module.exports = function(opt, cache) {
                                             percent: SOURCETODESTINATIONPERCENT
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
-                                            credit: transferConstants.DESTINATIONACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: ruleConstants.DESTINATIONACCOUNTNUMBER,
                                             description: 'Agent amount - Transfer',
                                             percent: SOURCETODESTINATIONPERCENT
                                         }]
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1330,7 +1303,7 @@ module.exports = function(opt, cache) {
                                             minValue: TRANSACTIONFEE
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeWalletToWallet,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Wallet to wallet'
@@ -1340,8 +1313,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeWalletToWallet,
@@ -1349,8 +1322,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1384,7 +1357,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum');
+                        assert.equals(error.type, transferConstants.DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - daily amount more than rule maxAmountDaily limit', (context) => {
                         return {
@@ -1396,7 +1369,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum');
+                        assert.equals(error.type, transferConstants.DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully execute wallet-to-wallet transaction - within the limits of rule maxAmountDaily limit', (context) => {
                         return {
@@ -1432,20 +1405,23 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdWalletToWallet
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get first product 2'].product[0].itemNameId
                             }, {
                                 conditionId: conditionId,
-                                factor: 'dc', // destination.account.product
+                                factor: ruleConstants.DESTINATIONCATEGORY, // destination.account.product
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
+                            }, {
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
+                                actorId: roleTellerId
                             }],
                             limit: [{
                                 conditionId: conditionId,
@@ -1457,7 +1433,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Wallet to wallet',
-                                            tag: '|acquirer|amount|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1466,15 +1442,15 @@ module.exports = function(opt, cache) {
                                             percent: SOURCETODESTINATIONPERCENT
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
-                                            credit: transferConstants.DESTINATIONACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: ruleConstants.DESTINATIONACCOUNTNUMBER,
                                             description: 'Agent amount - Transfer',
                                             percent: SOURCETODESTINATIONPERCENT
                                         }]
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1483,7 +1459,7 @@ module.exports = function(opt, cache) {
                                             minValue: TRANSACTIONFEE
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeWalletToWallet,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Wallet to wallet'
@@ -1493,8 +1469,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeWalletToWallet,
@@ -1502,8 +1478,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1537,7 +1513,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
+                        assert.equals(error.type, transferConstants.WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - weekly amount more than rule maxAmountWeekly limit', (context) => {
                         return {
@@ -1549,7 +1525,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
+                        assert.equals(error.type, transferConstants.WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully execute wallet-to-wallet transaction - within the limits of rule maxAmountWeekly limit', (context) => {
                         return {
@@ -1568,8 +1544,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 16, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     userMethods.logout('logout user 8', context => context['login user 8']['identity.check'].sessionId),
@@ -1587,20 +1561,23 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdWalletToWallet
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get first product 2'].product[0].itemNameId
                             }, {
                                 conditionId: conditionId,
-                                factor: 'dc', // destination.account.product
+                                factor: ruleConstants.DESTINATIONCATEGORY, // destination.account.product
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
+                            }, {
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
+                                actorId: roleTellerId
                             }],
                             limit: [{
                                 conditionId: conditionId,
@@ -1612,7 +1589,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Wallet to wallet',
-                                            tag: '|acquirer|amount|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1621,15 +1598,15 @@ module.exports = function(opt, cache) {
                                             percent: SOURCETODESTINATIONPERCENT
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
-                                            credit: transferConstants.DESTINATIONACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: ruleConstants.DESTINATIONACCOUNTNUMBER,
                                             description: 'Agent amount - Transfer',
                                             percent: SOURCETODESTINATIONPERCENT
                                         }]
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1638,7 +1615,7 @@ module.exports = function(opt, cache) {
                                             minValue: TRANSACTIONFEE
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeWalletToWallet,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Wallet to wallet'
@@ -1648,8 +1625,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeWalletToWallet,
@@ -1657,8 +1634,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1694,8 +1671,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 17, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - rule maxCountWeekly limit already reached', (context) => {
@@ -1713,7 +1688,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
+                        assert.equals(error.type, transferConstants.WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - rule maxCountWeekly limit already reached', (context) => {
                         return {
@@ -1725,7 +1700,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
+                        assert.equals(error.type, transferConstants.WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
                     }),
                     userMethods.logout('logout user 9', context => context['login user 9']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1742,20 +1717,23 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdWalletToWallet
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get first product 2'].product[0].itemNameId
                             }, {
                                 conditionId: conditionId,
-                                factor: 'dc', // destination.account.product
+                                factor: ruleConstants.DESTINATIONCATEGORY, // destination.account.product
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
+                            }, {
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
+                                actorId: roleTellerId
                             }],
                             limit: [{
                                 conditionId: conditionId,
@@ -1767,7 +1745,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Wallet to wallet',
-                                            tag: '|acquirer|amount|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1776,15 +1754,15 @@ module.exports = function(opt, cache) {
                                             percent: SOURCETODESTINATIONPERCENT
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
-                                            credit: transferConstants.DESTINATIONACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: ruleConstants.DESTINATIONACCOUNTNUMBER,
                                             description: 'Agent amount - Transfer',
                                             percent: SOURCETODESTINATIONPERCENT
                                         }]
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1793,7 +1771,7 @@ module.exports = function(opt, cache) {
                                             minValue: TRANSACTIONFEE
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeWalletToWallet,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Wallet to wallet'
@@ -1803,8 +1781,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeWalletToWallet,
@@ -1812,8 +1790,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1847,7 +1825,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
+                        assert.equals(error.type, transferConstants.MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - monthly amount more than rule maxAmountMonthly limit', (context) => {
                         return {
@@ -1859,7 +1837,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
+                        assert.equals(error.type, transferConstants.MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully execute wallet-to-wallet transaction - within the limits of rule maxAmountMonthly limit', (context) => {
                         return {
@@ -1878,8 +1856,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 20, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     userMethods.logout('logout user 10', context => context['login user 10']['identity.check'].sessionId),
@@ -1897,20 +1873,23 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdWalletToWallet
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get first product 2'].product[0].itemNameId
                             }, {
                                 conditionId: conditionId,
-                                factor: 'dc', // destination.account.product
+                                factor: ruleConstants.DESTINATIONCATEGORY, // destination.account.product
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
+                            }, {
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
+                                actorId: roleTellerId
                             }],
                             limit: [{
                                 conditionId: conditionId,
@@ -1922,7 +1901,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Wallet to wallet',
-                                            tag: '|acquirer|amount|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1931,15 +1910,15 @@ module.exports = function(opt, cache) {
                                             percent: SOURCETODESTINATIONPERCENT
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
-                                            credit: transferConstants.DESTINATIONACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: ruleConstants.DESTINATIONACCOUNTNUMBER,
                                             description: 'Agent amount - Transfer',
                                             percent: SOURCETODESTINATIONPERCENT
                                         }]
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -1948,7 +1927,7 @@ module.exports = function(opt, cache) {
                                             minValue: TRANSACTIONFEE
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeWalletToWallet,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Wallet to wallet'
@@ -1958,8 +1937,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeWalletToWallet,
@@ -1967,8 +1946,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -2004,8 +1983,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 21, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - rule maxCountDaily limit already reached', (context) => {
@@ -2023,7 +2000,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
+                        assert.equals(error.type, transferConstants.MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - rule maxCountDaily limit already reached', (context) => {
                         return {
@@ -2035,7 +2012,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
+                        assert.equals(error.type, transferConstants.MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
                     }),
                     userMethods.logout('logout user 11', context => context['login user 11']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2052,27 +2029,30 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdWalletToWallet
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get first product 2'].product[0].itemNameId
                             }, {
                                 conditionId: conditionId,
-                                factor: 'dc', // destination.account.product
+                                factor: ruleConstants.DESTINATIONCATEGORY, // destination.account.product
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
+                            }, {
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
+                                actorId: roleTellerId
                             }],
                             split: {
                                 data: {
                                     rows: [{
                                         splitName: {
                                             name: 'Wallet to wallet',
-                                            tag: '|acquirer|amount|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -2081,15 +2061,15 @@ module.exports = function(opt, cache) {
                                             percent: SOURCETODESTINATIONPERCENT
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
-                                            credit: transferConstants.DESTINATIONACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: ruleConstants.DESTINATIONACCOUNTNUMBER,
                                             description: 'Agent amount - Transfer',
                                             percent: SOURCETODESTINATIONPERCENT
                                         }]
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             isSourceAmount: 0,
@@ -2098,7 +2078,7 @@ module.exports = function(opt, cache) {
                                             minValue: TRANSACTIONFEE
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeWalletToWallet,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee - Wallet to wallet'
@@ -2108,8 +2088,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeWalletToWallet,
@@ -2117,8 +2097,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other tax - Wallet to wallet',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -2146,7 +2126,6 @@ module.exports = function(opt, cache) {
                         assert.equals(accountJoiValidation.validateAddAccount(result).error, null, 'Return all details after adding an account');
                         accountSenderId2 = result.account[0].accountId;
                         accountSenderNumber2 = result.account[0].accountNumber;
-                        accountSenderState2 = result.account[0].stateId;
                     }),
                     commonFunc.createStep('ledger.account.add', 'add receiver account 2', context => {
                         return {
@@ -2166,7 +2145,6 @@ module.exports = function(opt, cache) {
                         assert.equals(accountJoiValidation.validateAddAccount(result).error, null, 'Return all details after adding an account');
                         accountReceiverId2 = result.account[0].accountId;
                         accountReceiverNumber2 = result.account[0].accountNumber;
-                        accountReceiverState2 = result.account[0].stateId;
                     }),
                     transferMethods.setBalance('set default balance in all accounts 7',
                         context => [accountSenderId1,
@@ -2194,7 +2172,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'return failure - account not found');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - destination account in status new', (context) => {
                         return {
@@ -2206,7 +2184,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'return failure - account not found');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - source account in status new', (context) => {
                         return {
@@ -2223,7 +2201,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
+                        assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - source account in status new', (context) => {
                         return {
@@ -2235,7 +2213,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
+                        assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
                     userMethods.logout('logout user 12', context => context['login user 12']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2263,7 +2241,6 @@ module.exports = function(opt, cache) {
                                 accountNumber: accountSenderNumber2,
                                 ownerId: customerActorId1,
                                 productId: context['add first product'].product[0].productId,
-                                stateId: accountSenderState2,
                                 businessUnitId: orgId1
                             },
                             accountPerson: {
@@ -2283,7 +2260,6 @@ module.exports = function(opt, cache) {
                                 accountNumber: accountReceiverNumber2,
                                 ownerId: customerActorId2,
                                 productId: context['add second product'].product[0].productId,
-                                stateId: accountReceiverState2,
                                 businessUnitId: orgId1
                             },
                             accountPerson: {
@@ -2320,7 +2296,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - destination account in status pending', (context) => {
                         return {
@@ -2332,7 +2308,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - source account in status pending', (context) => {
                         return {
@@ -2349,7 +2325,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - source account in status pending', (context) => {
                         return {
@@ -2361,7 +2337,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout user 13', context => context['login user 13']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2398,7 +2374,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - destination account in status rejected', (context) => {
                         return {
@@ -2410,7 +2386,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - source account in status rejected', (context) => {
                         return {
@@ -2427,7 +2403,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - source account in status rejected', (context) => {
                         return {
@@ -2439,7 +2415,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout user 14', context => context['login user 14']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2449,7 +2425,6 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get fee account balance 13', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 13', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 13', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
-                    // TODO discard changes
                     accountMethods.discardAccount('discard changes customer 1 accounts', context => {
                         return {
                             ownerId: customerActorId1
@@ -2488,8 +2463,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 28, 'return correct transferIdAcquirer');
-                        // assert.equals(result.transferType, operationeCodeWalletToWallet, 'return correct transferType');
                     }),
                     userMethods.logout('logout user 15', context => context['login user 15']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2502,16 +2475,15 @@ module.exports = function(opt, cache) {
                     commonFunc.createStep('ledger.account.edit', 'edit default account of receiver', context => {
                         return {
                             account: {
-                                accountId: context['get default receiver account'].account[0].accountId,
+                                accountId: context['fetch default receiver account'].account[0].accountId,
                                 accountName: ACCOUNTNAME + '5',
-                                accountNumber: context['get default receiver account'].account[0].accountNumber,
+                                accountNumber: context['fetch default receiver account'].account[0].accountNumber,
                                 ownerId: customerActorId2,
                                 productId: context['add second product'].product[0].productId,
-                                stateId: context['get default receiver account'].account[0].stateId,
                                 businessUnitId: orgId1
                             },
                             accountPerson: {
-                                accountId: context['get default receiver account'].account[0].accountId,
+                                accountId: context['fetch default receiver account'].account[0].accountId,
                                 personId: customerActorId2,
                                 isDefault: 1
                             }
@@ -2537,7 +2509,7 @@ module.exports = function(opt, cache) {
                     userMethods.loginMobile('login user 16', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 11',
                         context => [accountSenderId1,
-                            context['get default receiver account'].account[0].accountId,
+                            context['fetch default receiver account'].account[0].accountId,
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
@@ -2593,7 +2565,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
+                        assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute wallet-to-wallet transaction - destinationAccount msisdn', (context) => {
                         return {
@@ -2607,12 +2579,12 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
+                        assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
                     userMethods.logout('logout user 16', context => context['login user 16']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get sender account balance 15', context => accountSenderId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
-                    accountMethods.getAccountBalance('get default account balance 15', context => context['get default receiver account'].account[0].accountId, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
+                    accountMethods.getAccountBalance('get default account balance 15', context => context['fetch default receiver account'].account[0].accountId, DEFAULTCREDIT + TRANSFERAMOUNT, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 15', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT + TRANSACTIONFEEVALUE - FEETOVATVALUE - FEETOOTHERTAXVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 15', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 15', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
@@ -2646,7 +2618,7 @@ module.exports = function(opt, cache) {
                             description: operationNameWalletToWallet
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - missing permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - missing permission');
                     }),
                     /** Negative scenarios - missing or invalid fields */
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - negative amount', (context) => {
@@ -2908,7 +2880,6 @@ module.exports = function(opt, cache) {
                         assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        // assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 'reverse', 'return correct transferIdAcquirer');
                     }),
                     userMethods.logout('logout user 18', context => context['login user 18']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2920,7 +2891,6 @@ module.exports = function(opt, cache) {
                                 accountNumber: accountSenderNumber2,
                                 ownerId: customerActorId1,
                                 productId: context['add first product'].product[0].productId,
-                                stateId: accountSenderState2,
                                 businessUnitId: orgId1
                             },
                             accountPerson: {
@@ -2934,12 +2904,12 @@ module.exports = function(opt, cache) {
                     }),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller 1', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
-                    commonFunc.createStep('transaction.reverse', 'unsuccessfully reverse transaction - source account in status pending', (context) => {
+                    commonFunc.createStep('transaction.reverse.execute', 'unsuccessfully reverse transaction - source account in status pending', (context) => {
                         return {
                             transferId: context['successfully execute wallet-to-wallet transaction - to be reversed'].transferId
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
                     }),
                     userMethods.logout('logout teller 1', context => context['login teller 1']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2956,7 +2926,6 @@ module.exports = function(opt, cache) {
                                 accountNumber: accountReceiverNumber2,
                                 ownerId: customerActorId2,
                                 productId: context['add second product'].product[0].productId,
-                                stateId: accountReceiverState2,
                                 businessUnitId: orgId1
                             },
                             accountPerson: {
@@ -2970,12 +2939,12 @@ module.exports = function(opt, cache) {
                     }),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller 2', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
-                    commonFunc.createStep('transaction.reverse', 'unsuccessfully reverse transaction - destination account in status pending', (context) => {
+                    commonFunc.createStep('transaction.reverse.execute', 'unsuccessfully reverse transaction - destination account in status pending', (context) => {
                         return {
                             transferId: context['successfully execute wallet-to-wallet transaction - to be reversed'].transferId
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
                     }),
                     userMethods.logout('logout teller 2', context => context['login teller 2']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2993,21 +2962,21 @@ module.exports = function(opt, cache) {
                     userMethods.login('login teller 3', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set balance in sender account > product MAXACCOUNTBALANCE - REVERSALAMOUNTSENDER',
                         context => [accountSenderId2], commonFunc.roundNumber(MAXACCOUNTBALANCE - REVERSALAMOUNTSENDER + SMALLESTNUM, PRECISION)),
-                    commonFunc.createStep('transaction.reverse', 'unsuccessfully reverse transaction - source account balance exceeding product MAXACCOUNTBALANCE', (context) => {
+                    commonFunc.createStep('transaction.reverse.execute', 'unsuccessfully reverse transaction - source account balance exceeding product MAXACCOUNTBALANCE', (context) => {
                         return {
                             transferId: context['successfully execute wallet-to-wallet transaction - to be reversed'].transferId
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
                     transferMethods.setBalance('set balance in receiver account < product MINACCOUNTBALANCE + REVERSALAMOUNTRECEIVER',
                         context => [accountReceiverId2], commonFunc.roundNumber(MINACCOUNTBALANCE + REVERSALAMOUNTRECEIVER - SMALLESTNUM, PRECISION)),
-                    commonFunc.createStep('transaction.reverse', 'unsuccessfully reverse transaction - source account balance exceeding product MAXACCOUNTBALANCE', (context) => {
+                    commonFunc.createStep('transaction.reverse.execute', 'unsuccessfully reverse transaction - source account balance exceeding product MAXACCOUNTBALANCE', (context) => {
                         return {
                             transferId: context['successfully execute wallet-to-wallet transaction - to be reversed'].transferId
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
                     userMethods.logout('logout teller 3', context => context['login teller 3']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -3040,7 +3009,7 @@ module.exports = function(opt, cache) {
                     }),
                     userMethods.logout('logout user 19', context => context['login user 19']['identity.check'].sessionId),
                     userMethods.login('login teller 4', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
-                    commonFunc.createStep('transaction.reverse', 'successfully reverse transaction', (context) => {
+                    commonFunc.createStep('transaction.reverse.execute', 'successfully reverse transaction', (context) => {
                         return {
                             transferId: context['successfully execute wallet-to-wallet transaction - to be reversed 1'].transferId
                         };
@@ -3079,7 +3048,7 @@ module.exports = function(opt, cache) {
                             }
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute transaction - closed account', (context) => {
                         return {
@@ -3090,7 +3059,7 @@ module.exports = function(opt, cache) {
                             transferIdAcquirer: TRANSFERIDACQUIRER + 48
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
+                        assert.equals(error.type, transferConstants.ACCOUNTSTATUSFAILURE, 'Account status does not allow transactions.');
                     })
                     /** TODO Scenarios for state - transactions cannot be processed for account in state Blocked */
                 ])

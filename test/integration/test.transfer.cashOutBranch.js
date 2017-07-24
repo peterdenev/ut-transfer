@@ -13,6 +13,8 @@ var ruleJoiValidation = require('ut-test/lib/joiValidations/rule');
 var transferJoiValidation = require('ut-test/lib/joiValidations/transfer');
 var userJoiValidation = require('ut-test/lib/joiValidations/user');
 var productParams = require('ut-test/lib/requestParams/product');
+var accountConstants = require('ut-test/lib/constants/account').constants();
+var coreConstants = require('ut-test/lib/constants/core').constants();
 var customerConstants = require('ut-test/lib/constants/customer').constants();
 var documentConstants = require('ut-test/lib/constants/document').constants();
 var productConstants = require('ut-test/lib/constants/product').constants();
@@ -20,12 +22,6 @@ var ruleConstants = require('ut-test/lib/constants/rule').constants();
 var transferConstants = require('ut-test/lib/constants/transfer').constants();
 var userConstants = require('ut-test/lib/constants/user').constants();
 const TRANSFERIDACQUIRER = transferConstants.TRANSFERIDACQUIRER;
-const GETBYDEPTHORGANIZATION = customerConstants.GETBYDEPTHORGANIZATION;
-const RANDOMCONDITIONID = customerConstants.RANDOMCONDITIONID;
-const KYCDESCRIPTION = customerConstants.KYCDESCRIPTION;
-const PRODUCTNAME = productConstants.PRODUCTNAME;
-const STARTDATE = productConstants.STARTDATE;
-const ENDDATE = productConstants.ENDDATE;
 const PHONENUMBER = customerConstants.PHONENUMBER.slice(3);
 // Rule parameters
 const ACCOUNTTOBRANCHPERCENT = 100;
@@ -39,38 +35,18 @@ const FEETOOTHERTAXVALUE = TRANSACTIONFEE * FEETOOTHERTAXPERCENT / 100;
 // Balance parameters
 const MINACCOUNTBALANCE = 200;
 const MAXACCOUNTBALANCE = 10000;
-const PRECISION = 4;
-var SMALLESTNUM = 0.001;
+const PRECISION = transferConstants.PRECISION;
+var SMALLESTNUM = transferConstants.SMALLESTNUM;
 var successfulTransactionsCount = 0;
 const MINACCOUNTOPENINGBALANCE = 200;
 const DEFAULTCREDIT = 2000;
 const TRANSFERAMOUNT = 200;
-const ORGNAME = customerConstants.ORGNAME;
-const CURRENCY = 'currency';
-const OPERATION = 'operation';
-const TELLER = 'Teller';
-const CHANNELMOBILE = 'mobile';
-const IMEI = (Math.floor(100000000000000 + Math.random() * 999999999999999)).toString();
-const ACCOUNTNAME = 'TestAccount' + commonFunc.generateRandomNumber();
-// Errors
-const INSUFFICIENTBALANCEERROR = 'ledger.insufficientBalance';
-const ACCOUNTBALANCERESTRICTIONFAILURE = 'ledger.accountBalanceRestrictionFailure';
-const TRANSACTIONPERMISSIONERROR = 'transaction.noPermissions';
-const MINLIMITAMOUNTFAILURE = 'rule.exceedMinLimitAmount';
-const MAXLIMITAMOUNTFAILURE = 'rule.exceedMaxLimitAmount';
-const DAILYLIMITCOUNTERROR = 'rule.exceedDailyLimitCount';
-const WEEKLYLIMITCOUNTERROR = 'rule.exceedWeeklyLimitCount';
-const MONTHLYLIMITCOUNTERROR = 'rule.exceedMonthlyLimitCount';
-const DAILYLIMITAMOUNTERROR = 'rule.exceedDailyLimitAmount';
-const WEEKLYLIMITAMOUNTERROR = 'rule.exceedWeeklyLimitAmount';
-const MONTHLYLIMITAMOUNTERROR = 'rule.exceedMonthlyLimitAmount';
-const TRANSFERIDALREADYEXISTS = 'transfer.idAlreadyExists';
-const ACCOUNTNOTFOUNDERROR = 'transaction.accountNotFound';
+const ACCOUNTNAME = accountConstants.ACCOUNTNAME;
 var conditionId, orgId1, organizationDepthArray;
 var currencyName1, priority;
 var operationIdCashOutBranch, operationeCodeCashOutBranch, operationNameCashOutBranch;
 var customerTypeIndividual, customerActorId, currencyId, category1, category2, productType, productTypeId, periodicFeeId, productGroup, productGroupId, roleTellerId;
-var accountId1, accountId2, accountNumber1, accountNumber2, stateId2;
+var accountId1, accountId2, accountNumber1, accountNumber2;
 var stdPolicy;
 
 // Wallet customer withdraws money from his/her wallet by visiting a branch
@@ -105,7 +81,7 @@ module.exports = function(opt, cache) {
                 }),
                 commonFunc.createStep('core.itemTranslation.fetch', 'fetch currencies', (context) => {
                     return {
-                        itemTypeName: CURRENCY
+                        itemTypeName: coreConstants.CURRENCY
                     };
                 }, (result, assert) => {
                     assert.equals(coreJoiValidation.validateFetchItemTranslation(result.itemTranslationFetch[0]).error, null, 'Return all details after listing itemName');
@@ -115,7 +91,7 @@ module.exports = function(opt, cache) {
                 }),
                 commonFunc.createStep('core.itemTranslation.fetch', 'fetch operations', (context) => {
                     return {
-                        itemTypeName: OPERATION
+                        itemTypeName: coreConstants.OPERATION
                     };
                 }, (result, assert) => {
                     assert.equals(coreJoiValidation.validateFetchItemTranslation(result.itemTranslationFetch[0]).error, null, 'Return all details after listing itemName');
@@ -142,7 +118,7 @@ module.exports = function(opt, cache) {
                 }),
                 commonFunc.createStep('core.configuration.fetch', 'fetch defaultBu setting', (context) => {
                     return {
-                        key: GETBYDEPTHORGANIZATION
+                        key: customerConstants.GETBYDEPTHORGANIZATION
                     };
                 }, (result, assert) => {
                     var orgDepth = result[0][0].value;
@@ -157,7 +133,7 @@ module.exports = function(opt, cache) {
                                 commonFunc.createStep('customer.organization.add', 'add organization', context2 => {
                                     return {
                                         organization: {
-                                            organizationName: ORGNAME
+                                            organizationName: customerConstants.ORGNAME
                                         },
                                         parent: [orgId1]
                                     };
@@ -192,11 +168,11 @@ module.exports = function(opt, cache) {
                             customerTypeId: customerTypeIndividual,
                             organizationId: orgId1,
                             itemNameId: context['get levels for creating kyc 1'].levels[0].itemNameId,
-                            conditionId: RANDOMCONDITIONID,
+                            conditionId: customerConstants.RANDOMCONDITIONID,
                             attributeId: context['list kyc attributes 1'].kycAttributes[0].itemNameId
 
                         };
-                    }, KYCDESCRIPTION),
+                    }, customerConstants.KYCDESCRIPTION),
                     commonFunc.createStep('customer.customerCategory.fetch', 'fetch customer categories', (context) => {
                         return {};
                     }, (result, assert) => {
@@ -218,7 +194,7 @@ module.exports = function(opt, cache) {
                             lng: customerConstants.LNG,
                             actorDevice: {
                                 installationId: customerConstants.INSTALLATIONID,
-                                imei: IMEI
+                                imei: customerConstants.IMEI
                             }
                         };
                     }, (result, assert) => {
@@ -237,14 +213,6 @@ module.exports = function(opt, cache) {
                         productGroup = result.account[0].productGroup;
                         productType = result.account[0].productType;
                     }),
-                    // get state id - to be removed later
-                    commonFunc.createStep('ledger.account.get', 'get default customer account', context => {
-                        return {
-                            accountId: context['fetch default customer account'].account[0].accountId
-                        };
-                    }, (result, assert) => {
-                        // console.log(result);
-                    }),
                     commonFunc.createStep('user.user.get', 'get user details', (context) => {
                         return {
                             actorId: customerActorId
@@ -252,7 +220,7 @@ module.exports = function(opt, cache) {
                     }, (result, assert) => {
                         assert.equals(customerJoiValidation.validateGetPerson(result.person, customerConstants.FIRSTNAME).error, null, 'return person');
                         assert.equals(result['user.hash'][0].identifier, PHONENUMBER, 'return username = customer phone number in user.hash');
-                        roleTellerId = result.rolesPossibleForAssign.find(role => role.name === TELLER).roleId;
+                        roleTellerId = result.rolesPossibleForAssign.find(role => role.name === transferConstants.TELLER).roleId;
                     }),
                     userMethods.addUser('add teller', context => {
                         return {
@@ -288,18 +256,18 @@ module.exports = function(opt, cache) {
                             customerTypeId: customerTypeIndividual,
                             businessUnitId: orgId1,
                             currencyId: currencyId,
-                            startDate: STARTDATE,
-                            endDate: ENDDATE,
+                            startDate: productConstants.STARTDATE,
+                            endDate: productConstants.ENDDATE,
                             minAccountOpeningBalance: MINACCOUNTOPENINGBALANCE,
                             kyc: [context['add kyc 1'].kyc[0].kycId],
                             customerCategory: [category1, category2],
                             productTypeId: productTypeId,
                             periodicFeeId: periodicFeeId
                         };
-                    }, PRODUCTNAME + 1),
+                    }, productConstants.PRODUCTNAME + 1),
                     (result, assert) => {
                         assert.equals(productJoiValidation.validateAddProduct(result).error, null, 'Return all details after adding a product');
-                        assert.equals(result.product[0].name, PRODUCTNAME + 1, 'return product name');
+                        assert.equals(result.product[0].name, productConstants.PRODUCTNAME + 1, 'return product name');
                     }),
                     productMethods.getProduct('get product 1', (context) => context['add product'].product[0].productId),
                     productMethods.approveProduct('approve product', context => {
@@ -366,14 +334,14 @@ module.exports = function(opt, cache) {
                                 priority: priority - 1
                             },
                             conditionItem: [{
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdCashOutBranch
                             }, {
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             split: {
@@ -381,7 +349,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Transfer amount',
-                                            tag: '|acquirer|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -392,7 +360,7 @@ module.exports = function(opt, cache) {
                                         splitAssignment: [{
                                             // Pulls funds from the sender customer account and sends them to the bank account.
                                             // The sent amount is percent(ACCOUNTTOBRANCHPERCENT) of the transferred amount defined in transaction.execute
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.bankAccount,
                                             percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Transfer amount'
@@ -400,7 +368,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -411,7 +379,7 @@ module.exports = function(opt, cache) {
                                         splitAssignment: [{
                                             // Pulls funds from the sender customer account and sends them to the GL fee account.
                                             // The sent amount is percent of the amount defined in the split range (TRANSACTIONFEEPERCENT * TRANSACTIONFEE / 100)
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
@@ -419,7 +387,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee - GL',
-                                            tag: '|issuer|tax|'
+                                            tag: ruleConstants.FEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -435,8 +403,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             // Pulls funds from the GL fee account and sends them to the GL other tax account.
@@ -446,8 +414,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -469,7 +437,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transaction');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transaction');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully cash out at branch - missing permissions', (context) => {
                         return {
@@ -481,7 +449,7 @@ module.exports = function(opt, cache) {
                         };
                     }, null,
                         (error, assert) => {
-                            assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transaction');
+                            assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transaction');
                         }),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     commonFunc.createStep('identity.check', 'login user 1', (context) => {
@@ -491,7 +459,7 @@ module.exports = function(opt, cache) {
                             newPassword: userConstants.ADMINPASSWORD,
                             uri: userConstants.URI,
                             timezone: userConstants.TIMEZONE,
-                            channel: CHANNELMOBILE
+                            channel: userConstants.MOBCHANNEL
                         };
                     }, (result, assert) => {
                         assert.equals(userJoiValidation.validateLogin(result['identity.check']).error, null, 'Return all details after login a user');
@@ -529,7 +497,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, INSUFFICIENTBALANCEERROR, 'Insufficient balance in customer account');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance in customer account');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - insufficient balance in customer account', (context) => {
                         return {
@@ -540,7 +508,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, INSUFFICIENTBALANCEERROR, 'Insufficient balance in customer account');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance in customer account');
                     }),
                     transferMethods.setBalance('set customer account balance equal to TRANSFERAMOUNT',
                         context => [accountId1], TRANSFERAMOUNT + TRANSACTIONFEEVALUE),
@@ -603,7 +571,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - customer balance exceeding product maxAccountBalance', (context) => {
                         return {
@@ -614,7 +582,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
                     transferMethods.setBalance('set customer account balance equal to MAXACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
                         context => [accountId1], commonFunc.roundNumber(MAXACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE, PRECISION)),
@@ -662,7 +630,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - customer balance less than product minAccountBalance', (context) => {
                         return {
@@ -673,7 +641,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
                     transferMethods.setBalance('set customer account balance equal to MAXACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
                         context => [accountId1], commonFunc.roundNumber(MINACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE, PRECISION)),
@@ -711,16 +679,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             limit: [{
@@ -733,7 +701,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Transfer amount',
-                                            tag: '|acquirer|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -742,7 +710,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.bankAccount,
                                             percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
@@ -750,7 +718,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -759,7 +727,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
@@ -767,7 +735,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee - GL',
-                                            tag: '|issuer|tax|'
+                                            tag: ruleConstants.FEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -781,8 +749,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeCashOutBranch,
@@ -790,8 +758,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -818,7 +786,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSFERIDALREADYEXISTS, 'transferIdAcquirer must be unique');
+                        assert.equals(error.type, transferConstants.TRANSFERIDALREADYEXISTS, 'transferIdAcquirer must be unique');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxCountDaily transactions', (context) => {
                         return {
@@ -850,7 +818,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
+                        assert.equals(error.type, transferConstants.DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - exceeding the limits of rule maxCountDaily transactions', (context) => {
                         return {
@@ -861,16 +829,14 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
+                        assert.equals(error.type, transferConstants.DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
                     }),
                     userMethods.logout('logout teller 4', context => context['login teller 4']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    // TODO
                     accountMethods.getAccountBalance('get customer account balance 4', context => accountId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 4', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 4', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 4', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
-                    // CONTINUE TODO
                     commonFunc.createStep('db/rule.rule.edit', 'edit rule - add minAmount, maxAmount limits', (context) => {
                         return {
                             condition: {
@@ -879,16 +845,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             limit: [{
@@ -902,7 +868,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Transfer amount',
-                                            tag: '|acquirer|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -911,7 +877,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.bankAccount,
                                             percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
@@ -919,7 +885,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -928,7 +894,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
@@ -936,7 +902,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee - GL',
-                                            tag: '|issuer|tax|'
+                                            tag: ruleConstants.FEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -950,8 +916,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeCashOutBranch,
@@ -959,8 +925,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -990,7 +956,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MINLIMITAMOUNTFAILURE, 'Transaction amount is below minimum');
+                        assert.equals(error.type, transferConstants.MINLIMITAMOUNTERROR, 'Transaction amount is below minimum');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - amount less than rule minAmount limit', (context) => {
                         return {
@@ -1001,7 +967,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MINLIMITAMOUNTFAILURE, 'Transaction amount is below minimum');
+                        assert.equals(error.type, transferConstants.MINLIMITAMOUNTERROR, 'Transaction amount is below minimum');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - amount more than rule maxAmount limit', (context) => {
                         return {
@@ -1014,7 +980,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MAXLIMITAMOUNTFAILURE, 'Transaction amount is above maximum');
+                        assert.equals(error.type, transferConstants.MAXLIMITAMOUNTERROR, 'Transaction amount is above maximum');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - amount more than rule maxAmount limit', (context) => {
                         return {
@@ -1025,7 +991,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MAXLIMITAMOUNTFAILURE, 'Transaction amount is above maximum');
+                        assert.equals(error.type, transferConstants.MAXLIMITAMOUNTERROR, 'Transaction amount is above maximum');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of min and max amount', (context) => {
                         return {
@@ -1060,16 +1026,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             limit: [{
@@ -1082,7 +1048,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Transfer amount',
-                                            tag: '|acquirer|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1091,7 +1057,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.bankAccount,
                                             percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
@@ -1099,7 +1065,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1108,7 +1074,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
@@ -1116,7 +1082,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee - GL',
-                                            tag: '|issuer|tax|'
+                                            tag: ruleConstants.FEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1130,8 +1096,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeCashOutBranch,
@@ -1139,8 +1105,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1169,7 +1135,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum daily amount');
+                        assert.equals(error.type, transferConstants.DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum daily amount');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - daily amount more than rule maxAmountDaily limit', (context) => {
                         return {
@@ -1180,7 +1146,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum daily amount');
+                        assert.equals(error.type, transferConstants.DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum daily amount');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxAmountDaily limit', (context) => {
                         return {
@@ -1215,16 +1181,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             limit: [{
@@ -1237,7 +1203,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Transfer amount',
-                                            tag: '|acquirer|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1246,7 +1212,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.bankAccount,
                                             percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
@@ -1254,7 +1220,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1263,7 +1229,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
@@ -1271,7 +1237,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee - GL',
-                                            tag: '|issuer|tax|'
+                                            tag: ruleConstants.FEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1285,8 +1251,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeCashOutBranch,
@@ -1294,8 +1260,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1324,7 +1290,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
+                        assert.equals(error.type, transferConstants.WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - weekly amount more than rule maxAmountWeekly limit', (context) => {
                         return {
@@ -1335,7 +1301,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
+                        assert.equals(error.type, transferConstants.WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxAmountWeekly limit', (context) => {
                         return {
@@ -1370,16 +1336,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             limit: [{
@@ -1392,7 +1358,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Transfer amount',
-                                            tag: '|acquirer|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1401,7 +1367,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.bankAccount,
                                             percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
@@ -1409,7 +1375,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1418,7 +1384,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
@@ -1426,7 +1392,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee - GL',
-                                            tag: '|issuer|tax|'
+                                            tag: ruleConstants.FEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1440,8 +1406,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeCashOutBranch,
@@ -1449,8 +1415,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1498,7 +1464,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
+                        assert.equals(error.type, transferConstants.WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - rule maxCountWeekly limit already reached', (context) => {
                         return {
@@ -1509,7 +1475,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
+                        assert.equals(error.type, transferConstants.WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
                     }),
                     userMethods.logout('logout teller 8', context => context['login teller 8']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1525,16 +1491,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             limit: [{
@@ -1547,7 +1513,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Transfer amount',
-                                            tag: '|acquirer|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1556,7 +1522,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.bankAccount,
                                             percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
@@ -1564,7 +1530,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1573,7 +1539,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
@@ -1581,7 +1547,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee - GL',
-                                            tag: '|issuer|tax|'
+                                            tag: ruleConstants.FEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1595,8 +1561,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeCashOutBranch,
@@ -1604,8 +1570,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1634,7 +1600,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
+                        assert.equals(error.type, transferConstants.MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - monthly amount more than rule maxAmountMonthly limit', (context) => {
                         return {
@@ -1645,7 +1611,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
+                        assert.equals(error.type, transferConstants.MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
                     }),
                     commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxAmountMonthly limit', (context) => {
                         return {
@@ -1680,16 +1646,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             limit: [{
@@ -1702,7 +1668,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Transfer amount',
-                                            tag: '|acquirer|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1711,7 +1677,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.bankAccount,
                                             percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
@@ -1719,7 +1685,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1728,7 +1694,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
@@ -1736,7 +1702,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee - GL',
-                                            tag: '|issuer|tax|'
+                                            tag: ruleConstants.FEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1750,8 +1716,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeCashOutBranch,
@@ -1759,8 +1725,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1808,7 +1774,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
+                        assert.equals(error.type, transferConstants.MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - rule maxCountDaily limit already reached', (context) => {
                         return {
@@ -1819,7 +1785,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
+                        assert.equals(error.type, transferConstants.MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
                     }),
                     userMethods.logout('logout teller 10', context => context['login teller 10']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1835,16 +1801,16 @@ module.exports = function(opt, cache) {
                             },
                             conditionItem: [{
                                 conditionId: conditionId,
-                                factor: 'oc', // operation.id
+                                factor: ruleConstants.OPERATIONCATEGORY, // operation.id
                                 itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
-                                factor: 'sc', // source.account.product
+                                factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
                                 conditionId: conditionId,
-                                factor: 'co', // role
+                                factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
                             split: {
@@ -1852,7 +1818,7 @@ module.exports = function(opt, cache) {
                                     rows: [{
                                         splitName: {
                                             name: 'Transfer amount',
-                                            tag: '|acquirer|'
+                                            tag: ruleConstants.ACQUIRERTAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1861,7 +1827,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.bankAccount,
                                             percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
@@ -1869,7 +1835,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee',
-                                            tag: '|acquirer|fee|'
+                                            tag: ruleConstants.ACQUIRERFEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1878,7 +1844,7 @@ module.exports = function(opt, cache) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: transferConstants.SOURCEACCOUNTNUMBER,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
                                             credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
@@ -1886,7 +1852,7 @@ module.exports = function(opt, cache) {
                                     }, {
                                         splitName: {
                                             name: 'Transfer fee - GL',
-                                            tag: '|issuer|tax|'
+                                            tag: ruleConstants.FEETAG
                                         },
                                         splitRange: [{
                                             startAmount: 0,
@@ -1900,8 +1866,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.VAT
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.VAT
                                             }
                                         }, {
                                             debit: opt.feeCashOutBranch,
@@ -1909,8 +1875,8 @@ module.exports = function(opt, cache) {
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
-                                                name: transferConstants.FEETYPE,
-                                                value: transferConstants.OTHERTAX
+                                                name: ruleConstants.FEETYPE,
+                                                value: ruleConstants.OTHERTAX
                                             }
                                         }]
                                     }]
@@ -1938,7 +1904,6 @@ module.exports = function(opt, cache) {
                         assert.equals(accountJoiValidation.validateAddAccount(result).error, null, 'Return all details after adding an account');
                         accountId2 = result.account[0].accountId;
                         accountNumber2 = result.account[0].accountNumber;
-                        stateId2 = result.account[0].stateId;
                     }),
                     transferMethods.setBalance('set default balance in all accounts 7',
                         context => [context['fetch fee account id'].account[0].accountId,
@@ -1958,7 +1923,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
+                        assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - source account in status new', (context) => {
                         return {
@@ -1969,7 +1934,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
+                        assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
                     userMethods.logout('logout teller 11', context => context['login teller 11']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -1991,7 +1956,6 @@ module.exports = function(opt, cache) {
                                 accountNumber: accountNumber2,
                                 ownerId: customerActorId,
                                 productId: context['add product'].product[0].productId,
-                                stateId: stateId2,
                                 businessUnitId: orgId1
                             },
                             accountPerson: {
@@ -2021,7 +1985,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - source account in status pending', (context) => {
                         return {
@@ -2032,7 +1996,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout teller 12', context => context['login teller 12']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2059,7 +2023,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - source account in status rejected', (context) => {
                         return {
@@ -2070,7 +2034,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout teller 13', context => context['login teller 13']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2122,7 +2086,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - GL account as source account', (context) => {
                         return {
@@ -2133,7 +2097,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     userMethods.logout('logout teller 14', context => context['login teller 14']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -2151,7 +2115,6 @@ module.exports = function(opt, cache) {
                                 accountNumber: context['fetch default customer account'].account[0].accountNumber,
                                 ownerId: customerActorId,
                                 productId: context['add product'].product[0].productId,
-                                stateId: context['get default customer account'].account[0].stateId,
                                 businessUnitId: orgId1
                             },
                             accountPerson: {
@@ -2242,7 +2205,7 @@ module.exports = function(opt, cache) {
                         assert.equals(result.transferFee, TRANSACTIONFEEVALUE, 'return correct transfer fee');
                         assert.equals(transferJoiValidation.validateGetTransaction(result).error, null, 'return transaction information');
                     }),
-                    commonFunc.createStep('transaction.reverse', 'successfully reverse transaction', (context) => {
+                    commonFunc.createStep('transaction.reverse.execute', 'successfully reverse transaction', (context) => {
                         return {
                             transferId: context['successfully execute transaction'].transferId,
                             message: transferConstants.REVERSALMESSAGE
@@ -2286,7 +2249,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully execute transaction -  closed account', (context) => {
                         return {
@@ -2297,7 +2260,7 @@ module.exports = function(opt, cache) {
                             description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
-                        assert.equals(error.type, TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     })
                 ])
             );

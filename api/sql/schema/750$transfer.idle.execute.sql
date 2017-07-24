@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[idle.execute]
+ALTER PROCEDURE  [transfer].[idle.execute] 
     @issuerPort varchar(50)
 AS
 DECLARE @callParams XML
@@ -65,7 +65,7 @@ BEGIN TRY
                     [transfer].[transfer] t
                 JOIN
                     [transfer].[partner] p ON p.port = @issuerPort AND (((
-                       (t.issuerTxState = 2 AND ISNULL(t.acquirerTxState, 0) IN (0 , 3, 4, 5) AND p.mode = 'online') OR                --tx succeeded at issuer during online but failed at acquirer and current mode is online
+                       (t.issuerTxState = 2 AND ISNULL(t.acquirerTxState, 0) IN (0 , 3, 4, 5) AND p.mode = 'online' AND t.channelType IN ('ATM')) OR --tx succeeded at issuer during online but failed at acquirer and current mode is online
                        (t.issuerTxState = 8 AND ISNULL(t.acquirerTxState, 0) IN (0 , 3, 4, 5) AND p.mode IN ('online', 'offline')) OR --tx succeeded at issuer during offline but failed at acquirer and current mode is online/offline
                        (ISNULL(t.merchantTxState, 0) IN (1, 3)) OR                                                               --tx failed at merchant (succeeded at issuer implicitly)
                        (t.issuerTxState IN (1,4) AND p.mode = 'online') OR                                                    --tx timed out at issuer during online and current mode is online
@@ -80,7 +80,7 @@ BEGIN TRY
                     20 > ISNULL(t.expireCount, 0) AND
                     GETDATE() >= t.expireTime AND
                     t.transferDateTime > DATEADD(DAY, -1, GETDATE()) AND
-                    t.channelType IN ('ATM')
+                    t.channelType IN ('ATM', 'web')
                 ORDER
                     BY t.expireTime, t.transferId
             )
@@ -133,6 +133,8 @@ BEGIN TRY
         SELECT 0 result WHERE 1 = 2
     END ELSE
     BEGIN
+        SELECT 'transferInfo' AS resultSetName
+
         SELECT TOP 1
             @mtid mti,
             @opcode operation,
@@ -153,9 +155,12 @@ BEGIN TRY
             t.transferId,
             t.transferIdAcquirer,
             t.sourceAccount,
-            t.destinationAccount
+            t.destinationAccount,
+            cin.itemCode
         FROM
             [transfer].[transfer] t
+        JOIN
+            core.itemName cin ON cin.itemNameId = t.transferTypeId
         LEFT JOIN
             [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
         LEFT JOIN
@@ -164,6 +169,29 @@ BEGIN TRY
             t.transferId = @txid
         ORDER BY
             e.eventDateTime, e.eventId
+
+        SELECT 'split' AS resultSetName
+        
+        SELECT 
+            splitId, 
+            transferId,
+            conditionId, 
+            splitNameId, 
+            debit, 
+            credit, 
+            amount, 
+            [description], 
+            tag, 
+            debitActorId, 
+            creditActorId, 
+            debitItemId, 
+            creditItemId, 
+            [state], 
+            transferIdPayment
+        FROM
+            [transfer].[split]
+        WHERE
+            transferId = @txid
     END
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams

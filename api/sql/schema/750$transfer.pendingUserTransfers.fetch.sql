@@ -1,4 +1,4 @@
-CREATE PROCEDURE [transfer].[pendingUserTransfers.fetch] -- this SP fetches the open push requests of the user
+ALTER PROCEDURE [transfer].[pendingUserTransfers.fetch] -- this SP fetches the open push requests of the user
     @userAvailableAccounts core.arrayList READONLY, -- available accounts for the user maiking the operation
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
@@ -14,23 +14,29 @@ END
 
 SELECT 'pushTransactions' AS resultSetName
 SELECT
-    t.*
+    t.*,
+    cin.itemCode
 FROM
     [transfer].[transfer] t
 JOIN
     [transfer].pending tp ON tp.[pullTransactionId] = t.[transferId]
 JOIN
     @userAvailableAccounts an ON an.[value] = tp.[approvalAccountNumber]
+JOIN
+    core.itemName cin ON cin.itemNameId = t.transferTypeId
 WHERE
     tp.[status] = 1
 
 SELECT 'pullTransactions' AS resultSetName
 SELECT
-    t.*
+    t.*,
+    cin.itemCode
 FROM
     [transfer].[transfer] t
 JOIN
     [transfer].pending tp ON tp.[pullTransactionId] = t.[transferId]
+JOIN
+    core.itemName cin ON cin.itemNameId = t.transferTypeId
 WHERE
     t.channelId = @userId AND
     tp.[status] = 1
