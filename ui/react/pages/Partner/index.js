@@ -56,7 +56,7 @@ class Partner extends Component {
     getButtons() {
         let buttons = [];
         if (this.context.checkPermission('transfer.partner.add')) {
-            buttons.push({text: 'Create Partner', onClick: this.props.openCreatePartnerPopup});
+            buttons.push({text: 'Create Partner', onClick: this.props.openCreatePartnerPopup, styleType: 'primaryLight'});
         }
 
         return buttons;
