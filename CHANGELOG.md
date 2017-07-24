@@ -1,3 +1,13 @@
+<a name="6.17.0"></a>
+# [6.17.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.16.0...v6.17.0) (2017-07-24)
+
+
+### Features
+
+* web channel ([#70](https://github.com/softwaregroup-bg/ut-transfer/issues/70)) ([2f33907](https://github.com/softwaregroup-bg/ut-transfer/commit/2f33907))
+
+
+
 <a name="6.16.0"></a>
 # [6.16.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.7...v6.16.0) (2017-07-24)
 
