@@ -16,7 +16,8 @@ USING
         ('changePin', 'PIN change'),
         ('loanDisburse', 'Loan disbursement'),
         ('loanRepay', 'Loan repayment'),
-        ('forex', 'Foreign currency exchange')
+        ('forex', 'Foreign currency exchange'),
+        ('tia', 'Teller initiated audit')
     ) AS source (itemCode, itemName)
 JOIN
 	core.itemType t on t.alias='operation'

@@ -1,3 +1,13 @@
+<a name="6.15.8"></a>
+## [6.15.8](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.7...v6.15.8) (2017-07-20)
+
+
+### Features
+
+* tia ([aa0f3b8](https://github.com/softwaregroup-bg/ut-transfer/commit/aa0f3b8))
+
+
+
 <a name="6.15.7"></a>
 ## [6.15.7](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.15.6...v6.15.7) (2017-07-12)
 
