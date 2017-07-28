@@ -1,3 +1,13 @@
+<a name="6.17.2"></a>
+## [6.17.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.17.1...v6.17.2) (2017-07-28)
+
+
+### Bug Fixes
+
+* remove extra space ([#76](https://github.com/softwaregroup-bg/ut-transfer/issues/76)) ([24d0054](https://github.com/softwaregroup-bg/ut-transfer/commit/24d0054))
+
+
+
 <a name="6.17.1"></a>
 ## [6.17.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.17.0...v6.17.1) (2017-07-24)
 
