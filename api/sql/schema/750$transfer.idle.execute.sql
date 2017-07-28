@@ -1,4 +1,4 @@
-ALTER PROCEDURE  [transfer].[idle.execute] 
+ALTER PROCEDURE [transfer].[idle.execute] 
     @issuerPort varchar(50)
 AS
 DECLARE @callParams XML
