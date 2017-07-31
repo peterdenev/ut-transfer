@@ -1,3 +1,13 @@
+<a name="6.17.3"></a>
+## [6.17.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.17.2...v6.17.3) (2017-07-31)
+
+
+### Bug Fixes
+
+* vTransfer to include 'web' channel type ([#77](https://github.com/softwaregroup-bg/ut-transfer/issues/77)) ([5c6f878](https://github.com/softwaregroup-bg/ut-transfer/commit/5c6f878))
+
+
+
 <a name="6.17.2"></a>
 ## [6.17.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.17.1...v6.17.2) (2017-07-28)
 
