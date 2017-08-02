@@ -70,7 +70,7 @@ export function transferPartnersGrid(state = defaultState, action) {
                     .update('checkedRowsChangeId', (v) => (v + 1));
             } else {
                 return state
-                    .set('checkedRows', state.get('applications').toMap())
+                    .set('checkedRows', state.get('partners').toMap())
                     .update('checkedRowsChangeId', (v) => (v + 1));
             }
     }
