@@ -1,3 +1,13 @@
+<a name="6.17.4"></a>
+## [6.17.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.17.3...v6.17.4) (2017-08-02)
+
+
+### Bug Fixes
+
+* check all items on grid, UIS-3173 ([#78](https://github.com/softwaregroup-bg/ut-transfer/issues/78)) ([3e32b12](https://github.com/softwaregroup-bg/ut-transfer/commit/3e32b12))
+
+
+
 <a name="6.17.3"></a>
 ## [6.17.3](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.17.2...v6.17.3) (2017-07-31)
 
