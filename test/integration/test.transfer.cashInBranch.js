@@ -501,7 +501,7 @@ module.exports = function(opt, cache) {
                     userMethods.logout('logout admin 1', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller 2', userConstants.USERNAME, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
                     transferMethods.setBalance('set customer account balance > MAXACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
-                        context => [accountId1], commonFunc.roundNumber(MAXACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE + SMALLESTNUM, PRECISION)),
+                        context => accountId1, commonFunc.roundNumber(MAXACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE + SMALLESTNUM, PRECISION)),
                     transferMethods.setBalance('set default balance in fee, vat and otherTax accounts',
                         context => [context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
@@ -2361,7 +2361,7 @@ module.exports = function(opt, cache) {
                     /** Scenarios for state */
                     transferMethods.setBalance('set account 1 balance to 0',
                         context => [accountId1], 0),
-                    accountMethods.closeAccount('close account 1', context => [accountId1]),
+                    accountMethods.closeAccount('close account 1', context => accountId1),
                     accountMethods.approveAccount('approve closing of account', context => {
                         return {
                             accountId: accountId1

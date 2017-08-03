@@ -606,7 +606,7 @@ module.exports = function(opt, cache) {
                     }),
                     /** Scenarios for product which is with min account balance */
                     transferMethods.setBalance('set agent account balance less than product min account balance + transaction fee + transfer amount',
-                        context => [accountId1], commonFunc.roundNumber(MINACCOUNTBALANCE + TRANSACTIONFEEVALUE + TRANSFERAMOUNT - SMALLESTNUM, PRECISION)),
+                        context => accountId1, commonFunc.roundNumber(MINACCOUNTBALANCE + TRANSACTIONFEEVALUE + TRANSFERAMOUNT - SMALLESTNUM, PRECISION)),
                     transferMethods.setBalance('set default balance in fee, vat, otherTax and commission accounts',
                         context => [context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
@@ -635,7 +635,7 @@ module.exports = function(opt, cache) {
                         assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance in sender account');
                     }),
                     transferMethods.setBalance('set sender account balance equal to product min account balance + transaction fee + transfer amount',
-                        context => [accountId1], commonFunc.roundNumber(MINACCOUNTBALANCE + TRANSACTIONFEEVALUE + TRANSFERAMOUNT, PRECISION)),
+                        context => accountId1, commonFunc.roundNumber(MINACCOUNTBALANCE + TRANSACTIONFEEVALUE + TRANSFERAMOUNT, PRECISION)),
                     commonFunc.createStep('transaction.validate', 'successful transaction validation - sufficient balance in sender account', (context) => {
                         return {
                             transferType: operationCodeCashInBank,
@@ -1127,8 +1127,8 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get otherTax account balance 4', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
                     /** Negative scenario for closed account */
                     transferMethods.setBalance('set agent wallet balance to 0',
-                        context => [accountId1], 0),
-                    accountMethods.closeAccount('close account', context => [accountId1]),
+                        context => accountId1, 0),
+                    accountMethods.closeAccount('close account', context => accountId1),
                     accountMethods.approveAccount('approve close of account', context => {
                         return {
                             accountId: accountId1

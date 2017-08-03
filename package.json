@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.17.4",
+  "version": "6.18.0-updateTests.0",
   "main": "./index.js",
   "dependencies": {
     "immutable": "^3.8.1",

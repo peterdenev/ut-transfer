@@ -1171,7 +1171,7 @@ module.exports = function(opt, cache) {
                     userMethods.logout('logout merchant 5', context => context['login merchant 5']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.rejectAccount('reject sender account 2', context => accountMerchantId1),
-                    accountMethods.closeAccount('close merchant account 3', context => [accountMerchantId3]),
+                    accountMethods.closeAccount('close merchant account 3', context => accountMerchantId3),
                     accountMethods.approveAccount('approve closing of merchant account 3', context => {
                         return {
                             accountId: accountMerchantId3

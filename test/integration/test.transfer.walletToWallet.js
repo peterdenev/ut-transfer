@@ -3025,8 +3025,8 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get vat account balance 19', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 19', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
                     transferMethods.setBalance('set receiver account 2 balance to 0',
-                        context => [accountReceiverId2], 0),
-                    accountMethods.closeAccount('close receiver account 2', context => [accountReceiverId2]),
+                        context => accountReceiverId2, 0),
+                    accountMethods.closeAccount('close receiver account 2', context => accountReceiverId2),
                     accountMethods.approveAccount('approve closing of account', context => {
                         return {
                             accountId: accountReceiverId2

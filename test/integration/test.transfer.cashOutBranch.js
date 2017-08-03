@@ -2230,7 +2230,7 @@ module.exports = function(opt, cache) {
                     /** Scenarios for state */
                     transferMethods.setBalance('set account 1 balance to 0',
                         context => [accountId1], 0),
-                    accountMethods.closeAccount('close account 1', context => [accountId1]),
+                    accountMethods.closeAccount('close account 1', context => accountId1),
                     accountMethods.approveAccount('approve closing of account', context => {
                         return {
                             accountId: accountId1

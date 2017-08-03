@@ -712,7 +712,7 @@ module.exports = function(opt, cache) {
                         context => [context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    accountMethods.closeAccount('close account 3', context => [context['add account 3'].account[0].accountId]),
+                    accountMethods.closeAccount('close account 3', context => context['add account 3'].account[0].accountId),
                     accountMethods.approveAccount('approve closing of account 3', context => {
                         return {
                             accountId: context['add account 3'].account[0].accountId

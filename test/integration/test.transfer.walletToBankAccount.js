@@ -948,12 +948,13 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get vat account balance 4', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 4', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT + FEETOOTHERTAXVALUE, PRECISION),
                     /** Negative scenario for closed account */
-                    accountMethods.closeAccount('close account', context => [accountId1]),
+                    transferMethods.setBalance('set account balance to 0',
+                        context => [accountId1], 0),
+                    accountMethods.closeAccount('close account', context => accountId1),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.loginMobile('login customer 6', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 4',
-                        context => [accountId1,
-                            context['fetch fee account id'].account[0].accountId,
+                        context => [context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     // Customer's account is pending for closing (not approved). Transactions should be processed successfully.
@@ -1015,7 +1016,7 @@ module.exports = function(opt, cache) {
                     }),
                     userMethods.logout('logout customer 7', context => context['login customer 7']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get sender account balance 5', context => accountId1, DEFAULTCREDIT),
+                    accountMethods.getAccountBalance('get sender account balance 5', context => accountId1, 0),
                     accountMethods.getAccountBalance('get fee account balance 5', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 5', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 5', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
@@ -1070,7 +1071,6 @@ module.exports = function(opt, cache) {
                     }),
                     userMethods.logout('logout customer 8', context => context['login customer 8']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get sender account balance 6', context => accountId1, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get fee account balance 6', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 6', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 6', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT)])
