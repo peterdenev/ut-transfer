@@ -1,3 +1,13 @@
+<a name="6.19.0"></a>
+# [6.19.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.18.1...v6.19.0) (2017-08-04)
+
+
+### Features
+
+* upgrade react ([62e90be](https://github.com/softwaregroup-bg/ut-transfer/commit/62e90be))
+
+
+
 <a name="6.18.1"></a>
 ## [6.18.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.18.0...v6.18.1) (2017-08-04)
 
