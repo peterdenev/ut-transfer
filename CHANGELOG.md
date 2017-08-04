@@ -1,3 +1,8 @@
+<a name="6.18.1"></a>
+## [6.18.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.18.0...v6.18.1) (2017-08-04)
+
+
+
 <a name="6.18.0"></a>
 # [6.18.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.17.4...v6.18.0) (2017-08-03)
 
