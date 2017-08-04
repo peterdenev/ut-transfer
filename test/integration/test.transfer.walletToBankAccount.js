@@ -950,7 +950,7 @@ module.exports = function(opt, cache) {
                     /** Negative scenario for closed account */
                     transferMethods.setBalance('set account balance to 0',
                         context => [accountId1], 0),
-                    accountMethods.closeAccount('close account', context => accountId1),
+                    accountMethods.closeAccount('close account', context => [accountId1]),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     userMethods.loginMobile('login customer 6', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 4',

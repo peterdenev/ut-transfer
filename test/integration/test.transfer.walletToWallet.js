@@ -868,9 +868,11 @@ module.exports = function(opt, cache) {
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }, {
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
@@ -1074,9 +1076,11 @@ module.exports = function(opt, cache) {
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }, {
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
@@ -1261,9 +1265,11 @@ module.exports = function(opt, cache) {
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }, {
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
@@ -1417,9 +1423,11 @@ module.exports = function(opt, cache) {
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }, {
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
@@ -1573,9 +1581,11 @@ module.exports = function(opt, cache) {
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }, {
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
@@ -1729,9 +1739,11 @@ module.exports = function(opt, cache) {
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }, {
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
@@ -1885,9 +1897,11 @@ module.exports = function(opt, cache) {
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }, {
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
@@ -2041,9 +2055,11 @@ module.exports = function(opt, cache) {
                                 itemNameId: context['get second product 2'].product[0].itemNameId
                             }],
                             conditionActor: [{
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleMobileClientId
                             }, {
+                                conditionId: conditionId,
                                 factor: ruleConstants.CHANNELORGANIZATION, // role
                                 actorId: roleTellerId
                             }],
@@ -3026,7 +3042,7 @@ module.exports = function(opt, cache) {
                     accountMethods.getAccountBalance('get otherTax account balance 19', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
                     transferMethods.setBalance('set receiver account 2 balance to 0',
                         context => accountReceiverId2, 0),
-                    accountMethods.closeAccount('close receiver account 2', context => accountReceiverId2),
+                    accountMethods.closeAccount('close receiver account 2', context => [accountReceiverId2]),
                     accountMethods.approveAccount('approve closing of account', context => {
                         return {
                             accountId: accountReceiverId2

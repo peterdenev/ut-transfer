@@ -1390,7 +1390,7 @@ module.exports = function(opt, cache) {
                             accountId: accountId2
                         };
                     }),
-                    accountMethods.closeAccount('close account 2', context => accountId2),
+                    accountMethods.closeAccount('close account 2', context => [accountId2]),
                     accountMethods.approveAccount('approve close of account', context => {
                         return {
                             accountId: accountId2
