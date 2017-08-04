@@ -1,3 +1,13 @@
+<a name="6.19.1"></a>
+## [6.19.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.19.0...v6.19.1) (2017-08-04)
+
+
+### Bug Fixes
+
+* upgrade ut-front-react? ([#81](https://github.com/softwaregroup-bg/ut-transfer/issues/81)) ([9861739](https://github.com/softwaregroup-bg/ut-transfer/commit/9861739))
+
+
+
 <a name="6.19.0"></a>
 # [6.19.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.18.1...v6.19.0) (2017-08-04)
 
