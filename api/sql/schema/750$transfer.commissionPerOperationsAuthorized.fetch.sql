@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[commissionPerOperationsNonAuthorized.fetch]-- fetch non authorised commissions per agent's operations
+ALTER PROCEDURE [transfer].[commissionPerOperationsAuthorized.fetch]-- fetch authorised commissions per agent's operations
     @actorId BIGINT, -- agent's actorId
     @dateFrom DATETIME = NULL, --start date 
     @dateTo DATETIME, --end date
@@ -22,7 +22,7 @@ BEGIN TRY
        -- @transferTypeId BIGINT,
         @sortBy varchar(50) = 'commission',
         @sortOrder varchar(4) = 'ASC'
-
+    
     SELECT 
         @sortBy = ISNULL([column],'commission'), 
         @sortOrder=ISNULL([direction],'ASC') 
@@ -30,28 +30,28 @@ BEGIN TRY
 
     SET @dateTo = DATEADD(day, 1, @dateTo)
     
-    IF OBJECT_ID('tempdb..#commissionPerOperationNonAuthorized') IS NOT NULL
-    DROP TABLE #commissionPerOperationNonAuthorized
+    IF OBJECT_ID('tempdb..#commissionPerOperationAuthorized') IS NOT NULL
+    DROP TABLE #commissionPerOperationAuthorized
 
-    CREATE TABLE #commissionPerOperationNonAuthorized
+    CREATE TABLE #commissionPerOperationAuthorized
     ( 
       transferTypeId BIGINT,
       operationName NVARCHAR(200),
       volume BIGINT,
       commission MONEY)
 
-    INSERT INTO #commissionPerOperationNonAuthorized( transferTypeId, operationName,  commission, volume )
+    INSERT INTO #commissionPerOperationAuthorized( transferTypeId, operationName,  commission, volume )
     SELECT 
         t.transferTypeId,
         i.itemName AS operationName,
         SUM (s.amount) AS commission,
         COUNT(*) AS volume
     FROM [transfer].split s
-    JOIN [transfer].[transfer] t ON t.transferId = s.transferId
+    JOIN [transfer].[transfer] t ON t.transferId = s.transferId 
     JOIN core.itemName i ON i.itemNameId = t.transferTypeId
     WHERE t.issuerTxState = 2 AND t.reversed = 0 AND s.actorId = @actorID
-    AND t.channelType ='agent'
-    AND s.[state] IS NULL AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
+    AND t.channelType ='agent' AND s.[state] = 4 
+    AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
     AND ( @dateFrom IS NULL OR t.transferDateTime >= @dateFrom )
     AND t.transferDateTime < @dateTo
     GROUP BY GROUPING SETS(
@@ -76,7 +76,7 @@ BEGIN TRY
                                         WHEN @sortBy = 'volume' THEN  volume    
                                     END
 					           END DESC) AS rowNum
-        FROM #commissionPerOperationNonAuthorized
+        FROM #commissionPerOperationAuthorized
         WHERE transferTypeId IS NOT NULL
         ORDER BY rowNum
     END
@@ -84,10 +84,10 @@ BEGIN TRY
     SELECT 'totalCommission' as resultSetName
 
     SELECT volume, commission
-    FROM #commissionPerOperationNonAuthorized
+    FROM #commissionPerOperationAuthorized
     WHERE transferTypeId  IS NULL
 
-    DROP TABLE #commissionPerOperationNonAuthorized
+    DROP TABLE #commissionPerOperationAuthorized
 END TRY
 BEGIN CATCH
     EXEC core.error

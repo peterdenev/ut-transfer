@@ -1,7 +1,7 @@
 ALTER PROCEDURE [transfer].[commissionPerAgent.authorize]-- authorized non authorised commissions per agents
     @actorList core.arrayNumberList READONLY,-- actorIds of the agents
-    @transferDateTimeFrom DATE = NULL, -- date from 
-    @transferDateTimeTo DATE = NULL,-- date to
+    @dateFrom DATETIME = NULL, --start date 
+    @dateTo DATETIME, --end date
 	@meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
 DECLARE @callParams XML
@@ -18,10 +18,8 @@ BEGIN TRY
          RETURN 55555
     END
  
-    IF @transferDateTimeTo IS NOT NULL
-    BEGIN
-        SET @transferDateTimeTo = DATEADD(day, 1, @transferDateTimeTo)
-    END
+    SET @dateTo = DATEADD(day, 1, @dateTo)
+
     IF NOT EXISTS ( SELECT value FROM @actorList WHERE value IS NOT NULL)
     BEGIN
         RAISERROR('commissionPerAgent.authorize.actorListMissing', 16, 1);
@@ -47,8 +45,8 @@ BEGIN TRY
             @actorList al ON al.value = s.actorId
         WHERE t.issuerTxState = 2 AND t.reversed = 0 AND t.channelType ='agent'
         AND s.[state] IS NULL AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
-        AND ( @transferDateTimeFrom IS NULL OR t.transferDateTime >= @transferDateTimeFrom )
-        AND ( @transferDateTimeTo IS NULL OR t.transferDateTime < @transferDateTimeTo )
+        AND ( @dateFrom IS NULL OR t.transferDateTime >= @dateFrom )
+        AND t.transferDateTime < @dateTo
          
         UPDATE s
         -- 4 -->authorized

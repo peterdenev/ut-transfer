@@ -2,7 +2,6 @@ ALTER PROCEDURE [transfer].[commissionPerAgentNonAuthorized.fetch]-- fetch non a
     @actorList core.arrayNumberList READONLY,-- actorIds of the agents
     @dateFrom DATETIME = NULL, --start date 
     @dateTo DATETIME, --end date
-    --@filterBy [transfer].filterByTT READONLY,-- information for filters
     @orderBy [transfer].orderByTT READONLY,-- information for ordering
 	@meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
@@ -31,12 +30,8 @@ BEGIN TRY
         @sortBy = ISNULL([column],'agentName'), 
         @sortOrder=ISNULL([direction],'ASC') 
     FROM @orderBy
-
-    --SELECT 
-    --    @transferDateTimeFrom = transferDateTimeFrom,
-    --    @transferDateTimeTo = DATEADD(day, 1, transferDateTimeTo)
-    --   -- ,@transferTypeId = transferTypeId
-    --FROM @filterBy
+    
+    SET @dateTo = DATEADD(day, 1, @dateTo)
 
     IF EXISTS ( SELECT value FROM @actorList WHERE value IS NOT NULL)
     BEGIN
@@ -58,11 +53,10 @@ BEGIN TRY
         SUM (s.amount) AS commission,
         COUNT(*) AS volume
     FROM [transfer].split s
-    JOIN [transfer].[transfer] t ON t.transferId = s.transferId /*AND t.channelID = s.ActorId */
-    --JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
+    JOIN [transfer].[transfer] t ON t.transferId = s.transferId 
     JOIN customer.person p ON p.actorId = s.actorId
     LEFT JOIN @actorList al ON al.value = s.actorId
-    WHERE t.issuerTxState = 2 AND t.reversed = 0 AND /*t.channelID = @actorID*/ /*s.actorId = @actorID  AND */t.channelType ='agent'
+    WHERE t.issuerTxState = 2 AND t.reversed = 0 AND t.channelType ='agent'
     AND s.[state] IS NULL AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
     AND ( @dateFrom  IS NULL OR t.transferDateTime >= @dateFrom )
     AND t.transferDateTime < @dateTo
@@ -100,14 +94,12 @@ BEGIN TRY
             ROW_NUMBER() OVER( ORDER BY
 					           CASE WHEN @sortOrder = 'ASC' THEN
 						            CASE
-                                        WHEN @sortBy = 'agentName' THEN agentName  
-                                       -- WHEN @sortBy = 'volume' THEN  convert(nvarchar(1000), volume)                 
+                                        WHEN @sortBy = 'agentName' THEN agentName           
 							        END
 					           END,
 					           CASE WHEN @sortOrder = 'DESC' THEN
 						            CASE
                                         WHEN @sortBy = 'agentName' THEN agentName
-                                       -- WHEN @sortBy = 'volume' THEN  convert(nvarchar(1000), volume)
                                     END
 					           END DESC) AS rowNum
         FROM #commissionNonAuthorized
