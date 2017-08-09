@@ -43,6 +43,7 @@ BEGIN TRY
     CREATE TABLE #commissionNonAuthorized
     ( actorId BIGINT,
       agentName NVARCHAR(1000),
+      userName NVARCHAR(200),
       volume BIGINT,
       commission MONEY)
 
@@ -50,11 +51,13 @@ BEGIN TRY
     SELECT 
         s.actorId,
         p.firstName + ''+ p.lastName AS agentName,
+        ha.identifier AS userName,
         SUM (s.amount) AS commission,
         COUNT(*) AS volume
     FROM [transfer].split s
     JOIN [transfer].[transfer] t ON t.transferId = s.transferId 
     JOIN customer.person p ON p.actorId = s.actorId
+    JOIN [user].[hash] ha ON ha.actorId = s.actorId AND ha.[type] = 'password' AND ha.isEnabled = 1
     LEFT JOIN @actorList al ON al.value = s.actorId
     WHERE t.issuerTxState = 2 AND t.reversed = 0 AND t.channelType ='agent'
     AND s.[state] IS NULL AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
@@ -62,7 +65,7 @@ BEGIN TRY
     AND t.transferDateTime < @dateTo
     AND ( @hasActorList = 0 OR al.value IS NOT NULL)
     GROUP BY GROUPING SETS(
-        (s.actorId, p.firstName + ''+ p.lastName)
+        (s.actorId, p.firstName + ''+ p.lastName, ha.identifier)
         ,())
 
 
@@ -70,7 +73,7 @@ BEGIN TRY
 
     IF @sortBy = 'commission' OR @sortBy = 'volume'
     BEGIN
-        SELECT actorId, agentName, volume, commission,
+        SELECT actorId, agentName, userName, volume, commission,
             ROW_NUMBER() OVER( ORDER BY
 					           CASE WHEN @sortOrder = 'ASC' THEN
 						            CASE
@@ -90,16 +93,18 @@ BEGIN TRY
     END
     ELSE
     BEGIN
-        SELECT actorId, agentName, volume, commission,
+        SELECT actorId, agentName, userName, volume, commission,
             ROW_NUMBER() OVER( ORDER BY
 					           CASE WHEN @sortOrder = 'ASC' THEN
 						            CASE
-                                        WHEN @sortBy = 'agentName' THEN agentName           
+                                        WHEN @sortBy = 'agentName' THEN agentName 
+                                        WHEN @sortBy = 'userName' THEN userName           
 							        END
 					           END,
 					           CASE WHEN @sortOrder = 'DESC' THEN
 						            CASE
                                         WHEN @sortBy = 'agentName' THEN agentName
+                                        WHEN @sortBy = 'userName' THEN userName
                                     END
 					           END DESC) AS rowNum
         FROM #commissionNonAuthorized
