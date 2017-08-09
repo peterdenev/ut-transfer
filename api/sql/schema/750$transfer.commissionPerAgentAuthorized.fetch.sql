@@ -44,7 +44,7 @@ BEGIN TRY
       volume BIGINT,
       commission MONEY)
 
-    INSERT INTO #commissionAuthorized( actorId, agentName,  commission, volume )
+    INSERT INTO #commissionAuthorized( actorId, agentName, userName, commission, volume )
     SELECT 
         s.actorId,
         p.firstName + ''+ p.lastName AS agentName,
@@ -62,7 +62,7 @@ BEGIN TRY
     AND t.transferDateTime < @dateTo 
     AND ( @hasActorList = 0 OR al.value IS NOT NULL)
     GROUP BY GROUPING SETS(
-        (s.actorId, p.firstName + ''+ p.lastName)
+        (s.actorId, p.firstName + ''+ p.lastName, ha.identifier)
         ,())
 
 

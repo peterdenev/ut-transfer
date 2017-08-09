@@ -47,7 +47,7 @@ BEGIN TRY
       volume BIGINT,
       commission MONEY)
 
-    INSERT INTO #commissionNonAuthorized( actorId, agentName,  commission, volume )
+    INSERT INTO #commissionNonAuthorized( actorId, agentName,  userName, commission, volume )
     SELECT 
         s.actorId,
         p.firstName + ''+ p.lastName AS agentName,
