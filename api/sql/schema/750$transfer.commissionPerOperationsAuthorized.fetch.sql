@@ -62,7 +62,7 @@ BEGIN TRY
 
     IF @sortBy = 'commission' OR @sortBy = 'volume'
     BEGIN
-        SELECT operationName, volume, commission,
+        SELECT transferTypeId, operationName, volume, commission,
             ROW_NUMBER() OVER( ORDER BY
 					           CASE WHEN @sortOrder = 'ASC' THEN
 						            CASE
