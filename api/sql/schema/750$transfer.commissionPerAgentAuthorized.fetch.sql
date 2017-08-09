@@ -70,7 +70,7 @@ BEGIN TRY
 
     IF @sortBy = 'commission' OR @sortBy = 'volume'
     BEGIN
-        SELECT actorId, agentName, volume, commission,
+        SELECT actorId, agentName, userName, volume, commission,
             ROW_NUMBER() OVER( ORDER BY
 					           CASE WHEN @sortOrder = 'ASC' THEN
 						            CASE
@@ -90,16 +90,18 @@ BEGIN TRY
     END
     ELSE
     BEGIN
-        SELECT actorId, agentName, volume, commission,
+        SELECT actorId, agentName, userName, volume, commission,
             ROW_NUMBER() OVER( ORDER BY
 					           CASE WHEN @sortOrder = 'ASC' THEN
 						            CASE
-                                        WHEN @sortBy = 'agentName' THEN agentName               
+                                        WHEN @sortBy = 'agentName' THEN agentName    
+                                        WHEN @sortBy = 'userName' THEN  userName                               
 							        END
 					           END,
 					           CASE WHEN @sortOrder = 'DESC' THEN
 						            CASE
                                         WHEN @sortBy = 'agentName' THEN agentName
+                                        WHEN @sortBy = 'userName' THEN  userName
                                     END
 					           END DESC) AS rowNum
         FROM #commissionAuthorized
