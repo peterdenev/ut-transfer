@@ -15,7 +15,17 @@ BEGIN TRY
     BEGIN
         RETURN 55555
     END
-    
+
+    IF EXISTS 
+    (
+        SELECT 1 
+        FROM [transfer].split s
+        WHERE s.[state] IS NOT NULL AND s.splitId = @splitId
+    )
+    BEGIN
+        RAISERROR('transfer.commissionSplit.edit.wrongState', 16, 1);
+    END
+
     BEGIN TRANSACTION
     BEGIN
         DECLARE @today DATETIMEOFFSET = SYSDATETIMEOFFSET()
