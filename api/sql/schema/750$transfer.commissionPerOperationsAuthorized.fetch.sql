@@ -80,6 +80,24 @@ BEGIN TRY
         WHERE transferTypeId IS NOT NULL
         ORDER BY rowNum
     END
+    ELSE
+    BEGIN
+        SELECT transferTypeId, operationName, volume, commission,
+            ROW_NUMBER() OVER( ORDER BY
+					           CASE WHEN @sortOrder = 'ASC' THEN
+						            CASE
+                                        WHEN @sortBy = 'operationName' THEN operationName                               
+							        END
+					           END,
+					           CASE WHEN @sortOrder = 'DESC' THEN
+						            CASE
+                                        WHEN @sortBy = 'operationName' THEN operationName
+                                    END
+					           END DESC) AS rowNum
+        FROM #commissionPerOperationAuthorized
+        WHERE transferTypeId IS NOT NULL
+        ORDER BY rowNum
+    END
     
     SELECT 'totalCommission' as resultSetName
 

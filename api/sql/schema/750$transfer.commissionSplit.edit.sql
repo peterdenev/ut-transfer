@@ -16,6 +16,16 @@ BEGIN TRY
         RETURN 55555
     END
 
+    IF @splitId IS NULL
+    BEGIN
+         RAISERROR('transfer.commissionSplit.edit.noSplitId', 16, 1);
+    END
+    
+    IF @amount IS NULL
+    BEGIN
+        RAISERROR('transfer.commissionSplit.edit.noAmount', 16, 1);
+    END
+
     IF EXISTS 
     (
         SELECT 1 
