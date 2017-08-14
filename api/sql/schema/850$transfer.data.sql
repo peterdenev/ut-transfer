@@ -24,7 +24,8 @@ USING
         ('agentBalance', 'Agent Balance'),
         ('commission', 'Commission'),
         ('fee', 'Fee'),
-        ('airline', 'Airline ticket purchase')
+        ('airline', 'Airline ticket purchase'),
+        ('glTransfer', 'GL Transfer')
     ) AS source (itemCode, itemName)
 JOIN
 	core.itemType t on t.alias='operation'
