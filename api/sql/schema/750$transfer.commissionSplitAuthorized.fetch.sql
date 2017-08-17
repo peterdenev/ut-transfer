@@ -17,6 +17,7 @@ SET NOCOUNT ON
     DECLARE  
         @transferDateTimeFrom DATE,
         @transferDateTimeTo DATE,
+        @transferTypeId BIGINT,
         @sortBy varchar(50) = 'itemName',
         @sortOrder varchar(4) = 'ASC'
 
@@ -27,7 +28,8 @@ SET NOCOUNT ON
 
     SELECT 
         @transferDateTimeFrom = transferDateTimeFrom,
-        @transferDateTimeTo = DATEADD(day, 1, transferDateTimeTo)
+        @transferDateTimeTo = DATEADD(day, 1, transferDateTimeTo),
+        @transferTypeId = transferTypeId
     FROM @filterBy
 
     SELECT 'commission' as resultSetName
@@ -55,6 +57,7 @@ SET NOCOUNT ON
         AND s.[state] = 4 AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
         AND ( @transferDateTimeFrom IS NULL OR t.transferDateTime >= @transferDateTimeFrom )
         AND ( @transferDateTimeTo IS NULL OR t.transferDateTime < @transferDateTimeTo )
+        AND ( @transferTypeId IS NULL OR t.transferTypeId = @transferTypeId)
         ORDER BY rowNum
     END
     ELSE
@@ -87,5 +90,6 @@ SET NOCOUNT ON
         AND s.[state] = 4 AND s.tag LIKE '%|commission|%' AND s.tag LIKE '%|pending|%'
         AND ( @transferDateTimeFrom IS NULL OR t.transferDateTime >= @transferDateTimeFrom )
         AND ( @transferDateTimeTo IS NULL OR t.transferDateTime < @transferDateTimeTo )
+         AND ( @transferTypeId IS NULL OR t.transferTypeId = @transferTypeId)
         ORDER BY rowNum
     END
