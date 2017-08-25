@@ -25,7 +25,8 @@ USING
         ('commission', 'Commission'),
         ('fee', 'Fee'),
         ('airline', 'Airline ticket purchase'),
-        ('glTransfer', 'GL Transfer')
+        ('glTransfer', 'GL Transfer'),
+        ('transferOtpReverse','Funds transfer with OTP - Reverse')
     ) AS source (itemCode, itemName)
 JOIN
 	core.itemType t on t.alias='operation'
