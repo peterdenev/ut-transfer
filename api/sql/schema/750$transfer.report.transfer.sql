@@ -7,6 +7,7 @@ ALTER PROCEDURE [transfer].[report.transfer]
     @endDate datetime,
     @issuerTxState int,
     @merchantName varchar(100),
+    @channelType varchar(50),
     @pageNumber int, -- page number for result
     @pageSize int, -- page size of result
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
@@ -70,6 +71,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@deviceId IS NULL OR tl.terminalId LIKE '%' + @deviceId + '%')
             AND (@processingCode IS NULL OR t.[transferTypeId] = @processingCode)
             AND (@merchantName IS NULL OR t.[merchantId] LIKE '%' + @merchantName + '%')
+            AND (@channelType IS NULL OR t.[channelType] = @channelType )
     )
 SELECT
     [transferId],
@@ -122,6 +124,7 @@ SELECT
     t.[issuerTxStateName],
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
     t.[merchantId] [merchantName],
+    UPPER(t.[channelType]) [channelType],
     NULL [additionalInfo],
     t.style,
     t.alerts,
@@ -153,6 +156,7 @@ UNION ALL SELECT
     NULL AS issuerTxStateName,
     NULL AS reversalCode,
     NULL AS merchantName,
+    NULL AS channelType,
     NULL AS [additionalInfo],
     NULL AS style,
     NULL AS alerts,
