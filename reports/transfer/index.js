@@ -29,6 +29,7 @@ module.exports = (gridStyle) => ({
             { name: 'destinationAccount', title: 'Credit Account' },
             { name: 'description', title: 'Description' },
             { name: 'transferIdAcquirer', title: 'RRN' },
+            { name: 'transferIdIssuer', title: 'Auth Code' },
             { name: 'transferAmount', title: 'Transfer Amount' },
             { name: 'issuerFee', title: 'Issuer Fee' },
             { name: 'acquirerFee', title: 'Acquirer Fee' },
