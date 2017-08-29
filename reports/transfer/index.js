@@ -40,7 +40,8 @@ module.exports = (gridStyle) => ({
             { name: 'reversalCode', title: 'Reversal Code' },
             { name: 'merchantName', title: 'Merchant' },
             { name: 'additionalInfo', title: 'Additional Info' },
-            { name: 'alerts', title: 'Alerts' }
+            { name: 'alerts', title: 'Alerts' },
+            { name: 'channelType', title: 'Channel Type' }
         ],
         allowColumnConfig: true,
         method: 'db/transfer.report.transfer',
@@ -92,6 +93,17 @@ module.exports = (gridStyle) => ({
                 params: {alias: ['operation']},
                 map: {display: 'display', value: 'value'}
             }
+        },
+        {
+            name: 'channelType',
+            label: 'Channel Type',
+            placeholder: 'Channel Type',
+            type: filterElementTypes.dropDown,
+            canSelectPlaceholder: true,
+            data: [
+                { key: 'atm', name: 'ATM' },
+                { key: 'iso', name: 'ISO' }
+            ]
         },
         {
             labelFrom: 'Date from',
