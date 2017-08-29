@@ -19,9 +19,9 @@ SET NOCOUNT ON
     SELECT p.pendingId
     FROM [transfer].pending p
     JOIN [transfer].[transfer] t ON t.transferId = p.firstTransferId
-    WHERE p.phoneNumber = @phoneNumber
+    WHERE p.recipientPhoneNumber = @phoneNumber
     AND p.securityCode = @securityCode
     AND t.transferAmount = @transferAmount
     AND p.secondTransferId IS NULL
-    AND t.reversed = 0 
+    AND t.reversed = 0
     AND p.expireTime > getdate()

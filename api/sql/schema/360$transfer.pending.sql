@@ -7,8 +7,9 @@ CREATE TABLE [transfer].[pending](
 	[attempts] [int] NULL,
 	[status] [int] NULL,
      customerNumber nvarchar(20) NULL,
-     phoneNumber varchar(50) NULL,
+     recipientPhoneNumber varchar(50) NULL,
      reversalAttempts int NULL,
+	 senderPhoneNumber varchar(50) NULL,
     CONSTRAINT [pkTransferPending] PRIMARY KEY CLUSTERED ([PendingId] ASC),
     CONSTRAINT [fkTransferPending_FirstTransferId] FOREIGN KEY([firstTransferId]) REFERENCES [transfer].[transfer] ([transferId]),
     CONSTRAINT [fkTransferPending_SecondTransferId] FOREIGN KEY([secondTransferId]) REFERENCES [transfer].[transfer] ([transferId])

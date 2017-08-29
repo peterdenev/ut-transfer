@@ -18,9 +18,9 @@ BEGIN TRY
 
     BEGIN TRANSACTION
     BEGIN
-        
-        INSERT INTO [transfer].pending ( firstTransferId, securityCode, attempts, customerNumber, phoneNumber, expireTime, reversalAttempts )
-        SELECT firstTransferId, securityCode, 0, customerNumber, phoneNumber, DATEADD(hour,24,getdate()), 0
+
+        INSERT INTO [transfer].pending ( firstTransferId, securityCode, attempts, customerNumber, senderPhoneNumber, recipientPhoneNumber, expireTime, reversalAttempts )
+        SELECT firstTransferId, securityCode, 0, customerNumber, senderPhoneNumber, recipientPhoneNumber, DATEADD(hour,72,getdate()), 0
         FROM @pendingTransfer
 
     END
@@ -33,7 +33,7 @@ BEGIN TRY
 
     SELECT *
     FROM [transfer].pending
-    WHERE pendingId = @pendingId 
+    WHERE pendingId = @pendingId
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY

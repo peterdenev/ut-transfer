@@ -1,6 +1,6 @@
 CREATE PROCEDURE [transfer].[pendingTransferReversal.fetch]-- fetch initiated pendingTransfer for reversal
     @transactionRrn VARCHAR(50), -- amount of initiated pending transfer
-    @phoneNumber VARCHAR(50), -- phone number of recipient
+    @senderPhoneNumber VARCHAR(50), -- phone number of the sender
     @securityCode VARCHAR(50), -- generated token
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
@@ -19,7 +19,7 @@ SET NOCOUNT ON
     SELECT p.pendingId, t.transferAmount, p.reversalAttempts
     FROM [transfer].pending p
     JOIN [transfer].[transfer] t ON t.transferId = p.firstTransferId
-    WHERE p.phoneNumber = @phoneNumber
+    WHERE p.senderPhoneNumber = @senderPhoneNumber
     AND p.securityCode = @securityCode
     AND t.transferIdIssuer = @transactionRrn
     AND p.secondTransferId IS NULL
