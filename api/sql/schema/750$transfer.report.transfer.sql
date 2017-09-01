@@ -1,5 +1,5 @@
 ALTER PROCEDURE [transfer].[report.transfer]
-    @cardNumber varchar(20),
+    @cardNumber varchar(32),
     @accountNumber varchar(100),
     @deviceId varchar(100),
     @processingCode varchar(100),
