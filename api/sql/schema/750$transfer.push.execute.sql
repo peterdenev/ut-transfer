@@ -3,6 +3,7 @@ ALTER PROCEDURE [transfer].[push.execute]
     @acquirerCode varchar(50),
     @transferDateTime datetime,
     @localDateTime varchar(14),
+    @settlementDate varchar(14),
     @transferIdAcquirer varchar(50),
     @channelId bigint,
     @channelType varchar(50),
@@ -67,6 +68,19 @@ BEGIN TRY
         @issuerSettings = settings
     WHERE
         partnerId = @issuerId
+
+    IF LEN(@settlementDate) = 4
+    BEGIN
+        SET @issuerSettlementDate = CAST(CAST(DATEPART(YEAR, GETDATE()) AS CHAR(4)) + @settlementDate AS DATETIME)
+        SET @issuerSettlementDate = DATEADD(YEAR, CASE
+            WHEN DATEPART(MONTH, @issuerSettlementDate) = 1 AND DATEPART(MONTH, GETDATE()) = 12 THEN -1
+            WHEN DATEPART(MONTH, @issuerSettlementDate) = 12 AND DATEPART(MONTH, GETDATE()) = 1 THEN 1
+            ELSE 0 END, @issuerSettlementDate)
+    END ELSE
+    IF LEN(@settlementDate) > 4
+    BEGIN
+        SET @issuerSettlementDate = CAST(@settlementDate AS datetime)
+    END
 
     UPDATE
         [transfer].[partner]
