@@ -147,6 +147,7 @@ module.exports = {
 
         function canSkip(transfer) { // todo streamline skip logic
             return ((transfer.transferType === 'changePin') && (transfer.issuerFee === 0)) ||
+                (transfer.transferType === 'tia') ||
                 ((transfer.transferType === 'sms') && (transfer.issuerFee === 0));
         }
 
