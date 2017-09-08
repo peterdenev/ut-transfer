@@ -34,7 +34,7 @@ AS
     WHERE
         t.transferIdAcquirer = @transferIdAcquirer AND
         t.reversed = 0 AND
-        t.settlementDate = CAST(CAST(DATEPART(YEAR, GETDATE()) AS CHAR(4)) + '0802' AS DATETIME) AND
+        t.settlementDate = CAST(CAST(DATEPART(YEAR, GETDATE()) AS CHAR(4)) + @settlementDate AS DATETIME) AND
         t.localDateTime LIKE '%' + @localDateTime AND
         t.acquirerCode = @acquirerCode AND
         e.udfDetails.value('(/root/terminalId/text())[1]', 'nvarchar(8)') = @udfAcquirer.value('(/root/terminalId/text())[1]', 'nvarchar(8)')
