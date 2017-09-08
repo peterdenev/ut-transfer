@@ -4,10 +4,10 @@ USING
     (VALUES
         ('deposit','Deposit / cash in'),
         ('withdraw','Withdrawal / cash out'),
-        ('withdrawOtp','Withdraw with OTP'),
+        ('withdrawOtp', 'FMT - Fulfillment'), -- Withdraw with OTP
         ('transfer','Funds transfer to account'),
-        ('transferOtp','Funds transfer with OTP'),
-        ('transferOtpCash','Funds transfer with OTP - Cash option'),
+        ('transferOtp','FMT - Account Option'), -- Funds transfer with OTP
+        ('transferOtpCash','FMT - Cash Option'), -- Funds transfer with OTP - Cash option
         ('balance','Balance enquiry'),
         ('ministatement','Mini statement enquiry'),
         ('topup', 'Top up'),
@@ -26,7 +26,7 @@ USING
         ('fee', 'Fee'),
         ('airline', 'Airline ticket purchase'),
         ('glTransfer', 'GL Transfer'),
-        ('transferOtpReverse','Funds transfer with OTP - Reverse')
+        ('transferOtpReverse', 'FMT Reversal') -- Funds transfer with OTP - Reverse
     ) AS source (itemCode, itemName)
 JOIN
 	core.itemType t on t.alias='operation'
