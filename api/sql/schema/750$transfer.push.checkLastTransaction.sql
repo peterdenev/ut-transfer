@@ -5,7 +5,8 @@ ALTER PROCEDURE [transfer].[push.checkLastTransaction]
     @notes1 int,
     @notes2 int,
     @notes3 int,
-    @notes4 int
+    @notes4 int,
+    @confirm bit
 AS
 SET NOCOUNT ON
 DECLARE @callParams XML
@@ -44,14 +45,36 @@ BEGIN TRY
     BEGIN
         if @lastSernum != @sernum
         BEGIN
-            EXEC [transfer].[push.failAcquirer]
-                @transferId = @lastTx,
-                @type = 'atm.lastTransactionNoReply',
-                @message = 'ATM did not receive transaction reply',
-                @details = NULL
+            IF @confirm = 1
+            BEGIN
+                EXEC [transfer].[push.event]
+                    @transferId = @lastTx,
+                    @type = 'atm.lastTransactionNoReply',
+                    @state = 'fail',
+                    @source = 'acquirer',
+                    @message = 'Unexpected last transaction serial number',
+                    @udfDetails = NULL
+            END ELSE
+            BEGIN
+                EXEC [transfer].[push.failAcquirer]
+                    @transferId = @lastTx,
+                    @type = 'atm.lastTransactionNoReply',
+                    @message = 'ATM did not receive transaction reply',
+                    @details = NULL
+            END
         END else
         IF @lastNotes1 != @notes1 OR @lastNotes2 != @notes2 OR @lastNotes3 != @notes3 OR @lastNotes4 != @notes4
         BEGIN
+            IF @confirm = 1
+            BEGIN
+                EXEC [transfer].[push.event]
+                    @transferId = @lastTx,
+                    @type = 'atm.lastTransactionNoReply',
+                    @state = 'fail',
+                    @source = 'acquirer',
+                    @message = 'Unexpected last dispense',
+                    @udfDetails = NULL
+            END ELSE
             IF @notes1 = 0 AND @notes2 = 0 AND @notes3 = 0 AND @notes4 = 0
                 EXEC [transfer].[push.failAcquirer]
                     @transferId = @lastTx,
