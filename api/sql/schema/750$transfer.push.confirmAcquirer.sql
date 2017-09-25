@@ -9,6 +9,6 @@ SET
     acquirerTxState = 2
 WHERE
     transferId = @transferId AND
-    acquirerTxState = 1
+    acquirerTxState in (1, 2)
 
 IF @@ROWCOUNT <> 1 RAISERROR('transfer.confirmAcquirer', 16, 1);

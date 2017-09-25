@@ -5,7 +5,8 @@ ALTER PROCEDURE [transfer].[push.checkLastTransaction]
     @notes1 int,
     @notes2 int,
     @notes3 int,
-    @notes4 int
+    @notes4 int,
+    @confirm bit
 AS
 SET NOCOUNT ON
 DECLARE @callParams XML
@@ -33,37 +34,71 @@ BEGIN TRY
         @lastNotes4 = e.udfDetails.value('(/root/type4Notes)[1]', 'int')
     FROM
         [transfer].[transfer] t
-    JOIN
+    LEFT JOIN
         [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.requestAcquirer'
     WHERE
         t.channelId = @channelId
     ORDER BY
         t.transferId DESC
 
+    IF @lastAcquirerState IS NULL AND @lastTx IS NOT NULL
+    BEGIN
+        EXEC [transfer].[push.abortAcquirer]
+            @transferId = @lastTx,
+            @type = 'atm.lastTransactionTimeout',
+            @message = 'ATM timed out waiting for response',
+            @details = @callParams
+    END ELSE
     IF @lastAcquirerState=1 AND @lastIssuerState=2
     BEGIN
-        if @lastSernum != @sernum
+        IF @lastSernum IS NULL
         BEGIN
-            EXEC [transfer].[push.failAcquirer]
+            EXEC [transfer].[push.errorAcquirer]
                 @transferId = @lastTx,
-                @type = 'atm.lastTransactionNoReply',
-                @message = 'ATM did not receive transaction reply',
-                @details = NULL
+                @type = 'atm.lastTransactionMissingSernum',
+                @message = 'Missing last transaction serial number',
+                @details = @callParams
+        END ELSE
+        IF @lastSernum != @sernum
+        BEGIN
+            IF @confirm = 1
+            BEGIN
+                EXEC [transfer].[push.errorAcquirer]
+                    @transferId = @lastTx,
+                    @type = 'atm.lastTransactionUnexpectedSernum',
+                    @message = 'Unexpected last transaction serial number',
+                    @details = @callParams
+            END ELSE
+            BEGIN
+                EXEC [transfer].[push.failAcquirer]
+                    @transferId = @lastTx,
+                    @type = 'atm.lastTransactionNoReply',
+                    @message = 'ATM did not receive transaction reply',
+                    @details = @callParams
+            END
         END else
         IF @lastNotes1 != @notes1 OR @lastNotes2 != @notes2 OR @lastNotes3 != @notes3 OR @lastNotes4 != @notes4
         BEGIN
+            IF @confirm = 1
+            BEGIN
+                EXEC [transfer].[push.errorAcquirer]
+                    @transferId = @lastTx,
+                    @type = 'atm.lastTransactionUnexpectedDispense',
+                    @message = 'Unexpected last dispense',
+                    @details = @callParams
+            END ELSE
             IF @notes1 = 0 AND @notes2 = 0 AND @notes3 = 0 AND @notes4 = 0
                 EXEC [transfer].[push.failAcquirer]
                     @transferId = @lastTx,
-                    @type = 'atm.lastTransactionZero',
+                    @type = 'atm.lastTransactionZeroDispense',
                     @message = 'ATM did not dispense any money',
-                    @details = NULL
+                    @details = @callParams
             else
                 EXEC [transfer].[push.errorAcquirer]
                     @transferId = @lastTx,
-                    @type = 'atm.lastTransactionDifferent',
+                    @type = 'atm.lastTransactionDifferentDispense',
                     @message = 'ATM dispensed different amount',
-                    @details = NULL
+                    @details = @callParams
         END else
         BEGIN
             EXEC [transfer].[push.confirmAcquirer]
