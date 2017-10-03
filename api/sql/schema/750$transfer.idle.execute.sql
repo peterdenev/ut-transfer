@@ -147,7 +147,7 @@ BEGIN TRY
             t.transferAmount,
             t.transferCurrency,
             t.localDateTime,
-            t.settlementDate issuerSettlementDate,
+            FORMAT(t.settlementDate,'yyyyMMdd') issuerSettlementDate,
             t.merchantType,
             e.udfDetails udfAcquirer,
             t.transferId,
