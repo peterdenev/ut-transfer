@@ -31,6 +31,8 @@ BEGIN TRY
 
     DECLARE @today DATETIMEOFFSET = SYSDATETIMEOFFSET()
 
+    SET  @dateTo = DATEADD(day, 1, @dateTo)
+
     IF OBJECT_ID('tempdb..#splitPost') IS NOT NULL
         DROP TABLE #splitPost
 
