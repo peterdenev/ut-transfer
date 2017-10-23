@@ -1,7 +1,9 @@
 ALTER PROCEDURE [transfer].[commissionSplitPosted.fetch]-- fetch commission posted for actorId
-    @actorId BIGINT,-- actorId of the agent
+    --@actorId BIGINT,-- actorId of the agent
+    @actorIds core.arrayList READONLY,
     @filterBy [transfer].filterByTT READONLY,-- information for filters
     @orderBy [transfer].orderByTT READONLY,-- information for ordering
+    @paging [agent].[pagingTT] READONLY,
 	@meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
 
@@ -14,28 +16,61 @@ SET NOCOUNT ON
          RETURN 55555
     END
 
-     DECLARE  
+    DECLARE @pageSize int
+    DECLARE @pageNumber int
+
+    -- Set & Callculate paging details
+	SELECT
+        @pageNumber = ISNULL(pageNumber,1),
+        @pageSize = ISNULL([pageSize], 20)
+    FROM @paging
+
+    DECLARE @startRow INT = ( @pageNumber - 1) * @pageSize + 1
+    DECLARE @endRow INT = @startRow + @pageSize - 1
+
+    -- Set this flag if any actorIds were provided. If not - all data is returned
+    DECLARE @filterByActorIds bit = 0
+    IF EXISTS ( SELECT 1 FROM @actorIds WHERE value IS NOT NULL)
+        SET @filterByActorIds = 1
+
+    DECLARE
         @transferDateTimeFrom DATE,
         @transferDateTimeTo DATE,
         @sortBy varchar(50) = 'itemName',
         @sortOrder varchar(4) = 'ASC'
 
-    SELECT 
-        @sortBy = ISNULL([column],'itemName'), 
-        @sortOrder=ISNULL([direction],'ASC') 
+    SELECT
+        @sortBy = ISNULL([column],'itemName'),
+        @sortOrder=ISNULL([direction],'ASC')
     FROM @orderBy
 
-    SELECT 
+    SELECT
         @transferDateTimeFrom = transferDateTimeFrom,
         @transferDateTimeTo = DATEADD(day, 1, transferDateTimeTo)
     FROM @filterBy
 
-    SELECT 'commission' as resultSetName
+    -- Insert all data in a table, so later we can properly filter paging
+	CREATE TABLE #resultItems (
+        [identifier] NVARCHAR(100),
+        splitId bigint,
+        transferIdIssuer NVARCHAR(200),
+        transferDateTime DATETIME,
+        operation NVARCHAR(100),
+        commission money,
+        transferCurrency NVARCHAR(50),
+        transferAmount money,
+        [Status] NVARCHAR(100),
+        reversed bit,
+        rowNum int,
+        recordsTotal int
+	)
+
     IF @sortBy = 'commission' --OR @sortBy = 'commission'
     BEGIN
-        SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
-            s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount, 
-            CASE WHEN t.issuerTxState=2 THEN 'Successful' 
+        INSERT INTO #resultItems
+        SELECT h.identifier, s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation],
+            s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount,
+            CASE WHEN t.issuerTxState=2 THEN 'Successful'
             WHEN t.issuerTxState = 4 THEN 'Failed (cbs)'
             WHEN t.issuerTxState = 3 THEN 'Failed'
             WHEN t.issuerTxState = 1 THEN 'Requested'
@@ -53,21 +88,28 @@ SET NOCOUNT ON
                                     WHEN @sortBy = 'commission' THEN s.amount
                                     --WHEN @sortBy = 'transferAmount' THEN convert(nvarchar(20), t.transferAmount)
                                 END
-					        END DESC) AS rowNum
+					        END DESC) AS rowNum,
+		    COUNT(*) OVER(PARTITION BY 1) AS recordsTotal
         FROM [transfer].split s
-            JOIN [transfer].[transfer] t ON t.transferId = s.txtId 
-            JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
-        WHERE s.ActorId  = @actorID AND t.channelType ='agent'
+            JOIN [transfer].[transfer] t ON t.transferId = s.txtId
+            JOIN core.itemName i ON i.itemNameId = t.transferTypeId
+			LEFT JOIN [user].[hash] h ON h.actorId = s.actorId
+            LEFT JOIN @actorIds ai ON ai.value = s.actorId
+        WHERE
+            -- (@actorID IS NULL OR s.ActorId  = @actorID) AND
+        t.channelType ='agent'
         AND s.tag LIKE '%|commission|%'
         AND ( @transferDateTimeFrom IS NULL OR t.transferDateTime >= @transferDateTimeFrom )
         AND ( @transferDateTimeTo IS NULL OR t.transferDateTime < @transferDateTimeTo )
+        AND ( @filterByActorIds = 0 OR ( @filterByActorIds = 1 AND ai.value = s.actorId))
         ORDER BY rowNum
     END
     ELSE
     BEGIN
-        SELECT s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation], 
-            s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount, 
-            CASE WHEN t.issuerTxState=2 THEN 'Successful' 
+        INSERT INTO #resultItems
+        SELECT h.identifier, s.splitId, t.transferIdIssuer, t.transferDateTime, i.itemName AS [operation],
+            s.amount AS commission, t.transferCurrency, t.transferAmount AS transferAmount,
+            CASE WHEN t.issuerTxState=2 THEN 'Successful'
             WHEN t.issuerTxState = 4 THEN 'Failed (cbs)'
             WHEN t.issuerTxState = 3 THEN 'Failed'
             WHEN t.issuerTxState = 1 THEN 'Requested'
@@ -79,9 +121,9 @@ SET NOCOUNT ON
 						            WHEN @sortBy = 'splitId' THEN convert(nvarchar(20), s.splitId)
                                     WHEN @sortBy = 'transferIdIssuer' THEN convert(nvarchar(20), t.transferIdIssuer)
                                     WHEN @sortBy = 'transferDateTime' THEN convert(nvarchar(100), t.transferDateTime)
-                                    WHEN @sortBy = 'operation' THEN i.itemName 
+                                    WHEN @sortBy = 'operation' THEN i.itemName
                                     WHEN @sortBy = 'transferCurrency' THEN t.transferCurrency
-                                    WHEN @sortBy = 'Status' THEN CASE WHEN t.issuerTxState=2 THEN 'Successful' 
+                                    WHEN @sortBy = 'Status' THEN CASE WHEN t.issuerTxState=2 THEN 'Successful'
                                                                 WHEN t.issuerTxState = 4 THEN 'Failed (cbs)'
                                                                 WHEN t.issuerTxState = 3 THEN 'Failed'
                                                                 WHEN t.issuerTxState = 1 THEN 'Requested'
@@ -93,21 +135,41 @@ SET NOCOUNT ON
 							       WHEN @sortBy = 'splitId' THEN convert(nvarchar(20), s.splitId)
                                     WHEN @sortBy = 'transferIdIssuer' THEN convert(nvarchar(20), t.transferIdIssuer)
                                     WHEN @sortBy = 'transferDateTime' THEN convert(nvarchar(100), t.transferDateTime)
-                                    WHEN @sortBy = 'operation' THEN i.itemName 
+                                    WHEN @sortBy = 'operation' THEN i.itemName
                                     WHEN @sortBy = 'transferCurrency' THEN t.transferCurrency
-                                    WHEN @sortBy = 'Status' THEN CASE WHEN t.issuerTxState=2 THEN 'Successful' 
+                                    WHEN @sortBy = 'Status' THEN CASE WHEN t.issuerTxState=2 THEN 'Successful'
                                                                 WHEN t.issuerTxState = 4 THEN 'Failed (cbs)'
                                                                 WHEN t.issuerTxState = 3 THEN 'Failed'
                                                                 WHEN t.issuerTxState = 1 THEN 'Requested'
                                                              ELSE 'Unknown' END
                                 END
-					        END DESC) AS rowNum
+					        END DESC) AS rowNum,
+		    COUNT(*) OVER(PARTITION BY 1) AS recordsTotal
         FROM [transfer].split s
-            JOIN [transfer].[transfer] t ON t.transferId = s.txtId 
-            JOIN core.itemName i ON i.itemNameId = t.transferTypeId 
-        WHERE s.ActorId  = @actorID AND t.channelType ='agent'
+            JOIN [transfer].[transfer] t ON t.transferId = s.txtId
+            JOIN core.itemName i ON i.itemNameId = t.transferTypeId
+			LEFT JOIN [user].[hash] h ON h.actorId = s.actorId
+            LEFT JOIN @actorIds ai ON ai.value = s.actorId
+        WHERE
+            --(@actorID IS NULL OR s.ActorId  = @actorID) AND
+        t.channelType ='agent'
         AND s.tag LIKE '%|commission|%'
         AND ( @transferDateTimeFrom IS NULL OR t.transferDateTime >= @transferDateTimeFrom )
         AND ( @transferDateTimeTo IS NULL OR t.transferDateTime < @transferDateTimeTo )
+        AND ( @filterByActorIds = 0 OR ( @filterByActorIds = 1 AND ai.value = s.actorId))
         ORDER BY rowNum
     END
+
+    SELECT 'commission' as resultSetName
+    SELECT * FROM #resultItems re
+	WHERE re.rowNum BETWEEN @startRow AND @endRow
+    ORDER BY rowNum
+
+	-- Return pagination data
+	SELECT 'pagination' AS resultSetName
+    SELECT TOP 1
+		@pageSize AS pageSize,
+		recordsTotal AS recordsTotal,
+		@pageNumber AS pageNumber,
+		(recordsTotal - 1) / @pageSize + 1 AS pagesTotal
+    FROM #resultItems
