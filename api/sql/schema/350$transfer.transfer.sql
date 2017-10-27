@@ -35,6 +35,8 @@ CREATE TABLE [transfer].[transfer](
     acquirerFee money,
     issuerFee money,
     transferFee money,
+    isserResponseCode varchar(10), 
+    isserResponseMessage varchar(250),
     description varchar(250),
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
     CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])
