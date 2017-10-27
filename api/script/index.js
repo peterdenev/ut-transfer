@@ -156,7 +156,9 @@ module.exports = {
                 source: where,
                 type: error.type || (where + '.error'),
                 message: error.message,
-                details: Object.assign({}, error, {transferDetails: transfer})
+                details: Object.assign({}, error, {transferDetails: transfer}),
+                issuerResponseCode: error.issuerResponseCode,
+                issuerResponseMessage: error.issuerResponseMessage
             })
             .catch(x => {
                 this.log.error && this.log.error(x);
