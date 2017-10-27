@@ -3,8 +3,8 @@ ALTER PROCEDURE [transfer].[push.confirmIssuer]
     @transferIdIssuer varchar(50),
     @type varchar(50),
     @message varchar(250),
-    @isserResponseCode varchar(10), 
-    @isserResponseMessage varchar(250),
+    @issuerResponseCode varchar(10), 
+    @issuerResponseMessage varchar(250),
     @details XML
 AS
 SET NOCOUNT ON
@@ -14,8 +14,8 @@ UPDATE
 SET
     transferIdIssuer = @transferIdIssuer,
     issuerTxState = 2,
-    isserResponseCode=@isserResponseCode,
-    isserResponseMessage=@isserResponseMessage
+    issuerResponseCode=@issuerResponseCode,
+    issuerResponseMessage=@issuerResponseMessage
 WHERE
     transferId = @transferId AND
     issuerTxState = 1
