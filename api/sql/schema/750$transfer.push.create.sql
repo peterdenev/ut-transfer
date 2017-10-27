@@ -50,12 +50,12 @@ DECLARE @merchantPort varchar(50),
 BEGIN TRY
 
     -- checks if the user has a right to make the operation
-    DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
+    /*DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
     EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
     IF @return != 0
     BEGIN
         RETURN 55555
-    END
+    END*/
 
     SET @userId = (SELECT [auth.actorId] FROM @meta)
 
@@ -271,7 +271,7 @@ BEGIN TRY
 
     COMMIT TRANSACTION
 
-    EXEC core.auditCall @procid = @@PROCID, @params = @callParams
+    --EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0

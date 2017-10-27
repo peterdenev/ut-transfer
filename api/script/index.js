@@ -141,11 +141,16 @@ module.exports = {
             var method;
             if (where === 'Acquirer') {
                 method = this.bus.importMethod('db/transfer.push.abortAcquirer');
-            } else if (DECLINED[where.toLowerCase()].includes(error && error.type)) {
-                method = this.bus.importMethod('db/transfer.push.fail' + where);
+            } else if (where === 'Issuer') {
+                method = this.bus.importMethod('db/transfer.push.failIssuer');
             } else {
-                method = this.bus.importMethod('db/transfer.push.reverse' + where);
+                method = this.bus.importMethod('db/transfer.push.fail');
             }
+            // else if (DECLINED[where.toLowerCase()].includes(error && error.type)) {
+            //     method = this.bus.importMethod('db/transfer.push.fail' + where);
+            // } else {
+            //     method = this.bus.importMethod('db/transfer.push.reverse' + where);
+            // }
             return method({
                 transferId: transfer.transferId,
                 source: where,
@@ -405,7 +410,7 @@ module.exports = {
         if (params.abortAcquirer) {
             return this.bus.importMethod('transfer.push.execute')(params, $meta);
         } else {
-            return this.bus.importMethod('db/atm.card.check')({
+            return this.bus.importMethod('card.card.check')({
                 cardId: params.cardId,
                 sourceAccount: params.sourceAccount,
                 sourceAccountType: params.sourceAccountType,
@@ -420,6 +425,9 @@ module.exports = {
             .catch(error => {
                 params.abortAcquirer = error;
                 return this.bus.importMethod('transfer.push.execute')(params, $meta);
+            })
+            .then((r) => {
+                return r.result;
             })
             .then(result => Object.assign(params, {
                 cardProductName: result.cardProductName,
