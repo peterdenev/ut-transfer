@@ -16,7 +16,7 @@ SET NOCOUNT ON
 
     SELECT 'pendingTransfer' as resultSetName
 
-    SELECT p.pendingId, t.transferAmount, p.reversalAttempts
+    SELECT p.pendingId, t.transferAmount, p.reversalAttempts, p.firstTransferId
     FROM [transfer].pending p
     JOIN [transfer].[transfer] t ON t.transferId = p.firstTransferId
     WHERE p.senderPhoneNumber = @senderPhoneNumber
