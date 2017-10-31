@@ -110,7 +110,7 @@ var processReversal = (bus, log, $meta) => params => {
             return reversalResult;
         });
             // -------------------------------------------
-    ;
+    };
 
     var failReversal = reversalError => {
         return Promise.resolve(transferId && bus.importMethod('db/transfer.push.failReversal')({
