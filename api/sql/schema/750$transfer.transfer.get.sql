@@ -10,7 +10,7 @@ AS
 
     -- checks if the user has a right to make the operation
 DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
-EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
+--EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
 IF @return != 0
 BEGIN
     RETURN 55555
@@ -27,8 +27,8 @@ DECLARE @transfer AS TABLE (transferId bigint, transferTypeId bigint, acquirerCo
                             channelType varchar(50), ordererId bigint, merchantId varchar(50), merchantInvoice varchar(50), merchantPort varchar(50), merchantType varchar(50),
                             cardId bigint, sourceAccount varchar(50), destinationAccount varchar(50), expireTime datetime, expireCount int, reversed bit, retryTime datetime,
                             retryCount int, ledgerTxState smallint, issuerTxState smallint, acquirerTxState smallint, merchantTxState smallint, issuerId varchar(50), ledgerId varchar(50),
-                            transferCurrency varchar(3), transferAmount money,  acquirerFee money, issuerFee money, transferFee money,[description] varchar(250), issuerPort varchar(50),
-                            ledgerPort varchar(50),udfAcquirer xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max))
+                            transferCurrency varchar(3), transferAmount money,  acquirerFee money, issuerFee money, transferFee money,[description] varchar(250),[networkData] varchar(30),[responseCode] char(2),
+                            [stan] char(6), issuerPort varchar(50),ledgerPort varchar(50),udfAcquirer xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max))
 
 -- get by pull transaction id
 INSERT INTO
@@ -71,6 +71,9 @@ SELECT TOP 1
     t.issuerFee,
     t.transferFee,
     t.[description],
+	t.[networkData],
+    t.[responseCode],
+    t.[stan],
     pi.port,
     pl.port,
     e.udfDetails,
@@ -140,6 +143,9 @@ BEGIN
         t.issuerFee,
         t.transferFee,
         t.[description],
+		t.[networkData],
+        t.[responseCode],
+        t.[stan],
         pi.port,
         pl.port,
         e.udfDetails,
@@ -161,6 +167,7 @@ BEGIN
     WHERE
         (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
         (@transferId IS NULL OR t.[transferId] = @transferId) AND
+        (t.[originalTransferId] IS NULL) AND
         (@cardId IS NULL OR t.cardId = @cardId) AND
         (@localDateTime IS NULL OR t.localDateTime LIKE '%' + @localDateTime) AND
         (@acquirerCode IS NULL OR t.acquirerCode = @acquirerCode)
@@ -208,6 +215,9 @@ SELECT
     issuerFee,
     transferFee,
     [description],
+	[networkData],
+    [responseCode],
+    [stan],
     issuerPort,
     ledgerPort,
     udfAcquirer

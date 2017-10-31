@@ -130,3 +130,43 @@ IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'updatedOn' AND Object_ID
 BEGIN
     ALTER TABLE [transfer].[pending] ADD updatedOn datetime2
 END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'networkData' AND Object_ID = Object_ID(N'transfer.transfer') )
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD networkData varchar(20) null
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'originalRequest' AND Object_ID = Object_ID(N'transfer.transfer') )
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD originalRequest varchar(2000) null
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'mcResponse' AND Object_ID = Object_ID(N'transfer.transfer') )
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD mcResponse varchar(2000) null
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'responseCode' AND Object_ID = Object_ID(N'transfer.transfer') )
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD responseCode char(2) null
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'stan' AND Object_ID = Object_ID(N'transfer.transfer') )
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD stan char(6) null
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'originalTransferId' AND Object_ID = Object_ID(N'transfer.transfer') )
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD originalTransferId bigint null
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'isPreauthorization' AND Object_ID = Object_ID(N'transfer.transfer') )
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD isPreauthorization bit null
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'isPartialReversal' AND Object_ID = Object_ID(N'transfer.transfer') )
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD isPartialReversal bit null
+END

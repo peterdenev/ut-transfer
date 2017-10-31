@@ -1,13 +1,24 @@
 const DECLINED = {
     ledger: ['transfer.insufficientFunds', 'transfer.invalidAccount', 'transfer.genericDecline', 'transfer.incorrectPin'],
     issuer: ['transfer.insufficientFunds', 'transfer.invalidAccount', 'transfer.genericDecline', 'transfer.incorrectPin'],
-    merchant: ['merchant.genericDecline']
+    merchant: ['merchant.genericDecline', 'merchant.invalidMerchant']
 };
 var errors = require('../../errors');
 var currency = require('../../currency');
 
+// ---------------------Added----------------------
+var addOriginalRequestProperty = (transfer) => {
+    if (!transfer.originalRequest){
+        transfer.originalRequest = Object.assign({},transfer);
+        delete transfer.originalRequest.pan;
+        transfer.originalRequest = JSON.stringify(transfer.originalRequest);
+    }
+    return Promise.resolve(transfer);
+};
 var processReversal = (bus, log, $meta) => params => {
     var transferId;
+    var partialTransferId;
+    var mcResponse;
 
     var portReversal = (port, reversal) => {
         if (port && reversal.transferType && reversal.operation) {
@@ -27,6 +38,12 @@ var processReversal = (bus, log, $meta) => params => {
     };
 
     var reverse = reversal => {
+        // ---------------------Added-------------------------
+        // Delete the added property because is no longer need it
+        if (reversal.originalRequest) {
+            delete reversal.originalRequest;
+        }
+        // -------------------------------------------
         transferId = reversal.transferId;
         if (reversal && !reversal.reversed) { // reverse only transaction that have NOT been reversed
             reversal.udfAcquirer && (reversal.udfAcquirer.mti = reversal.mti);
@@ -34,6 +51,11 @@ var processReversal = (bus, log, $meta) => params => {
                 transfer: currency.amount(reversal.transferCurrency, reversal.transferAmount)
             };
 
+            // ---------------------Changed----------------------
+            if (reversal.replacementAmount != null) { // if any replacement amount is present
+                reversal.amount.replacement = currency.amount(reversal.transferCurrency, reversal.replacementAmount);
+            }
+            // -------------------------------------------
             // prepare reversal object for postReversal
             if (!reversal.operation) {
                 reversal.operation = 'reverse';
@@ -44,6 +66,9 @@ var processReversal = (bus, log, $meta) => params => {
 
             return reversal && portReversal(reversal.issuerPort, reversal)
             .then(result => {
+                    // ---------------------Added----------------------
+                    mcResponse = JSON.stringify(result.mcResponse);
+                    // -------------------------------------------
                 if (reversal.issuerPort === reversal.ledgerPort) {
                     return reversal;
                 } else {
@@ -57,11 +82,35 @@ var processReversal = (bus, log, $meta) => params => {
     };
 
     var confirmReversal = reversalResult => {
-        return transferId && bus.importMethod('db/transfer.push.confirmReversal')({transferId})
+        // ---------------------Changed and Added----------------------
+        var isPartialReversal;
+        if (reversalResult.isPartialReversal) {
+            isPartialReversal = reversalResult.isPartialReversal;
+        } else {
+            isPartialReversal = null;
+        }
+        // -------------Added------------------------------
+        if (partialTransferId) {
+            return bus.importMethod('db/transfer.push.confirmPartialReversal')({
+                partialTransferId,
+                mcResponse
+            })
+            .then(transferId && bus.importMethod('db/transfer.push.confirmReversal')({
+                transferId,
+                isPartialReversal
+            }))
+            .then(function(confirmReversalResult) {
+                return reversalResult;
+            });
+        }
+        // return transferId && bus.importMethod('db/transfer.push.confirmReversal')({transferId})
+        // -------------
+        return transferId && bus.importMethod('db/transfer.push.confirmReversal')({transferId, isPartialReversal})
         .then(function(confirmReversalResult) {
             return reversalResult;
         });
-    };
+            // -------------------------------------------
+    ;
 
     var failReversal = reversalError => {
         return Promise.resolve(transferId && bus.importMethod('db/transfer.push.failReversal')({
@@ -78,8 +127,50 @@ var processReversal = (bus, log, $meta) => params => {
             return Promise.reject(reversalError);
         });
     };
+     // ---------------------Added----------------------
+     var partialReversal = reversal => {
+        if (reversal.isPartialReversal && reversal.isPartialReversal == 1) {
+            return Promise.resolve(bus.importMethod('db/transfer.push.partialReversal')(reversal, $meta))
+                .then(result => {
+                    partialTransferId = result[0][0].transferId;
+                    return reversal;
+                });
+        } else {
+            return reversal;
+        }
+    };
+     // ---------------------Added----------------------
+    var validateAmount = reversal => {
+        var replacementAmount = reversal.replacementAmount;
+        var transferIdAux = reversal.transferId;
+        return transferIdAux && bus.importMethod('db/transfer.push.validateAmount')({
+            transferIdAux,
+            replacementAmount,
+            type: reversal.type || ('issuer.error'),
+            message: reversal.message,
+            details: reversal
+        })
+        .then(result => {
+            if (result.length > 0) {
+                reversal.transferAmount = result[0][0].transferAmount;
+                if (reversal.transferAmount == reversal.replacementAmount) {
+                    reversal.isPartialReversal = 0;
+                    reversal.replacementAmount = 0;
+                }
+                return reversal;
+            } else {
+                // TODO: suggestion (create its own error)
+                throw errors.transferAlreadyReversed();
+            }
+        });
+    };
 
     return dbPushReverse(params)
+     // ---------------------Added----------------------
+        .then(validateAmount)
+        .then(addOriginalRequestProperty)
+        .then(partialReversal)
+ //-------------------------------------------
         .then(reverse)
         .then(confirmReversal)
         .catch(failReversal);
@@ -168,6 +259,15 @@ module.exports = {
         };
         var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.create')(transfer, Object.assign($meta, {method: 'db/transfer.push.create'}))
             .then(pushResult => {
+                // ---------------------Added----------------------
+                // ---- Delete the added property because is no longer need it
+                if (transfer.originalRequest) {
+                    delete transfer.originalRequest;
+                }
+                if (transfer.originalTransferId) {
+                    delete transfer.originalTransferId;
+                }
+                // -------------------------------------------
                 pushResult = pushResult && pushResult[0] && pushResult[0][0];
                 if (pushResult && pushResult.transferId) {
                     transfer.transferId = pushResult.transferId;
@@ -238,10 +338,29 @@ module.exports = {
                         transfer.transferIdIssuer = result.transferIdIssuer;
 
                         result.transferId = transfer.transferId;
+
+                        // ---------------------Added----------------------
+                        if (result.mcResponse) {
+                            result.mcResponse = JSON.stringify(result.mcResponse);
+                        }
+                        // -------------------------------------------
                         return result;
                     })
                     .catch(handleError(transfer, 'Issuer'))
+                    // ---------------------Added----------------------
+                    .then(this.bus.importMethod('db/transfer.push.saveResponse'))
+                    .then(() => transfer)
+                    // -------------------------------------------
                     .then(this.bus.importMethod('db/transfer.push.confirmIssuer'))
+                    // ---------------------Added----------------------
+                    .then(transfer => {
+                        // Delete the added property in order to not to show it in the response
+                        if (transfer.mcResponse) {
+                            delete transfer.mcResponse;
+                        }
+                        return transfer;
+                    })
+                    // -------------------------------------------
                     .then(() => transfer);
             } else {
                 return transfer;
@@ -265,8 +384,38 @@ module.exports = {
                 return transfer;
             }
         };
+        // ---------------------Added----------------------
+        var incrementalAuthorization = (transfer) => {
+            if (transfer.isIncrementalAuthorization && transfer.isIncrementalAuthorization != 0) {
+                var getTransfer = (transfer) => this.config['transfer.transfer.get']({
+                    transferId: transfer.transferId,
+                    transferIdAcquirer: null,
+                    acquirerCode: transfer.acquirerCode,
+                    cardId: transfer.cardId,
+                    localDateTime: transfer.localDateTime
+                }, $meta)
+                .then(result => {
+                    if (!result || !result.transferId) {
+                        throw errors.notFound();
+                    } else {
+                        transfer.originalTransferId = transfer.transferId;
+                        transfer.udfAcquirer.privateData = result.udfAcquirer.privateData +
+                        '6315' + result.networkData + result.issuerSettlementDate.substring(5, 10).replace('-', '') + '   ';
+                        return transfer;
+                    }
+                });
+                return getTransfer(transfer);
+            } else {
+                return transfer;
+            }
+        };
+        // -------------------------------------------------
 
         return ruleValidate(this.bus, params)
+        // ---------------------Added----------------------
+            .then(incrementalAuthorization)
+            .then(addOriginalRequestProperty)
+    // -------------------------------------------
             .then(dbPushExecute)
             .then(merchantTransferValidate)
             .then(ledgerPushExecute)
@@ -397,10 +546,36 @@ module.exports = {
             } else {
                 var transferInfo = Object.assign({
                     message: params.message,
-                    mti: '430',
+                    mti: params.udfAcquirer.mti,
+                    udfAcquirer: params.udfAcquirer,
                     operation: 'reverse',
-                    transferType: 'push'
+                    transferType: 'push',
+                    pan: params.pan,
+                    responseCode: params.responseCode,
+                    replacementAmount: params.amount && params.amount.replacement && params.amount.replacement.amount, // Shashi
+                    originalParams: params.originalParams,
+                    stan: params.stan,
+                    localDateTime: params.localDateTime,
+                    isPartialReversal: params.isPartialReversal
                 }, result);
+                // ---------------------Added----------------------
+                if (transferInfo.isPartialReversal && transferInfo.isPartialReversal == 1) {
+                    var currentAmount = currency.cents(params.currency, params.amount.transfer.amount, 1);
+                    var replacementAmount = currency.cents(transferInfo.transferCurrency, transferInfo.replacementAmount, 1);
+                    // Check the amounts
+                    // TODO: Create its own error to this condition.
+                    if ((parseInt(currentAmount.amount) < parseInt(replacementAmount.amount)) &&
+                    (parseInt(currentAmount.cents) < parseInt(replacementAmount.cents))) {
+                        throw errors.transferAlreadyReversed();
+                    }
+                }
+                // ---------------------Changed----------------------
+                transferInfo.udfAcquirer.privateData = params.udfAcquirer.privateData + '2001S' +
+                '6315' + transferInfo.networkData + transferInfo.issuerSettlementDate.substring(5, 10).replace('-', '');
+                // Add DE 90 (Original Params)
+                transferInfo.originalParams = '0' + transferInfo.udfAcquirer.mti + transferInfo.stan + transferInfo.localDateTime +
+                ('0000000000' + transferInfo.acquirerCode).slice(-11) + '00000000000';
+                // ------------------------------------------------------
                 return transferInfo;
             }
         });

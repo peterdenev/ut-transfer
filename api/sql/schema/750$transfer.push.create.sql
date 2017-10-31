@@ -27,11 +27,15 @@ ALTER PROCEDURE [transfer].[push.create]
     @udfAcquirer XML,
     @split transfer.splitTT READONLY,
     @isPending BIT,
+    @networkData varchar(20),
+	@originalRequest varchar(2000),
+    @originalTransferId bigint,
+    @isPreauthorization bit,
     @transferPending transfer.pendingTT READONLY,
     @userAvailableAccounts [core].[arrayList] READONLY,
     @meta core.metaDataTT READONLY
 AS
-DECLARE @callParams XML
+DECLARE @callParams XML = ( SELECT @transferTypeId [transferTypeId], @acquirerCode [acquirerCode], @transferDateTime [transferDateTime], @localDateTime [localDateTime], @settlementDate [settlementDate], @transferIdAcquirer [transferIdAcquirer], @channelId [channelId], @channelType [channelType], @ordererId [ordererId], @merchantId [merchantId], @merchantInvoice [merchantInvoice], @merchantType [merchantType], @cardId [cardId], @sourceAccount [sourceAccount], @destinationAccount [destinationAccount], @expireTime [expireTime], @expireSeconds [expireSeconds], @transferCurrency [transferCurrency], @transferAmount [transferAmount], @issuerId [issuerId], @ledgerId [ledgerId], @acquirerFee [acquirerFee], @issuerFee [issuerFee], @transferFee [transferFee], @description [description], @udfAcquirer [udfAcquirer], @networkData [networkData], @originalRequest [originalRequest], @originalTransferId [originalTransferId], @isPreauthorization [isPreauthorization],(SELECT * from @split rows FOR XML AUTO, TYPE) [split], @isPending [isPending], (SELECT * from @transferPending rows FOR XML AUTO, TYPE) [transferPending], (SELECT * from @userAvailableAccounts rows FOR XML AUTO, TYPE) [userAvailableAccounts], (SELECT * from @meta rows FOR XML AUTO, TYPE) [meta] FOR XML RAW('params'),TYPE)
 DECLARE @merchantPort varchar(50),
     @merchantMode varchar(20),
     @merchantSettlementDate datetime,
@@ -50,12 +54,12 @@ DECLARE @merchantPort varchar(50),
 BEGIN TRY
 
     -- checks if the user has a right to make the operation
-    /*DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
+/*    DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
     EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
     IF @return != 0
     BEGIN
         RETURN 55555
-    END*/
+    END */
 
     SET @userId = (SELECT [auth.actorId] FROM @meta)
 
@@ -131,7 +135,11 @@ BEGIN TRY
         issuerFee,
         transferFee,
         description,
-        reversed
+        reversed,
+		networkData,
+        originalRequest,
+        originalTransferId,
+        isPreauthorization
     )
     OUTPUT
         INSERTED.*,
@@ -173,7 +181,11 @@ BEGIN TRY
         @issuerFee,
         @transferFee,
         @description,
-        0
+        0,
+		@networkData,
+		@originalRequest,
+        @originalTransferId,
+        @isPreauthorization
 
     DECLARE @transferId BIGINT = @@IDENTITY
 
@@ -271,7 +283,7 @@ BEGIN TRY
 
     COMMIT TRANSACTION
 
-    --EXEC core.auditCall @procid = @@PROCID, @params = @callParams
+    EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0
@@ -279,13 +291,13 @@ BEGIN CATCH
 
     IF error_number() not in (2627)
         BEGIN
-            EXEC [core].[error]
+DECLARE @CORE_ERROR_FILE_281 sysname='c:\UT5\impl-alignet-mastercard\node_modules\ut-transfer\api\sql\schema/750$transfer.push.create.sql' DECLARE @CORE_ERROR_LINE_281 int='282' EXEC [core].[errorStack] @procid=@@PROCID, @file=@CORE_ERROR_FILE_281, @fileLine=@CORE_ERROR_LINE_281, @params = @callParams
         END
     ELSE
     BEGIN TRY
         RAISERROR('transfer.idAlreadyExists', 16, 1);
     END TRY
     BEGIN CATCH
-        EXEC [core].[error]
+DECLARE @CORE_ERROR_FILE_288 sysname='c:\UT5\impl-alignet-mastercard\node_modules\ut-transfer\api\sql\schema/750$transfer.push.create.sql' DECLARE @CORE_ERROR_LINE_288 int='289' EXEC [core].[errorStack] @procid=@@PROCID, @file=@CORE_ERROR_FILE_288, @fileLine=@CORE_ERROR_LINE_288, @params = @callParams
     END CATCH
 END CATCH
