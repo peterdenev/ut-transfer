@@ -27,7 +27,7 @@ DECLARE @transfer AS TABLE (transferId bigint, transferTypeId bigint, acquirerCo
                             channelType varchar(50), ordererId bigint, merchantId varchar(50), merchantInvoice varchar(50), merchantPort varchar(50), merchantType varchar(50),
                             cardId bigint, sourceAccount varchar(50), destinationAccount varchar(50), expireTime datetime, expireCount int, reversed bit, retryTime datetime,
                             retryCount int, ledgerTxState smallint, issuerTxState smallint, acquirerTxState smallint, merchantTxState smallint, issuerId varchar(50), ledgerId varchar(50),
-                            transferCurrency varchar(3), transferAmount money,  acquirerFee money, issuerFee money, transferFee money,[description] varchar(250),[networkData] varchar(30),[responseCode] char(2),
+                            transferCurrency varchar(3), transferAmount money,  acquirerFee money, issuerFee money, transferFee money,[description] varchar(250),[networkData] varchar(30),[issuerResponseCode] varchar(10),
                             [stan] char(6), issuerPort varchar(50),ledgerPort varchar(50),udfAcquirer xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max))
 
 -- get by pull transaction id
@@ -72,7 +72,7 @@ SELECT TOP 1
     t.transferFee,
     t.[description],
 	t.[networkData],
-    t.[responseCode],
+    t.[issuerResponseCode],
     t.[stan],
     pi.port,
     pl.port,
@@ -144,7 +144,7 @@ BEGIN
         t.transferFee,
         t.[description],
 		t.[networkData],
-        t.[responseCode],
+        t.[issuerResponseCode],
         t.[stan],
         pi.port,
         pl.port,
@@ -216,7 +216,7 @@ SELECT
     transferFee,
     [description],
 	[networkData],
-    [responseCode],
+    [issuerResponseCode],
     [stan],
     issuerPort,
     ledgerPort,

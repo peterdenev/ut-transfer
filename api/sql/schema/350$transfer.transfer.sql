@@ -37,6 +37,13 @@ CREATE TABLE [transfer].[transfer](
     transferFee money,
     issuerResponseCode varchar(10), 
     issuerResponseMessage varchar(250),
+    networkData varchar(20) NULL,
+    originalRequest TEXT NULL,
+    originalResponse TEXT NULL,
+    stan char(6) NULL,
+    originalTransferId bigint NULL,
+    reversedByTransferId bigint NULL,
+    isPreauthorization bit NULL,
     description varchar(250),
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
     CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])

@@ -1,28 +1,15 @@
 ALTER PROCEDURE [transfer].[push.confirmReversal]
-    @transferId bigint,
-    @isPartialReversal bit
+    @transferId bigint
 AS
 SET NOCOUNT ON
--- TODO: VEFIRY IF THIS LOGIC GOES IN HERE
-DECLARE @partialOrFullReversal int
 
-IF @isPartialReversal IS NOT NULL
-    BEGIN 
-     SET @partialOrFullReversal = 0
-    END
-ELSE 
-    BEGIN
-        SET @partialOrFullReversal = 1
-    END
---
 BEGIN TRY
     BEGIN TRANSACTION
 
     UPDATE
         [transfer].[transfer]
     SET
-        reversed = @partialOrFullReversal,
-        isPartialReversal = @isPartialReversal
+        reversed = 1
     WHERE
         transferId = @transferId
 

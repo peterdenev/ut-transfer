@@ -329,7 +329,9 @@ module.exports = {
             if (transfer.issuerPort && !canSkip(transfer)) {
                 return this.bus.importMethod('db/transfer.push.requestIssuer')(transfer)
                     .then(() => transfer)
-                    .then(this.bus.importMethod(transfer.issuerPort + '.push.execute'))
+                    .then((transfer) => {
+                        return this.bus.importMethod(transfer.issuerPort + '.push.execute')(transfer)
+                    })
                     .then(result => {
                         if (transfer.transferType === 'ministatement') {
                             transfer.ministatement = result.ministatement;
@@ -343,13 +345,22 @@ module.exports = {
                         if (result.mcResponse) {
                             result.mcResponse = JSON.stringify(result.mcResponse);
                         }
+                        /*
+
+                        @issuerResponseCode varchar(10), 
+    @issuerResponseMessage varchar(250),
+    @networkData varchar(20),
+    @originalResponse TEXT,
+    @stan char(6),
+    @settlementDate varchar(10),
+                        */
                         // -------------------------------------------
                         return result;
                     })
                     .catch(handleError(transfer, 'Issuer'))
                     // ---------------------Added----------------------
-                    .then(this.bus.importMethod('db/transfer.push.saveResponse'))
-                    .then(() => transfer)
+                    // .then(this.bus.importMethod('db/transfer.push.saveResponse'))
+                    // .then(() => transfer)
                     // -------------------------------------------
                     .then(this.bus.importMethod('db/transfer.push.confirmIssuer'))
                     // ---------------------Added----------------------
@@ -387,6 +398,7 @@ module.exports = {
         // ---------------------Added----------------------
         var incrementalAuthorization = (transfer) => {
             if (transfer.isIncrementalAuthorization && transfer.isIncrementalAuthorization != 0) {
+
                 var getTransfer = (transfer) => this.config['transfer.transfer.get']({
                     transferId: transfer.transferId,
                     transferIdAcquirer: null,

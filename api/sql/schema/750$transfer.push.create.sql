@@ -27,15 +27,15 @@ ALTER PROCEDURE [transfer].[push.create]
     @udfAcquirer XML,
     @split transfer.splitTT READONLY,
     @isPending BIT,
-    @networkData varchar(20),
-	@originalRequest varchar(2000),
+	@originalRequest TEXT,
     @originalTransferId bigint,
     @isPreauthorization bit,
+    @networkData varchar(20),
     @transferPending transfer.pendingTT READONLY,
     @userAvailableAccounts [core].[arrayList] READONLY,
     @meta core.metaDataTT READONLY
 AS
-DECLARE @callParams XML = ( SELECT @transferTypeId [transferTypeId], @acquirerCode [acquirerCode], @transferDateTime [transferDateTime], @localDateTime [localDateTime], @settlementDate [settlementDate], @transferIdAcquirer [transferIdAcquirer], @channelId [channelId], @channelType [channelType], @ordererId [ordererId], @merchantId [merchantId], @merchantInvoice [merchantInvoice], @merchantType [merchantType], @cardId [cardId], @sourceAccount [sourceAccount], @destinationAccount [destinationAccount], @expireTime [expireTime], @expireSeconds [expireSeconds], @transferCurrency [transferCurrency], @transferAmount [transferAmount], @issuerId [issuerId], @ledgerId [ledgerId], @acquirerFee [acquirerFee], @issuerFee [issuerFee], @transferFee [transferFee], @description [description], @udfAcquirer [udfAcquirer], @networkData [networkData], @originalRequest [originalRequest], @originalTransferId [originalTransferId], @isPreauthorization [isPreauthorization],(SELECT * from @split rows FOR XML AUTO, TYPE) [split], @isPending [isPending], (SELECT * from @transferPending rows FOR XML AUTO, TYPE) [transferPending], (SELECT * from @userAvailableAccounts rows FOR XML AUTO, TYPE) [userAvailableAccounts], (SELECT * from @meta rows FOR XML AUTO, TYPE) [meta] FOR XML RAW('params'),TYPE)
+DECLARE @callParams XML = NULL
 DECLARE @merchantPort varchar(50),
     @merchantMode varchar(20),
     @merchantSettlementDate datetime,
@@ -65,7 +65,7 @@ BEGIN TRY
 
     BEGIN TRANSACTION
 
-    UPDATE
+    /*UPDATE
         [transfer].[partner]
     SET
         @merchantPort = port,
@@ -86,7 +86,7 @@ BEGIN TRY
         @issuerSettings = settings
     WHERE
         partnerId = @issuerId
-
+    */
     IF LEN(@settlementDate) = 4
     BEGIN
         SET @issuerSettlementDate = CAST(CAST(DATEPART(YEAR, GETDATE()) AS CHAR(4)) + @settlementDate AS DATETIME)
@@ -100,7 +100,7 @@ BEGIN TRY
         SET @issuerSettlementDate = CAST(@settlementDate AS datetime)
     END
 
-    UPDATE
+    /*UPDATE
         [transfer].[partner]
     SET
         @ledgerPort = port,
@@ -108,7 +108,7 @@ BEGIN TRY
         @ledgerSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1
     WHERE
         partnerId = @ledgerId
-
+    */
     INSERT INTO [transfer].[transfer](
         transferDateTime,
         transferTypeId,
@@ -283,7 +283,7 @@ BEGIN TRY
 
     COMMIT TRANSACTION
 
-    EXEC core.auditCall @procid = @@PROCID, @params = @callParams
+    --EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0

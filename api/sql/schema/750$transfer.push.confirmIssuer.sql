@@ -5,6 +5,10 @@ ALTER PROCEDURE [transfer].[push.confirmIssuer]
     @message varchar(250),
     @issuerResponseCode varchar(10), 
     @issuerResponseMessage varchar(250),
+    @networkData varchar(20),
+    @originalResponse TEXT,
+    @stan char(6),
+    @settlementDate varchar(10),
     @details XML
 AS
 SET NOCOUNT ON
@@ -15,7 +19,11 @@ SET
     transferIdIssuer = @transferIdIssuer,
     issuerTxState = 2,
     issuerResponseCode=@issuerResponseCode,
-    issuerResponseMessage=@issuerResponseMessage
+    issuerResponseMessage=@issuerResponseMessage,
+    networkData = @networkData,
+    originalResponse = @originalResponse,
+    stan = @stan,
+    settlementDate = @settlementDate
 WHERE
     transferId = @transferId AND
     issuerTxState = 1
