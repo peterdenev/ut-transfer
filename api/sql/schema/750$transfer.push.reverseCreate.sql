@@ -3,7 +3,7 @@ ALTER PROCEDURE [transfer].[push.reverseCreate]
     @reverseAmount money,
     @isPartial BIT = 0,
     @issuerId varchar(50),
-    @transferDateTime datetime = NULL,
+    @transferDateTime datetime2(0) = NULL,
     @localDateTime varchar(14) = NULL
 AS
 

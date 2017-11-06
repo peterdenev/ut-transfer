@@ -1,10 +1,10 @@
 ALTER PROCEDURE [transfer].[push.partialReversal]
     @transferId bigint,
-    @transferDateTime datetime,
+    @transferDateTime datetime2(0),
     @localDateTime varchar(14),
     @replacementAmount money,    
-	@networkData varchar(20),
-	@originalRequest varchar(2000),
+    @networkData varchar(20),
+    @originalRequest varchar(2000),
     @udfAcquirer XML,
     @meta core.metaDataTT READONLY
 AS
@@ -24,10 +24,10 @@ BEGIN TRY
     BEGIN TRANSACTION
 
     INSERT INTO [transfer].[reverse](
-		originalTransferId,
+	   transferId,
         transferDateTime,
         localDateTime,
-        transferAmount,
+        reverseAmount,
         networkData,
         originalRequest
     )

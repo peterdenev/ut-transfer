@@ -1,4 +1,4 @@
----transfer.split/columns
+﻿---transfer.split/columns
 IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'debitActorId' AND Object_ID = Object_ID(N'transfer.split') )
 BEGIN
     ALTER TABLE [transfer].[split] ADD debitActorId BIGINT
@@ -131,3 +131,17 @@ BEGIN
     ALTER TABLE [transfer].[pending] ADD updatedOn datetime2
 END
 
+
+
+
+IF NOT EXISTS(SELECT * FROM sys.indexes WHERE name = 'XI_transferOriginalTransferId' AND object_id = OBJECT_ID('[transfer].[transfer]'))
+    BEGIN
+    CREATE NONCLUSTERED INDEX [XI_transferOriginalTransferId] ON [transfer].[transfer] ([originalTransferId] ASC)  
+    WHERE originalTransferId IS NOT NULL ;  
+    END
+
+
+    IF NOT EXISTS(SELECT * FROM sys.indexes WHERE name = 'XI_reverseTransferId' AND object_id = OBJECT_ID('[transfer].[reverse]'))
+    BEGIN
+    CREATE NONCLUSTERED INDEX [XI_reverseTransferId] ON [transfer].[reverse] ([transferId] ASC)  
+    END

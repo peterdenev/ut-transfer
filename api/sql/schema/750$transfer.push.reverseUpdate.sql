@@ -1,6 +1,6 @@
 ALTER PROCEDURE [transfer].[push.reverseUpdate]
     @reverseId bigint,
-    @originalRequest TEXT = NULL,
+    @originalRequest VARCHAR(MAX) = NULL,
     @issuerResponseCode varchar(10) = NULL, 
     @issuerResponseMessage varchar(250) = NULL
 AS
@@ -17,7 +17,7 @@ BEGIN
             THEN 2
             ELSE 3
             END,
-        updatedOn = GETDATE()
+        updatedOn = SYSDATETIMEOFFSET()
     WHERE
         reverseId = @reverseId
 END
@@ -27,7 +27,7 @@ BEGIN
         [transfer].[reverse]
     SET
         originalRequest = @originalRequest,
-        updatedOn = GETDATE()
+        updatedOn = SYSDATETIMEOFFSET()
     WHERE
         reverseId = @reverseId
 

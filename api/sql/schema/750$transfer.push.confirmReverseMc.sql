@@ -5,7 +5,8 @@ ALTER PROCEDURE [transfer].[push.confirmReverseMc]
     @issuerResponseMessage varchar(250) = NULL,
     @originalResponse TEXT = NULL,
     @stan char(6) = NULL,
-    @networkData varchar(20) = NULL
+    @networkData varchar(20) = NULL,
+    @isPartialReverse BIT=0
 AS
 SET NOCOUNT ON
 
@@ -24,13 +25,24 @@ BEGIN TRY
         updatedOn = GETDATE()
     WHERE
         reverseId = @reverseId
+    IF @isPartialReverse=0
+    BEGIN
+	   UPDATE
+		  [transfer].[transfer]
+	   SET
+		  reversed = 1
+	   WHERE
+		  transferId = @transferId
 
-    UPDATE
-        [transfer].[transfer]
-    SET
-        reversed = 1
-    WHERE
-        transferId = @transferId
+	   UPDATE
+		  [transfer].[transfer]
+	   SET
+		  reversed = 1
+	   WHERE
+		  originalTransferId = @transferId
+    END
+
+
 
     IF @@ROWCOUNT <> 1 RAISERROR('transfer.confirmReversal', 16, 1);
 

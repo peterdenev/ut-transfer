@@ -1,7 +1,7 @@
 ALTER PROCEDURE [transfer].[push.create]
     @transferTypeId bigint,
     @acquirerCode varchar(50),
-    @transferDateTime datetime,
+    @transferDateTime datetime2(0),
     @localDateTime varchar(14),
     @settlementDate varchar(14),
     @transferIdAcquirer varchar(50),
@@ -185,8 +185,8 @@ BEGIN TRY
 		@originalRequest,
         @originalTransferId,
         @isPreauthorization,
-        GETDATE(),
-        GETDATE()
+        SYSDATETIMEOFFSET(),
+        SYSDATETIMEOFFSET()
     DECLARE @transferId BIGINT = @@IDENTITY
 
     EXEC [transfer].[push.event]

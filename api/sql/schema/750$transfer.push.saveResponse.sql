@@ -3,7 +3,7 @@ ALTER PROCEDURE [transfer].[push.saveResponse]
     @type varchar(50),
     @message varchar(250),
     @networkData varchar(20),
-    @originalResponse varchar(2000),
+    @originalResponse varchar(MAX),
     @settlementDate varchar(5),
     @responseCode char(2),
     @stan char(6),

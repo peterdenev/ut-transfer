@@ -6,7 +6,7 @@ CREATE TABLE [transfer].[transfer](
     transferIdLedger varchar(50),
     transferIdIssuer varchar(50),
     transferIdMerchant varchar(50),
-    transferDateTime datetime NOT NULL,
+    transferDateTime datetime2(0) NOT NULL,
     localDateTime varchar(14),
     settlementDate date,
     channelId bigint NOT NULL,
