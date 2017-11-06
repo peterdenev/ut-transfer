@@ -28,5 +28,8 @@ module.exports = {
     reasonNameExists: create('reasonNameExists', Transfer, 'Transfer reasons name already exists'),
     transferAlreadyReversed: create('transferAlreadyReversed', Transfer, 'Transfer has been already reversed'),
     transferInvalidPendingTransfer: create('transferInvalidPendingTransfer', Transfer, 'Invalid pending transfer status'),
-    merchantRejectFailure: create('rejectFailure', Transfer, 'Merchant payment reject failure')
+    merchantRejectFailure: create('rejectFailure', Transfer, 'Merchant payment reject failure'),
+    invalidTransferIdReverse: create('invalidTransferIdReverse', Transfer, 'Invalid Transfer ID! Only Original transfers can be reversed'),
+    clearedTransfer: create('clearedTransfer', Transfer, 'Cleared Transfer'),
+    invalidReplacementAmount: create('invalidReplacementAmount', Transfer, 'Invalid Replacement Amount')
 };

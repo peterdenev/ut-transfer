@@ -53,19 +53,16 @@ DECLARE @merchantPort varchar(50),
 
 BEGIN TRY
 
-    -- checks if the user has a right to make the operation
-/*    DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
-    EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
-    IF @return != 0
+    IF @transferDateTime IS NULL
     BEGIN
-        RETURN 55555
-    END */
+        SELECT @transferDateTime = GETDATE()
+    END
 
     SET @userId = (SELECT [auth.actorId] FROM @meta)
 
     BEGIN TRANSACTION
 
-    /*UPDATE
+    UPDATE
         [transfer].[partner]
     SET
         @merchantPort = port,
@@ -86,7 +83,7 @@ BEGIN TRY
         @issuerSettings = settings
     WHERE
         partnerId = @issuerId
-    */
+    
     IF LEN(@settlementDate) = 4
     BEGIN
         SET @issuerSettlementDate = CAST(CAST(DATEPART(YEAR, GETDATE()) AS CHAR(4)) + @settlementDate AS DATETIME)
@@ -100,7 +97,7 @@ BEGIN TRY
         SET @issuerSettlementDate = CAST(@settlementDate AS datetime)
     END
 
-    /*UPDATE
+    UPDATE
         [transfer].[partner]
     SET
         @ledgerPort = port,
@@ -108,7 +105,7 @@ BEGIN TRY
         @ledgerSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1
     WHERE
         partnerId = @ledgerId
-    */
+    
     INSERT INTO [transfer].[transfer](
         transferDateTime,
         transferTypeId,
@@ -139,7 +136,9 @@ BEGIN TRY
 		networkData,
         originalRequest,
         originalTransferId,
-        isPreauthorization
+        isPreauthorization,
+        createdOn,
+        updatedOn
     )
     OUTPUT
         INSERTED.*,
@@ -185,8 +184,9 @@ BEGIN TRY
 		@networkData,
 		@originalRequest,
         @originalTransferId,
-        @isPreauthorization
-
+        @isPreauthorization,
+        GETDATE(),
+        GETDATE()
     DECLARE @transferId BIGINT = @@IDENTITY
 
     EXEC [transfer].[push.event]

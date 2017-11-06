@@ -7,18 +7,16 @@ var errors = require('../../errors');
 var currency = require('../../currency');
 
 // ---------------------Added----------------------
-var addOriginalRequestProperty = (transfer) => {
-    if (!transfer.originalRequest){
-        transfer.originalRequest = Object.assign({},transfer);
-        delete transfer.originalRequest.pan;
-        transfer.originalRequest = JSON.stringify(transfer.originalRequest);
-    }
-    return Promise.resolve(transfer);
-};
+// var addOriginalRequestProperty = (transfer) => {
+//     if (!transfer.originalRequest){
+//         transfer.originalRequest = JSON.stringify(transfer.originalRequest);
+//     }
+//     return Promise.resolve(transfer);
+// };
 var processReversal = (bus, log, $meta) => params => {
     var transferId;
     var partialTransferId;
-    var mcResponse;
+    var originalResponse;
 
     var portReversal = (port, reversal) => {
         if (port && reversal.transferType && reversal.operation) {
@@ -67,7 +65,7 @@ var processReversal = (bus, log, $meta) => params => {
             return reversal && portReversal(reversal.issuerPort, reversal)
             .then(result => {
                     // ---------------------Added----------------------
-                    mcResponse = JSON.stringify(result.mcResponse);
+                    originalResponse = JSON.stringify(result.originalResponse);
                     // -------------------------------------------
                 if (reversal.issuerPort === reversal.ledgerPort) {
                     return reversal;
@@ -93,7 +91,7 @@ var processReversal = (bus, log, $meta) => params => {
         if (partialTransferId) {
             return bus.importMethod('db/transfer.push.confirmPartialReversal')({
                 partialTransferId,
-                mcResponse
+                originalResponse
             })
             .then(transferId && bus.importMethod('db/transfer.push.confirmReversal')({
                 transferId,
@@ -168,7 +166,7 @@ var processReversal = (bus, log, $meta) => params => {
     return dbPushReverse(params)
      // ---------------------Added----------------------
         .then(validateAmount)
-        .then(addOriginalRequestProperty)
+        // .then(addOriginalRequestProperty)
         .then(partialReversal)
  //-------------------------------------------
         .then(reverse)
@@ -186,8 +184,8 @@ var ruleValidate = (bus, transfer) => {
         currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
         isSourceAmount: false
     }).then(decision => {
-        transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
-        transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
+        transfer.transferAmount = transfer.transferAmount || transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
+        transfer.transferCurrency = transfer.transferCurrency || transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
         if (decision.amount) {
             transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
             transfer.acquirerFee = decision.amount.acquirerFee;
@@ -338,40 +336,15 @@ module.exports = {
                         }
                         transfer.balance = result.balance;
                         transfer.transferIdIssuer = result.transferIdIssuer;
-
+                        transfer.issuerResponseCode = result.issuerResponseCode;
                         result.transferId = transfer.transferId;
+                        transfer.issuerResponseMessage = result.issuerResponseMessage;
+                        transfer.issuerSettlementDate = result.settlementDate;
 
-                        // ---------------------Added----------------------
-                        if (result.mcResponse) {
-                            result.mcResponse = JSON.stringify(result.mcResponse);
-                        }
-                        /*
-
-                        @issuerResponseCode varchar(10), 
-    @issuerResponseMessage varchar(250),
-    @networkData varchar(20),
-    @originalResponse TEXT,
-    @stan char(6),
-    @settlementDate varchar(10),
-                        */
-                        // -------------------------------------------
                         return result;
                     })
                     .catch(handleError(transfer, 'Issuer'))
-                    // ---------------------Added----------------------
-                    // .then(this.bus.importMethod('db/transfer.push.saveResponse'))
-                    // .then(() => transfer)
-                    // -------------------------------------------
                     .then(this.bus.importMethod('db/transfer.push.confirmIssuer'))
-                    // ---------------------Added----------------------
-                    .then(transfer => {
-                        // Delete the added property in order to not to show it in the response
-                        if (transfer.mcResponse) {
-                            delete transfer.mcResponse;
-                        }
-                        return transfer;
-                    })
-                    // -------------------------------------------
                     .then(() => transfer);
             } else {
                 return transfer;
@@ -426,7 +399,7 @@ module.exports = {
         return ruleValidate(this.bus, params)
         // ---------------------Added----------------------
             .then(incrementalAuthorization)
-            .then(addOriginalRequestProperty)
+            // .then(addOriginalRequestProperty)
     // -------------------------------------------
             .then(dbPushExecute)
             .then(merchantTransferValidate)
@@ -558,36 +531,10 @@ module.exports = {
             } else {
                 var transferInfo = Object.assign({
                     message: params.message,
-                    mti: params.udfAcquirer.mti,
-                    udfAcquirer: params.udfAcquirer,
+                    mti: '430',
                     operation: 'reverse',
-                    transferType: 'push',
-                    pan: params.pan,
-                    responseCode: params.responseCode,
-                    replacementAmount: params.amount && params.amount.replacement && params.amount.replacement.amount, // Shashi
-                    originalParams: params.originalParams,
-                    stan: params.stan,
-                    localDateTime: params.localDateTime,
-                    isPartialReversal: params.isPartialReversal
+                    transferType: 'push'
                 }, result);
-                // ---------------------Added----------------------
-                if (transferInfo.isPartialReversal && transferInfo.isPartialReversal == 1) {
-                    var currentAmount = currency.cents(params.currency, params.amount.transfer.amount, 1);
-                    var replacementAmount = currency.cents(transferInfo.transferCurrency, transferInfo.replacementAmount, 1);
-                    // Check the amounts
-                    // TODO: Create its own error to this condition.
-                    if ((parseInt(currentAmount.amount) < parseInt(replacementAmount.amount)) &&
-                    (parseInt(currentAmount.cents) < parseInt(replacementAmount.cents))) {
-                        throw errors.transferAlreadyReversed();
-                    }
-                }
-                // ---------------------Changed----------------------
-                transferInfo.udfAcquirer.privateData = params.udfAcquirer.privateData + '2001S' +
-                '6315' + transferInfo.networkData + transferInfo.issuerSettlementDate.substring(5, 10).replace('-', '');
-                // Add DE 90 (Original Params)
-                transferInfo.originalParams = '0' + transferInfo.udfAcquirer.mti + transferInfo.stan + transferInfo.localDateTime +
-                ('0000000000' + transferInfo.acquirerCode).slice(-11) + '00000000000';
-                // ------------------------------------------------------
                 return transferInfo;
             }
         });
@@ -599,7 +546,7 @@ module.exports = {
         if (params.abortAcquirer) {
             return this.bus.importMethod('transfer.push.execute')(params, $meta);
         } else {
-            return this.bus.importMethod('card.card.check')({
+            return this.bus.importMethod('db/atm.card.check')({
                 cardId: params.cardId,
                 sourceAccount: params.sourceAccount,
                 sourceAccountType: params.sourceAccountType,
@@ -665,6 +612,101 @@ module.exports = {
     },
     'pendingUserTransfers.fetch': function(msg, $meta) {
         return this.bus.importMethod('db/transfer.pendingUserTransfers.fetch')(msg, $meta);
-    }
+    },
+
+    'push.reverseMc': function(params, $meta) {
+        return this.bus.importMethod('db/transfer.transfer.get')({
+                transferIdAcquirer: params.transferIdAcquirer
+                , getReversalSum: (params.replacementAmount !== undefined)
+            }).then(result => {
+                if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
+                    throw errors.notFound();
+                }
+                let orgTransfer = result.transfer[0];
+                if (orgTransfer.originalTransferId) {
+                    throw errors.invalidTransferIdReverse();
+                }
+                if (orgTransfer.reversed) {
+                    throw errors.transferAlreadyReversed();
+                }
+                if (orgTransfer.cleared || (orgTransfer.clearingStatusId && orgTransfer.clearingStatusId !== 'pendng')) {
+                    throw errors.clearedTransfer();
+                }
+                params.transferId = orgTransfer.transferId;
+                params.transferTypeId = orgTransfer.transferTypeId;
+                params.transferIdIssuer = orgTransfer.transferIdIssuer;
+                params.transferAmount = parseFloat(orgTransfer.transferAmount) + parseFloat(orgTransfer.incrementalAmountSum)
+                // params.networkData = orgTransfer.networkData;
+                params.amount = {
+                    transfer: currency.amount(orgTransfer.transferCurrency, params.transferAmount)
+                }
+                if (params.replacementAmount) {
+                    let reversedSum = parseFloat(orgTransfer.reversedSum);
+                    params.replacementAmount = parseFloat(params.replacementAmount);
+                    if(params.replacementAmount >= (params.transferAmount - reversedSum)) {
+                        throw errors.invalidReplacementAmount();
+                    }
+                    params.amount.replacement = currency.amount(orgTransfer.transferCurrency, params.replacementAmount);
+                }
+
+                /*var transferInfo = Object.assign({
+                    message: params.message,
+                    mti: params.udfAcquirer.mti,
+                    udfAcquirer: params.udfAcquirer,
+                    operation: 'reverse',
+                    transferType: 'push',
+                    pan: params.pan,
+                    issuerResponseCode: params.issuerResponseCode,
+                    replacementAmount: params.amount && params.amount.replacement && params.amount.replacement.amount, // Shashi
+                    originalParams: params.originalParams,
+                    stan: params.stan,
+                    localDateTime: params.localDateTime,
+                    isPartialReversal: params.isPartialReversal
+                }, result);*/
+                
+                params.udfAcquirer.privateData = params.udfAcquirer.privateData + '2001S' +
+                '6315' + orgTransfer.networkData + orgTransfer.issuerSettlementDate.substring(5, 10).replace('-', '');
+                // Add DE 90 (Original Params)
+                params.originalParams = '0' + params.udfAcquirer.mti + orgTransfer.localDateTime + orgTransfer.stan +
+                ('0000000000' + params.acquirerCode).slice(-11) + '00000000000';
+                
+                return this.bus.importMethod('db/transfer.push.reverseCreate')({
+                    transferId: params.transferId,
+                    reverseAmount: params.amount.replacement ? params.replacementAmount : params.transferAmount,
+                    isPartial: params.amount.replacement ? 1 : 0,
+                    issuerId: orgTransfer.issuerId,
+                    transferDateTime: params.transferDateTime,
+                    localDateTime: params.localDateTime
+                });
+            }).then((res) => {
+                params.reverseId = res.reverseId;
+                return this.bus.importMethod(transfer.issuerPort + '.push.execute')(params);
+            }).then((reverseResult) => {
+                return this.bus.importMethod('db/transfer.push.confirmReversal')({
+                    transferId: params.transferId,
+                    reverseId: params.reverseId,
+                    issuerResponseCode: reverseResult.issuerResponseCode,
+                    issuerResponseMessage: reverseResult.issuerResponseMessage,
+                    originalResponse: reverseResult.originalResponse,
+                    stan: reverseResult.stan,
+                    networkData: reverseResult.networkData
+                }).then((res) => {
+                    return reverseResult;
+                });
+            }, (reversalError) => {
+                return this.bus.importMethod('db/transfer.push.reverseUpdate')({
+                    reverseId: params.reverseId,
+                    issuerResponseCode: reversalError.issuerResponseCode,
+                    issuerResponseMessage: reversalError.issuerResponseMessage
+                })
+                .then(() => {
+                    return Promise.reject({
+                        reverseId: params.reverseId,
+                        issuerResponseCode: reversalError.issuerResponseCode,
+                        issuerResponseMessage: reversalError.issuerResponseMessage
+                    });
+                });
+            });
+    },
 };
 // todo handle timeout from destination port

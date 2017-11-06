@@ -42,9 +42,13 @@ CREATE TABLE [transfer].[transfer](
     originalResponse TEXT NULL,
     stan char(6) NULL,
     originalTransferId bigint NULL,
-    reversedByTransferId bigint NULL,
     isPreauthorization bit NULL,
+    cleared bit NULL,
+    clearingStatusId char(5) NULL,
     description varchar(250),
+    createdOn DATETIMEOFFSET (7), 
+    updatedBy BIGINT,
+    updatedOn DATETIMEOFFSET (7),
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
     CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])
 )
