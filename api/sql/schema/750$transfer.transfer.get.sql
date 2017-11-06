@@ -8,7 +8,7 @@ ALTER PROCEDURE [transfer].[transfer.get]
 AS
 
 declare @incrementalAmountSum money = 0, @reversedSum money = 0;
-
+ 
 SELECT @transferId = transferId FROM [transfer].[transfer] WHERE [transferIdAcquirer] = @transferIdAcquirer
 
 IF @getReversedSum = 1
@@ -21,8 +21,11 @@ BEGIN
             OR r.issuerTxState = 2
         )
 END
-
- SELECT 'transfer' AS resultSetName
+SET @incrementalAmountSum= (SELECT SUM(it.transferAmount)
+						  FROM [transfer].[transfer] it
+						  WHERE it.originalTransferId = @transferId
+					   )
+SELECT 'transfer' AS resultSetName
 SELECT TOP 1
     t.transferId,
     t.transferTypeId,
@@ -69,21 +72,14 @@ SELECT TOP 1
     t.stan,
     t.originalTransferId,
     t.isPreauthorization,
-    (SELECT SUM(ISNULL(it.transferAmount, 0))
-        FROM [transfer].[transfer] it
-        WHERE it.originalTransferId = t.transferId
-    ) as incrementalAmountSum
+    @incrementalAmountSum as incrementalAmountSum
     , t.cleared
     , t.clearingStatusId
     , @reversedSum as reversedSum
 FROM
     [transfer].[transfer] t
-WHERE
-    (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
-    (@transferId IS NULL OR t.[transferId] = @transferId) AND
-    (@cardId IS NULL OR t.cardId = @cardId) AND
-    (@localDateTime IS NULL OR t.localDateTime LIKE '%' + @localDateTime) AND
-    (@acquirerCode IS NULL OR t.acquirerCode = @acquirerCode)
-ORDER BY
-    t.transferDateTime DESC
+WHERE    
+    t.[transferId] = @transferId    
+--ORDER BY
+--    t.transferDateTime DESC
 
