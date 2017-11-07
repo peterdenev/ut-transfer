@@ -6,7 +6,7 @@ ALTER PROCEDURE [transfer].[push.reverseCreate]
     @transferDateTime datetime2(0) = NULL,
     @localDateTime varchar(14) = NULL
 AS
-
+DECLARE @reverseId BIGINT
 INSERT INTO
 [transfer].[reverse] (
     transferId,
@@ -19,8 +19,6 @@ INSERT INTO
     createdOn,
     updatedOn
 )
-OUTPUT
-    INSERTED.*
 VALUES (
     @transferId,
     @reverseAmount,
@@ -29,9 +27,10 @@ VALUES (
     @issuerId,
     @transferDateTime,
     @localDateTime,
-    GETDATE(),
-    GETDATE()
+    SYSDATETIMEOFFSET(),
+    SYSDATETIMEOFFSET()
 )
+SET @reverseId=SCOPE_IDENTITY()
 
 EXEC [transfer].[push.event]
     @transferId = @transferId,
@@ -40,4 +39,6 @@ EXEC [transfer].[push.event]
     @source = 'acquirer',
     @message = NULL,
     @udfDetails = NULL
+
+SELECT @reverseId reverseId 
 
