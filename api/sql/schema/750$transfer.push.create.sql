@@ -31,6 +31,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @originalTransferId bigint,
     @isPreauthorization bit,
     @networkData varchar(20),
+    @transactionCategoryCode char(1),
     @transferPending transfer.pendingTT READONLY,
     @userAvailableAccounts [core].[arrayList] READONLY,
     @meta core.metaDataTT READONLY
@@ -134,6 +135,7 @@ BEGIN TRY
         description,
         reversed,
 		networkData,
+        transactionCategoryCode,
         originalRequest,
         originalTransferId,
         isPreauthorization,
@@ -182,6 +184,7 @@ BEGIN TRY
         @description,
         0,
 		@networkData,
+        @transactionCategoryCode,
 		@originalRequest,
         @originalTransferId,
         @isPreauthorization,

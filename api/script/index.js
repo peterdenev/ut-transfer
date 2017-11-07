@@ -616,7 +616,7 @@ module.exports = {
 
     'push.reverseMc': function(params, $meta) {
         return this.bus.importMethod('db/transfer.transfer.get')({
-                transferIdAcquirer: params.transferIdAcquirer
+                transferIdAcquirer: params.acquirerTransferId
                 , getReversalSum: (params.replacementAmount !== undefined)
             }).then(result => {
                 if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
@@ -647,8 +647,9 @@ module.exports = {
                         throw errors.invalidReplacementAmount();
                     }
                     params.amount.replacement = currency.amount(orgTransfer.transferCurrency, params.replacementAmount);
+                    params.replacementAmount = params.amount.replacement.amount;
                 }
-
+                params.transferAmount = params.amount.transfer.amount;
                 /*var transferInfo = Object.assign({
                     message: params.message,
                     mti: params.udfAcquirer.mti,
@@ -664,46 +665,47 @@ module.exports = {
                     isPartialReversal: params.isPartialReversal
                 }, result);*/
                 
-                params.udfAcquirer.privateData = params.udfAcquirer.privateData + '2001S' +
-                '6315' + orgTransfer.networkData + orgTransfer.issuerSettlementDate.substring(5, 10).replace('-', '');
-                // Add DE 90 (Original Params)
-                params.originalParams = '0' + params.udfAcquirer.mti + orgTransfer.localDateTime + orgTransfer.stan +
+                // DE 48 (Additional Data)
+                params.udfAcquirer = params.udfAcquirer || {};
+                params.udfAcquirer.privateData = orgTransfer.transactionCategoryCode + '2001S' +
+                '6315' + orgTransfer.networkData + orgTransfer.settlementDate.substring(5, 10).replace('-', '');
+                // DE 90 (Original Params)
+                params.originalParams = '0100' + orgTransfer.localDateTime + orgTransfer.stan +
                 ('0000000000' + params.acquirerCode).slice(-11) + '00000000000';
                 
                 return this.bus.importMethod('db/transfer.push.reverseCreate')({
                     transferId: params.transferId,
                     reverseAmount: params.amount.replacement ? params.replacementAmount : params.transferAmount,
                     isPartial: params.amount.replacement ? 1 : 0,
-                    issuerId: orgTransfer.issuerId,
-                    transferDateTime: params.transferDateTime,
-                    localDateTime: params.localDateTime
+                    issuerId: orgTransfer.issuerId
                 });
             }).then((res) => {
                 params.reverseId = res.reverseId;
-                return this.bus.importMethod(transfer.issuerPort + '.push.execute')(params);
-            }).then((reverseResult) => {
-                return this.bus.importMethod('db/transfer.push.confirmReversal')({
-                    transferId: params.transferId,
-                    reverseId: params.reverseId,
-                    issuerResponseCode: reverseResult.issuerResponseCode,
-                    issuerResponseMessage: reverseResult.issuerResponseMessage,
-                    originalResponse: reverseResult.originalResponse,
-                    stan: reverseResult.stan,
-                    networkData: reverseResult.networkData
-                }).then((res) => {
-                    return reverseResult;
-                });
-            }, (reversalError) => {
-                return this.bus.importMethod('db/transfer.push.reverseUpdate')({
-                    reverseId: params.reverseId,
-                    issuerResponseCode: reversalError.issuerResponseCode,
-                    issuerResponseMessage: reversalError.issuerResponseMessage
-                })
-                .then(() => {
-                    return Promise.reject({
+                return this.bus.importMethod(transfer.issuerPort + '.push.execute')(params)
+                .then((reverseResult) => {
+                    return this.bus.importMethod('db/transfer.push.confirmReversal')({
+                        transferId: params.transferId,
+                        reverseId: params.reverseId,
+                        issuerResponseCode: reverseResult.issuerResponseCode,
+                        issuerResponseMessage: reverseResult.issuerResponseMessage,
+                        originalResponse: reverseResult.originalResponse,
+                        stan: reverseResult.stan,
+                        networkData: reverseResult.networkData
+                    }).then((res) => {
+                        return reverseResult;
+                    });
+                }, (reversalError) => {
+                    return this.bus.importMethod('db/transfer.push.reverseUpdate')({
                         reverseId: params.reverseId,
                         issuerResponseCode: reversalError.issuerResponseCode,
                         issuerResponseMessage: reversalError.issuerResponseMessage
+                    })
+                    .then(() => {
+                        return Promise.reject({
+                            reverseId: params.reverseId,
+                            issuerResponseCode: reversalError.issuerResponseCode,
+                            issuerResponseMessage: reversalError.issuerResponseMessage
+                        });
                     });
                 });
             });

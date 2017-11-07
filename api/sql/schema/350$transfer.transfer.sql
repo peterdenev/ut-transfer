@@ -41,6 +41,7 @@ CREATE TABLE [transfer].[transfer](
     originalRequest TEXT NULL,
     originalResponse TEXT NULL,
     stan char(6) NULL,
+    transactionCategoryCode char(1) NULL,
     originalTransferId bigint NULL,
     isPreauthorization bit NULL,
     cleared bit NULL,

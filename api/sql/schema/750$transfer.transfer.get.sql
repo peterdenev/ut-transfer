@@ -21,7 +21,7 @@ BEGIN
             OR r.issuerTxState = 2
         )
 END
-SET @incrementalAmountSum= (SELECT SUM(it.transferAmount)
+SET @incrementalAmountSum= (SELECT ISNULL(SUM(it.transferAmount), 0)
 						  FROM [transfer].[transfer] it
 						  WHERE it.originalTransferId = @transferId
 					   )
@@ -70,6 +70,7 @@ SELECT TOP 1
     t.originalRequest,
     t.originalResponse,
     t.stan,
+    t.transactionCategoryCode,
     t.originalTransferId,
     t.isPreauthorization,
     @incrementalAmountSum as incrementalAmountSum
