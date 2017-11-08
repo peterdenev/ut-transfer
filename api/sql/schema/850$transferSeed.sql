@@ -20,19 +20,19 @@ DECLARE @parentItemNameId bigint
  IF NOT EXISTS(select top 1 1 from [transfer].[issuerTxState])
  BEGIN
  INSERT INTO [transfer].[issuerTxState]
- VALUES('rsent','Request was sent' ),
-    ('rconf','Request was confirmed' ),
-    ('rdeni','Request was denied' ),
-    ('rteue','Request timed out or ended with unknown error' ),
-    ('rabrr','Request was aborted before any response was received' ),
-    ('unerc','Unexpected error condition' ),
-    ('streq','Store was requested' ),
-    ('stcon','Store was confirmed' ),
-    ('clred','Store timed out or returned unknown error' ),
-    ('forre','Forward was requested' ),
-    ('forco','Forward was confirmed' ),
-    ('forde','Forward was denied' ),
-    ('ftrue','Forward timed out or returned unknown error' )
+ VALUES(1,'Request was sent' ),
+    (2,'Request was confirmed' ),
+    (3,'Request was denied' ),
+    (4,'Request timed out or ended with unknown error' ),
+    (5,'Request was aborted before any response was received' ),
+    (6,'Unexpected error condition' ),
+    (7,'Store was requested' ),
+    (8,'Store was confirmed' ),
+    (9,'Store timed out or returned unknown error' ),
+    (11,'Forward was requested' ),
+    (12,'Forward was confirmed' ),
+    (13,'Forward was denied' ),
+    (14,'Forward timed out or returned unknown error' )
 
 
  
