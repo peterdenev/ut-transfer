@@ -72,6 +72,7 @@ SELECT TOP 1
     t.stan,
     t.originalTransferId,
     t.isPreauthorization,
+    t.clearingStatusId,
     @incrementalAmountSum as incrementalAmountSum
     , t.cleared
     , t.clearingStatusId
