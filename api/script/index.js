@@ -405,7 +405,7 @@ module.exports = {
         if (params.abortAcquirer) {
             return this.bus.importMethod('transfer.push.execute')(params, $meta);
         } else {
-            return this.bus.importMethod('db/atm.card.check')({
+            return this.bus.importMethod('db/atm.card.check[0]')({
                 cardId: params.cardId,
                 sourceAccount: params.sourceAccount,
                 sourceAccountType: params.sourceAccountType,
