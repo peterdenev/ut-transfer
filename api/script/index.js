@@ -1,6 +1,24 @@
 const DECLINED = {
-    ledger: ['transfer.insufficientFunds', 'transfer.invalidAccount', 'transfer.genericDecline', 'transfer.incorrectPin'],
-    issuer: ['transfer.insufficientFunds', 'transfer.invalidAccount', 'transfer.genericDecline', 'transfer.incorrectPin'],
+    ledger: [
+        'transfer.insufficientFunds',
+        'transfer.invalidAccount',
+        'transfer.creditAccountNotAllowed',
+        'transfer.invalidCurrentAccount',
+        'transfer.invalidSavingsAccount',
+        'transfer.invalidAccountType',
+        'transfer.genericDecline',
+        'transfer.incorrectPin'
+    ],
+    issuer: [
+        'transfer.insufficientFunds',
+        'transfer.invalidAccount',
+        'transfer.creditAccountNotAllowed',
+        'transfer.invalidCurrentAccount',
+        'transfer.invalidSavingsAccount',
+        'transfer.invalidAccountType',
+        'transfer.genericDecline',
+        'transfer.incorrectPin'
+    ],
     merchant: ['merchant.genericDecline']
 };
 var errors = require('../../errors');
@@ -219,7 +237,11 @@ module.exports = {
             }
         };
         var issuerPushExecute = (transfer) => {
-            if (transfer.issuerPort && !canSkip(transfer)) {
+            if (!canSkip(transfer)) {
+                if (!transfer.issuerPort) {
+                    throw errors.invalidIssuer();
+                }
+
                 return this.bus.importMethod('db/transfer.push.requestIssuer')(transfer)
                     .then(() => transfer)
                     .then(this.bus.importMethod(transfer.issuerPort + '.push.execute'))
@@ -416,6 +438,13 @@ module.exports = {
                 pinOffset: params.pinOffset,
                 pinOffsetNew: params.pinOffsetNew,
                 mode: params.mode
+            })
+            .then(result => {
+                if (!result.issuerId) {
+                    throw errors.unknownIssuer();
+                }
+
+                return result;
             })
             .catch(error => {
                 params.abortAcquirer = error;
