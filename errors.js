@@ -31,5 +31,6 @@ module.exports = {
     merchantRejectFailure: create('rejectFailure', Transfer, 'Merchant payment reject failure'),
     invalidTransferIdReverse: create('invalidTransferIdReverse', Transfer, 'Invalid Transfer ID! Only Original transfers can be reversed'),
     clearedTransfer: create('clearedTransfer', Transfer, 'Cleared Transfer'),
-    invalidReplacementAmount: create('invalidReplacementAmount', Transfer, 'Invalid Replacement Amount')
+    invalidReplacementAmount: create('invalidReplacementAmount', Transfer, 'Invalid Replacement Amount'),
+    acquirerTransferIdNotFound: create('acquirerTransferIdNotFound', Transfer, 'Acquirer Transfer Id Not Found'),
 };

@@ -279,33 +279,30 @@ module.exports = {
                 return transfer;
             }
         };
-        // ---------------------Added----------------------
+        
         var incrementalAuthorization = (transfer) => {
-            if (transfer.isIncrementalAuthorization && transfer.isIncrementalAuthorization != 0) {
-
-                var getTransfer = (transfer) => this.config['transfer.transfer.get']({
-                    transferId: transfer.transferId,
-                    transferIdAcquirer: null,
-                    acquirerCode: transfer.acquirerCode,
-                    cardId: transfer.cardId,
-                    localDateTime: transfer.localDateTime
-                }, $meta)
+            if (transfer.originalAcquirerTransferId) {
+                return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: transfer.originalAcquirerTransferId})
                 .then(result => {
-                    if (!result || !result.transferId) {
-                        throw errors.notFound();
-                    } else {
-                        transfer.originalTransferId = transfer.transferId;
-                        transfer.udfAcquirer.privateData = result.udfAcquirer.privateData +
-                        '6315' + result.networkData + result.issuerSettlementDate.substring(5, 10).replace('-', '') + '   ';
-                        return transfer;
+                    if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
+                        throw errors.acquirerTransferIdNotFound();
                     }
+                    let orgTransfer = result.transfer[0];
+                    transfer.originalTransferId = orgTransfer.transferId;
+                    transfer.udfAcquirer.privateData = transfer.udfAcquirer.privateData +
+                    '6315' + orgTransfer.networkData + orgTransfer.settlementDate.substring(5, 10).replace('-', '') + '  ';
+                    /* Mastercard Authorization Manual p.289
+                    • Positions 1–3 = value from DE 63, subfield 1 (Financial Network Code)
+                    • Positions 4–9 = value from DE 63, subfield 2 (Banknet Reference Number)
+                    • Positions 10–13 = value from DE 15 (Date, Settlement)
+                    • Positions 14–15 = blank filled
+                    */
+                    return transfer;
                 });
-                return getTransfer(transfer);
             } else {
                 return transfer;
             }
         };
-        // -------------------------------------------------
 
         return ruleValidate(this.bus, params)
         // ---------------------Added----------------------
@@ -529,7 +526,7 @@ module.exports = {
         return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: params.acquirerTransferId})
             .then(result => {
                 if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
-                    throw errors.notFound();
+                    throw errors.acquirerTransferIdNotFound();
                 }
                 let orgTransfer = result.transfer[0];
                 if (orgTransfer.originalTransferId) {
