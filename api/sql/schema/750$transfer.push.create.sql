@@ -27,7 +27,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @udfAcquirer XML,
     @split transfer.splitTT READONLY,
     @isPending BIT,
-	@originalRequest TEXT,
+    @originalRequest TEXT,
     @originalTransferId bigint,
     @isPreauthorization bit,
     @networkData varchar(20),
@@ -36,6 +36,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @posEntryMode char(3),
     @posData varchar(25),
     @transferPending transfer.pendingTT READONLY,
+    @clearingStatusId CHAR(5),
     @userAvailableAccounts [core].[arrayList] READONLY,
     @meta core.metaDataTT READONLY
 AS
@@ -145,6 +146,7 @@ BEGIN TRY
         originalRequest,
         originalTransferId,
         isPreauthorization,
+	   clearingStatusId,
         createdOn,
         updatedOn
     )
@@ -197,6 +199,7 @@ BEGIN TRY
 		@originalRequest,
         @originalTransferId,
         @isPreauthorization,
+	   @clearingStatusId,
         SYSDATETIMEOFFSET(),
         SYSDATETIMEOFFSET()
     DECLARE @transferId BIGINT = @@IDENTITY
