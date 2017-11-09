@@ -1,6 +1,7 @@
 ALTER PROCEDURE [transfer].[push.confirmReverseMc]
     @reverseId bigint,
     @transferId bigint,
+    @transferIdIssuer varchar(50),
     @issuerResponseCode varchar(10), 
     @issuerResponseMessage varchar(250) = NULL,
     @originalResponse TEXT = NULL,
@@ -22,6 +23,7 @@ BEGIN TRY
         originalResponse = @originalResponse,
         stan = @stan,
         networkData = @networkData,
+        transferIdIssuer = @transferIdIssuer,
         updatedOn = GETDATE()
     WHERE
         reverseId = @reverseId
@@ -41,10 +43,6 @@ BEGIN TRY
 	   WHERE
 		  originalTransferId = @transferId
     END
-
-
-
-    IF @@ROWCOUNT <> 1 RAISERROR('transfer.confirmReversal', 16, 1);
 
     EXEC [transfer].[push.event]
         @transferId = @transferId,

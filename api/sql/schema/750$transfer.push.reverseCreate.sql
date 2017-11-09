@@ -25,7 +25,7 @@ VALUES (
     @isPartial,
     1,
     @issuerId,
-    @transferDateTime,
+    ISNULL(@transferDateTime, GETDATE()),
     @localDateTime,
     SYSDATETIMEOFFSET(),
     SYSDATETIMEOFFSET()
