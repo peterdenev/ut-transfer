@@ -65,8 +65,13 @@ BEGIN TRY
 
     SET @userId = (SELECT [auth.actorId] FROM @meta)
 
-    BEGIN TRANSACTION
+    
 
+    BEGIN TRANSACTION
+    IF EXISTS(SELECT TOP 1 1 from [transfer].[transfer] WHERE transferIdAcquirer=@transferIdAcquirer AND [issuerTxState] = 1 AND [issuerTxState] = 2)
+    BEGIN
+	   RAISERROR('Duplicate transfer id. This transfer was already sent.', 16, 1) 
+    END
     UPDATE
         [transfer].[partner]
     SET
