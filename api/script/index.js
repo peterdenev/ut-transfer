@@ -95,7 +95,9 @@ var ruleValidate = (bus, transfer) => {
         currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
         isSourceAmount: false
     }).then(decision => {
-        transfer.transferAmount = transfer.transferAmount || transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
+        if (transfer.transferAmount !== 0) {
+            transfer.transferAmount = transfer.transferAmount || transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
+        }
         transfer.transferCurrency = transfer.transferCurrency || transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
         if (decision.amount) {
             transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
