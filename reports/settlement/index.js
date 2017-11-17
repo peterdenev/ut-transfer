@@ -1,4 +1,10 @@
-var { filterElementTypes } = require('ut-front-react/components/GridToolBox/types');
+import { filterElementTypes } from 'ut-front-react/components/GridToolBox/types';
+
+let date = new Date();
+date.setHours(0);
+date.setMinutes(0);
+date.setSeconds(0);
+date.setMilliseconds(0);
 
 module.exports = (gridStyle) => ({
     title: 'Settlement Report',
@@ -28,17 +34,18 @@ module.exports = (gridStyle) => ({
             { name: '', title: 'Commission' }
         ],
         allowColumnConfig: true,
-        method: '',
-        resultsetName: '',
+        method: 'db/transfer.report.settlement',
+        resultsetName: 'settlement',
         externalStyle: gridStyle
     },
-    // export: {
-    //     method: '', // TODO replace with settlement report strored procedure
-    //     maxSize: 20000
-    // },
+    export: {
+        method: 'db/transfer.report.settlement',
+        resultsetName: 'settlement',
+        maxSize: 20000
+    },
     toolbox: {
-        showAdvanced: true,
-        maxVisibleInputs: 3,
+        showAdvanced: false,
+        maxVisibleInputs: 5,
         filterAutoFetch: false
     },
     filters: [
@@ -70,6 +77,7 @@ module.exports = (gridStyle) => ({
                 map: {display: 'organizationName', value: 'actorId'}
             }
         },
+        /*
         {
             name: '',
             label: '',
@@ -84,6 +92,7 @@ module.exports = (gridStyle) => ({
             //     map: {display: 'organizationName', value: 'actorId'}
             // }
         },
+        */
         {
             labelFrom: 'Transaction From',
             labelTo: 'Transaction To',

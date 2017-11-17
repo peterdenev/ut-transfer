@@ -24,6 +24,11 @@ module.exports = (gridStyle) => ({
         allowColumnConfig: true,
         externalStyle: gridStyle
     },
+    export: {
+        method: 'db/transfer.report.byWeekOfYear',
+        resultsetName: 'transferWeekOfYear',
+        maxSize: 20000
+    },
     toolbox: {
         showAdvanced: false,
         maxVisibleInputs: 3,

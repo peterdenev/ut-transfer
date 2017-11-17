@@ -12,7 +12,7 @@ module.exports = {
                     break;
                 default:
                     if (!isHeader) {
-                        result = formatNumber(value);
+                        result = formatNumber(value.toString().replace(/\s\%$/, '')); // format & remove '%'
                         classNames.push('textColorBlue');
                     }
                     classNames.push('rightAlign');

@@ -19,6 +19,11 @@ module.exports = (gridStyle) => ({
         allowColumnConfig: true,
         externalStyle: gridStyle
     },
+    export: {
+        method: 'db/transfer.transferDetails.get',
+        resultsetName: 'transferDetails',
+        maxSize: 20000
+    },
     toolbox: {
         showAdvanced: true,
         maxVisibleInputs: 3,

@@ -23,18 +23,19 @@ module.exports = (gridStyle) => ({
             { name: 'alerts', title: 'ALERTS' }
         ],
         allowColumnConfig: true,
-        method: 'card.report.transfer',
+        method: 'db/transfer.report.transfer',
         resultsetName: 'transfers',
         rowStyleField: 'style',
         externalStyle: gridStyle
     },
-    // export: {
-    //     method: 'your.exportMethod.here', // TODO replace with transfer report strored procedure
-    //     maxSize: 20000
-    // },
+    export: {
+        method: 'db/transfer.report.transfer',
+        resultsetName: 'transfers',
+        maxSize: 20000
+    },
     toolbox: {
         showAdvanced: true,
-        maxVisibleInputs: 5,
+        maxVisibleInputs: 7,
         filterAutoFetch: false
     },
     filters: [
@@ -82,7 +83,7 @@ module.exports = (gridStyle) => ({
             labelTo: 'Date to',
             nameMap: { from: 'startDate', to: 'endDate' },
             type: filterElementTypes.dateTimePickerBetween,
-            timeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+            // timeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
             dateFormat: { day: 'numeric', month: 'numeric', year: 'numeric' },
             defaultValue: {
                 from: new Date(),

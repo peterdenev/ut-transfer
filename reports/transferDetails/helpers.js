@@ -19,7 +19,7 @@ module.exports = {
                 case 'amountBilling':
                 case 'transferAmount':
                     if (!isHeader) {
-                        result = formatNumber(value);
+                        result = formatNumber(value.toString().replace(/\s\%$/, '')); // format & remove '%'
                         classNames.push('textColorBlue');
                     }
                     classNames.push('rightAlign');
