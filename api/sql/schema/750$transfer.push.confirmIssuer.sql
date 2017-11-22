@@ -25,10 +25,7 @@ SET
     stan = @stan,
     settlementDate = @settlementDate
 WHERE
-    transferId = @transferId AND
-    issuerTxState = 1
-
-DECLARE @COUNT int = @@ROWCOUNT
+    transferId = @transferId
 
 SET @type = ISNULL (@type, 'transfer.push.confirmIssuer')
 
@@ -40,4 +37,3 @@ EXEC [transfer].[push.event]
     @message = @message,
     @udfDetails = @details
 
-IF @COUNT <> 1 RAISERROR('transfer.confirmIssuer', 16, 1);

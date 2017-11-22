@@ -35,6 +35,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @processingCode char(6),
     @posEntryMode char(3),
     @posData varchar(25),
+    @transferType varchar(25),
     @transferPending transfer.pendingTT READONLY,
     @clearingStatusId CHAR(5),
     @userAvailableAccounts [core].[arrayList] READONLY,
@@ -70,6 +71,14 @@ BEGIN TRY
 		  AND ([issuerTxState] = 1 OR [issuerTxState] = 2))
     BEGIN
 	   RAISERROR('Duplicate transfer id. This transfer was already sent.', 16, 1) 
+    END
+
+    IF @transferTypeId IS NULL
+    BEGIN
+        SELECT @transferTypeId = n.itemNameId
+        FROM [core].[itemName] n
+        JOIN [core].[itemType] t ON n.itemTypeId = t.itemTypeId AND t.alias = 'operation'
+        WHERE itemCode = @transferType
     END
 
     BEGIN TRANSACTION

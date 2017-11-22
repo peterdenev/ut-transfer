@@ -239,11 +239,9 @@ module.exports = {
         var issuerPushExecute = (transfer) => {
             if (transfer.issuerPort && !canSkip(transfer)) {
                 return this.bus.importMethod('db/transfer.push.requestIssuer')(transfer)
-                    .then(() => transfer)
-                    .then((transfer) => {
+                    .then(() => {
                         return this.bus.importMethod(transfer.issuerPort + '.push.execute')(transfer)
-                    })
-                    .then(result => {
+                    }).then(result => {
                         if (transfer.transferType === 'ministatement') {
                             transfer.ministatement = result.ministatement;
                         }
@@ -282,35 +280,10 @@ module.exports = {
             }
         };
         
-        var incrementalAuthorization = (transfer) => {
-            if (transfer.originalAcquirerTransferId) {
-                return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: transfer.originalAcquirerTransferId})
-                .then(result => {
-                    if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
-                        throw errors.acquirerTransferIdNotFound();
-                    }
-                    let orgTransfer = result.transfer[0];
-                    transfer.originalTransferId = orgTransfer.transferId;
-                    transfer.udfAcquirer.privateData = transfer.udfAcquirer.privateData +
-                    '6315' + orgTransfer.networkData + orgTransfer.settlementDate.substring(5, 10).replace('-', '') + '  ';
-                    /* Mastercard Authorization Manual p.289
-                    • Positions 1–3 = value from DE 63, subfield 1 (Financial Network Code)
-                    • Positions 4–9 = value from DE 63, subfield 2 (Banknet Reference Number)
-                    • Positions 10–13 = value from DE 15 (Date, Settlement)
-                    • Positions 14–15 = blank filled
-                    */
-                    return transfer;
-                });
-            } else {
-                return transfer;
-            }
-        };
+        
 
         return ruleValidate(this.bus, params)
-        // ---------------------Added----------------------
-            .then(incrementalAuthorization)
-            // .then(addOriginalRequestProperty)
-    // -------------------------------------------
+
             .then(dbPushExecute)
             .then(merchantTransferValidate)
             .then(ledgerPushExecute)
@@ -524,6 +497,77 @@ module.exports = {
         return this.bus.importMethod('db/transfer.pendingUserTransfers.fetch')(msg, $meta);
     },
 
+    'push.executeMc': function(transfer, $meta) {
+
+        var incrementalAuthorization = (transfr) => {
+            if (transfr.originalAcquirerTransferId) {
+                return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: transfr.originalAcquirerTransferId})
+                .then(result => {
+                    if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
+                        throw errors.acquirerTransferIdNotFound();
+                    }
+                    let orgTransfer = result.transfer[0];
+                    transfer.originalTransferId = orgTransfer.transferId;
+                    transfer.udfAcquirer.privateData = transfer.udfAcquirer.privateData +
+                    '6315' + orgTransfer.networkData + orgTransfer.settlementDate.substring(5, 10).replace('-', '') + '  ';
+                    /* Mastercard Authorization Manual p.289
+                    • Positions 1–3 = value from DE 63, subfield 1 (Financial Network Code)
+                    • Positions 4–9 = value from DE 63, subfield 2 (Banknet Reference Number)
+                    • Positions 10–13 = value from DE 15 (Date, Settlement)
+                    • Positions 14–15 = blank filled
+                    */
+                    return transfer;
+                });
+            } else {
+                return Promise.resolve(transfer);
+            }
+        };
+        return incrementalAuthorization(transfer)
+        .then(() => {
+            return this.bus.importMethod('db/transfer.push.create')(transfer)
+        }).then(pushResult => {
+            
+            if (transfer.originalRequest) {
+                delete transfer.originalRequest;
+            }
+            if (transfer.originalTransferId) {
+                delete transfer.originalTransferId;
+            }
+            
+            pushResult = pushResult && pushResult[0] && pushResult[0][0];
+            if (pushResult && pushResult.transferId) {
+                transfer.transferId = pushResult.transferId;
+                transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
+                transfer.localDateTime = pushResult.localDateTime;
+                transfer.issuerPort = pushResult.issuerPort;
+                let issuerResponseCode = '';
+                return this.bus.importMethod(transfer.issuerPort + '.push.execute')(transfer)
+                .then((res) => {
+                        res.transferId = transfer.transferId;
+                        issuerResponseCode = res.issuerResponseCode;
+                        return this.bus.importMethod('db/transfer.push.confirmIssuer')(res)
+                        .then(() => res);
+                    }, (error) => {
+        
+                        return this.bus.importMethod('db/transfer.push.failIssuer')({
+                            transferId: transfer.transferId,                
+                            type: error.type || (where + '.error'),
+                            message: error.message,
+                            details: Object.assign({}, error, {transferDetails: transfer}),
+                            issuerResponseCode: error.issuerResponseCode,
+                            issuerResponseMessage: error.issuerResponseMessage
+                        }).then(() => {
+                            throw error;
+                        });
+                    }
+                );
+            } else {
+                throw errors.systemDecline('transfer.push.create');
+            }
+        }).then((res) => {
+            return res;
+        });
+    },
     'push.reverseMc': function(params, $meta) {
         return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: params.acquirerTransferId})
             .then(result => {
@@ -575,20 +619,6 @@ module.exports = {
                     params.replacementAmount = params.amount.replacement.amount;
                 }
                 params.transferAmount = params.amount.transfer.amount;
-                /*var transferInfo = Object.assign({
-                    message: params.message,
-                    mti: params.udfAcquirer.mti,
-                    udfAcquirer: params.udfAcquirer,
-                    operation: 'reverse',
-                    transferType: 'push',
-                    pan: params.pan,
-                    issuerResponseCode: params.issuerResponseCode,
-                    replacementAmount: params.amount && params.amount.replacement && params.amount.replacement.amount, // Shashi
-                    originalParams: params.originalParams,
-                    stan: params.stan,
-                    localDateTime: params.localDateTime,
-                    isPartialReversal: params.isPartialReversal
-                }, result);*/
                 
                 // DE 48 (Additional Data)
                 params.udfAcquirer.privateData = orgTransfer.transactionCategoryCode + '2001S';
@@ -649,5 +679,36 @@ module.exports = {
                 });
             });
     },
+    'push.accountStatus': function(params, $meta) {
+        return this.bus.importMethod('db/transfer.accountStatus.add')(params)
+            .then((res) => {
+                params.transferId = res[0][0].accountStatusId;
+                return this.bus.importMethod(params.issuerPort + '.push.accountStatus')(params)
+                .then((statusResult) => {
+                    return this.bus.importMethod('db/transfer.accountStatus.update')({
+                        accountStatusId: params.transferId,
+                        issuerResponseCode: statusResult.issuerResponseCode,
+                        issuerResponseMessage: statusResult.issuerResponseMessage,
+                        originalResponse: statusResult.originalResponse,
+                        stan: statusResult.stan,
+                        networkData: statusResult.networkData,
+                        transferIdIssuer: statusResult.transferIdIssuer
+                    }).then((res) => {
+                        return statusResult;
+                    });
+                }, (statusError) => {
+                    return this.bus.importMethod('db/transfer.accountStatus.update')({
+                        accountStatusId: params.transferId,
+                        issuerResponseCode: statusError.issuerResponseCode,
+                        issuerResponseMessage: statusError.issuerResponseMessage,
+                        originalResponse: statusError.originalResponse
+                    })
+                    .then(() => {
+                        throw statusError;
+                        
+                    });
+                });
+            })
+    }
 };
 // todo handle timeout from destination port
