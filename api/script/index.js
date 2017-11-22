@@ -251,7 +251,7 @@ module.exports = {
                         }
                         transfer.balance = result.balance;
                         transfer.transferIdIssuer = result.transferIdIssuer;
-
+                        transfer.issuerEmv = result.issuerEmv;
                         result.transferId = transfer.transferId;
                         return result;
                     })
