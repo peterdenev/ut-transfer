@@ -15,10 +15,8 @@ SET
     issuerResponseCode=@issuerResponseCode,
     issuerResponseMessage=@issuerResponseMessage
 WHERE
-    transferId = @transferId AND
-    issuerTxState = 1
+    transferId = @transferId 
 
-DECLARE @COUNT int = @@ROWCOUNT
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
@@ -27,4 +25,3 @@ EXEC [transfer].[push.event]
     @message = @message,
     @udfDetails = @details
 
-IF @COUNT <> 1 RAISERROR('transfer.failIssuer', 16, 1);

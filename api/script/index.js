@@ -540,10 +540,11 @@ module.exports = {
                 transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
                 transfer.localDateTime = pushResult.localDateTime;
                 transfer.issuerPort = pushResult.issuerPort;
-
+                let issuerResponseCode = '';
                 return this.bus.importMethod(transfer.issuerPort + '.push.execute')(transfer)
                 .then((res) => {
                         res.transferId = transfer.transferId;
+                        issuerResponseCode = res.issuerResponseCode;
                         return this.bus.importMethod('db/transfer.push.confirmIssuer')(res)
                         .then(() => res);
                     }, (error) => {
@@ -555,7 +556,9 @@ module.exports = {
                             details: Object.assign({}, error, {transferDetails: transfer}),
                             issuerResponseCode: error.issuerResponseCode,
                             issuerResponseMessage: error.issuerResponseMessage
-                        }).then(() => error);
+                        }).then(() => {
+                            throw error;
+                        });
                     }
                 );
             } else {
