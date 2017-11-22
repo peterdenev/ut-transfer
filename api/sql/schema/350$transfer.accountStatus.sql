@@ -1,4 +1,4 @@
-CREATE TABLE [transfer].[accountStatus](
+﻿CREATE TABLE [transfer].[accountStatus](
     accountStatusId bigint IDENTITY(1,1) NOT NULL,
     merchantId varchar(50),
     statusAmount money NOT NULL,
@@ -15,5 +15,6 @@ CREATE TABLE [transfer].[accountStatus](
     createdBy BIGINT NULL,
     createdOn DATETIMEOFFSET (7), 
     updatedBy BIGINT NULL,
-    updatedOn DATETIMEOFFSET (7)
+    updatedOn DATETIMEOFFSET (7),
+    CONSTRAINT [pkТransferАccountStatus] PRIMARY KEY CLUSTERED (accountStatusId ASC)
 )

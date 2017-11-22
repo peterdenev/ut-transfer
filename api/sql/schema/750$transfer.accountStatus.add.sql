@@ -16,8 +16,7 @@ INSERT INTO
     transferDateTime,
     localDateTime,
     originalRequest,
-    createdOn,
-    updatedOn
+    createdOn
 )
 VALUES (
     @merchantId,
@@ -27,7 +26,6 @@ VALUES (
     ISNULL(@transferDateTime, GETDATE()),
     @localDateTime,
     @originalRequest,
-    SYSDATETIMEOFFSET(),
     SYSDATETIMEOFFSET()
 )
 SET @accountStatusId=SCOPE_IDENTITY()
