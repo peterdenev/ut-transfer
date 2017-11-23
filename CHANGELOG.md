@@ -1,3 +1,20 @@
+<a name="6.20.0"></a>
+# [6.20.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.19.1...v6.20.0) (2017-10-25)
+
+
+### Bug Fixes
+
+* filter default values ([#82](https://github.com/softwaregroup-bg/ut-transfer/issues/82)) ([948aeda](https://github.com/softwaregroup-bg/ut-transfer/commit/948aeda))
+* handle race conditions ([97745e5](https://github.com/softwaregroup-bg/ut-transfer/commit/97745e5))
+* timeout handling ([1ba9a18](https://github.com/softwaregroup-bg/ut-transfer/commit/1ba9a18))
+
+
+### Features
+
+* card product improvements ([#85](https://github.com/softwaregroup-bg/ut-transfer/issues/85)) ([92fa02f](https://github.com/softwaregroup-bg/ut-transfer/commit/92fa02f))
+
+
+
 <a name="6.19.1"></a>
 ## [6.19.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.19.0...v6.19.1) (2017-08-04)
 
