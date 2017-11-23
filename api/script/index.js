@@ -173,9 +173,9 @@ module.exports = {
             })
             .catch(x => {
                 this.log.error && this.log.error(x);
-                return Promise.reject(error);
+                return Promise.reject(Object.assign({}, error, {transferDetails: transfer}));
             }) // .this is intentionally after catch as we do not want to this.log the original error
-            .then(x => Promise.reject(error));
+            .then(x => Promise.reject(Object.assign({}, error, {transferDetails: transfer})));
         };
         var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.create')(transfer, Object.assign($meta, {method: 'db/transfer.push.create'}))
             .then(pushResult => {
@@ -184,7 +184,7 @@ module.exports = {
                     transfer.transferId = pushResult.transferId;
                     transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
                     transfer.localDateTime = pushResult.localDateTime;
-
+                    transfer.issuerSerialNumber = pushResult.issuerSerialNumber;
                     // Set ports
                     transfer.merchantPort = pushResult.merchantPort;
                     transfer.issuerPort = pushResult.issuerPort;
@@ -237,30 +237,40 @@ module.exports = {
             }
         };
         var issuerPushExecute = (transfer) => {
-            if (!canSkip(transfer)) {
-                if (!transfer.issuerPort) {
-                    throw errors.invalidIssuer();
-                }
-
-                return this.bus.importMethod('db/transfer.push.requestIssuer')(transfer)
-                    .then(() => transfer)
-                    .then(this.bus.importMethod(transfer.issuerPort + '.push.execute'))
-                    .then(result => {
-                        if (transfer.transferType === 'ministatement') {
-                            transfer.ministatement = result.ministatement;
-                        }
-                        transfer.balance = result.balance;
-                        transfer.transferIdIssuer = result.transferIdIssuer;
-                        transfer.issuerEmv = result.issuerEmv;
-                        result.transferId = transfer.transferId;
-                        return result;
-                    })
-                    .catch(handleError(transfer, 'Issuer'))
-                    .then(this.bus.importMethod('db/transfer.push.confirmIssuer'))
-                    .then(() => transfer);
-            } else {
+            if (canSkip(transfer)) {
                 return transfer;
             }
+            if (!transfer.issuerPort) {
+                throw errors.invalidIssuer();
+            }
+            return this.bus.importMethod('db/transfer.push.requestIssuer')({
+                transferId: transfer.transferId,
+                transferIdIssuer: transfer.transferIdIssuer,
+                message: transfer.transferType,
+                details: {
+                    issuerSerialNumber: transfer.issuerSerialNumber
+                }
+            })
+            .then(() => transfer)
+            .then(this.bus.importMethod(transfer.issuerPort + '.push.execute'))
+            .then(result => {
+                if (transfer.transferType === 'ministatement') {
+                    transfer.ministatement = result.ministatement;
+                }
+                transfer.balance = result.balance;
+                transfer.transferIdIssuer = result.transferIdIssuer;
+                transfer.issuerEmv = result.issuerEmv;
+                transfer.udfIssuer = result.udfIssuer || {};
+                return result;
+            })
+            .catch(handleError(transfer, 'Issuer'))
+            .then(result => this.bus.importMethod('db/transfer.push.confirmIssuer')({
+                transferId: transfer.transferId,
+                transferIdIssuer: transfer.transferIdIssuer,
+                message: transfer.transferType,
+                details: Object.assign(result, transfer.udfIssuer)
+            }))
+            .then(() => transfer);
         };
         var merchantTransferExecute = (transfer) => {
             if (transfer.merchantPort) {
