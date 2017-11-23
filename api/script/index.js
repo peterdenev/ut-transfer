@@ -164,18 +164,19 @@ module.exports = {
             } else {
                 method = this.bus.importMethod('db/transfer.push.reverse' + where);
             }
+            error.transferDetails = Object.assign({}, transfer, error.transferDetails);
             return method({
                 transferId: transfer.transferId,
                 source: where,
                 type: error.type || (where + '.error'),
                 message: error.message,
-                details: Object.assign({}, error, {transferDetails: transfer})
+                details: error
             })
             .catch(x => {
                 this.log.error && this.log.error(x);
-                return Promise.reject(Object.assign({}, error, {transferDetails: transfer}));
+                return Promise.reject(error);
             }) // .this is intentionally after catch as we do not want to this.log the original error
-            .then(x => Promise.reject(Object.assign({}, error, {transferDetails: transfer})));
+            .then(x => Promise.reject(error));
         };
         var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.create')(transfer, Object.assign($meta, {method: 'db/transfer.push.create'}))
             .then(pushResult => {
