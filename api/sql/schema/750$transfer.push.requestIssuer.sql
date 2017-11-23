@@ -14,9 +14,9 @@ WHERE
     transferId = @transferId AND
     issuerTxState is NULL
 
+DECLARE @COUNT int = @@ROWCOUNT
 SET @type = ISNULL (@type, 'transfer.push.requestIssuer')
 
-DECLARE @COUNT int = @@ROWCOUNT
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
