@@ -121,7 +121,11 @@ SELECT
     t.[transferCurrency],
     t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') [terminalId],
     t.[requestDetails].value('(/root/terminalName)[1]', 'varchar(40)') [terminalName],
-    ISNULL(t.errorMessage, 'Success') [responseCode],
+    ISNULL(t.errorMessage, 'Success') [responseDetails],
+    CASE
+        WHEN t.[errorDetails] IS NULL THEN '00'
+        ELSE t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)')
+    END [responseCode],
     t.[issuerTxStateName],
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
     t.[merchantId] [merchantName],
@@ -156,6 +160,7 @@ UNION ALL SELECT
     r.[transferCurrency],
     NULL AS terminalId,
     NULL AS terminalName,
+    NULL AS responseDetails,
     NULL AS responseCode,
     NULL AS issuerTxStateName,
     NULL AS reversalCode,

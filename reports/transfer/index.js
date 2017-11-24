@@ -38,6 +38,7 @@ module.exports = (gridStyle) => ({
             { name: 'terminalId', title: 'Device Id' },
             { name: 'terminalName', title: 'Device Location' },
             { name: 'responseCode', title: 'Response Code' },
+            { name: 'responseDetails', title: 'Response Details' },
             { name: 'issuerTxStateName', title: 'Issuer State' },
             { name: 'reversalCode', title: 'Reversal Code' },
             { name: 'merchantName', title: 'Merchant' },
