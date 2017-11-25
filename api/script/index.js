@@ -164,7 +164,8 @@ module.exports = {
             } else {
                 method = this.bus.importMethod('db/transfer.push.reverse' + where);
             }
-            error.transferDetails = Object.assign({}, transfer, error.transferDetails);
+            error = Object.assign({transferDetails: transfer}, error);
+
             return method({
                 transferId: transfer.transferId,
                 source: where,
