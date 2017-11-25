@@ -124,7 +124,7 @@ SELECT
     ISNULL(t.errorMessage, 'Success') [responseDetails],
     CASE
         WHEN t.[errorDetails] IS NULL THEN '00'
-        ELSE t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)')
+        ELSE ISNULL(t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)'), t.[errorDetails].value('(/params/responseCode)[1]', 'varchar(3)'))
     END [responseCode],
     t.[issuerTxStateName],
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],

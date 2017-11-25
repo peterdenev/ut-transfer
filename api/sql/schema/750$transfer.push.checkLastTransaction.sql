@@ -6,7 +6,8 @@ ALTER PROCEDURE [transfer].[push.checkLastTransaction]
     @notes2 int,
     @notes3 int,
     @notes4 int,
-    @confirm bit
+    @confirm bit,
+    @errorMap core.indexedMapTT READONLY
 AS
 SET NOCOUNT ON
 DECLARE @callParams XML
@@ -21,7 +22,10 @@ BEGIN TRY
         @lastNotes3 int,
         @lastNotes4 int,
         @lastAcquirerState int,
-        @lastIssuerState int
+        @lastIssuerState int,
+
+        @details XML = @callParams,
+        @responseCode varchar(3)
 
     SELECT TOP 1
         @lastTx = t.transferId,
@@ -43,70 +47,96 @@ BEGIN TRY
 
     IF @lastAcquirerState IS NULL AND @lastTx IS NOT NULL
     BEGIN
+        SET @responseCode = ISNULL((SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionTimeout'), '96')
+        SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
+
         EXEC [transfer].[push.abortAcquirer]
             @transferId = @lastTx,
             @type = 'atm.lastTransactionTimeout',
             @message = 'ATM timed out waiting for response',
-            @details = @callParams
+            @details = @details
     END ELSE
     IF @lastAcquirerState=1 AND @lastIssuerState=2
     BEGIN
         IF @lastSernum IS NULL
         BEGIN
+            SET @responseCode = ISNULL((SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionMissingSernum'), '96')
+            SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
+
             EXEC [transfer].[push.errorAcquirer]
                 @transferId = @lastTx,
                 @type = 'atm.lastTransactionMissingSernum',
                 @message = 'Missing last transaction serial number',
-                @details = @callParams
+                @details = @details
         END ELSE
         IF @lastSernum != @sernum
         BEGIN
             IF @confirm = 1
             BEGIN
+                SET @responseCode = ISNULL((SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionUnexpectedSernum'), '96')
+                SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
+
                 EXEC [transfer].[push.errorAcquirer]
                     @transferId = @lastTx,
                     @type = 'atm.lastTransactionUnexpectedSernum',
                     @message = 'Unexpected last transaction serial number',
-                    @details = @callParams
+                    @details = @details
             END ELSE
             BEGIN
+                SET @responseCode = ISNULL((SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionNoReply'), '96')
+                SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
+
                 EXEC [transfer].[push.failAcquirer]
                     @transferId = @lastTx,
                     @type = 'atm.lastTransactionNoReply',
                     @message = 'ATM did not receive transaction reply',
-                    @details = @callParams
+                    @details = @details
             END
         END else
         IF @lastNotes1 != @notes1 OR @lastNotes2 != @notes2 OR @lastNotes3 != @notes3 OR @lastNotes4 != @notes4
         BEGIN
             IF @confirm = 1
             BEGIN
+                SET @responseCode = ISNULL((SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionUnexpectedDispense'), '96')
+                SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
+
                 EXEC [transfer].[push.errorAcquirer]
                     @transferId = @lastTx,
                     @type = 'atm.lastTransactionUnexpectedDispense',
                     @message = 'Unexpected last dispense',
-                    @details = @callParams
+                    @details = @details
             END ELSE
             IF @notes1 = 0 AND @notes2 = 0 AND @notes3 = 0 AND @notes4 = 0
-                EXEC [transfer].[push.failAcquirer]
-                    @transferId = @lastTx,
-                    @type = 'atm.lastTransactionZeroDispense',
-                    @message = 'ATM did not dispense any money',
-                    @details = @callParams
+                BEGIN
+                    SET @responseCode = ISNULL((SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionZeroDispense'), '96')
+                    SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
+
+                    EXEC [transfer].[push.failAcquirer]
+                        @transferId = @lastTx,
+                        @type = 'atm.lastTransactionZeroDispense',
+                        @message = 'ATM did not dispense any money',
+                        @details = @details
+                END
             else
+                SET @responseCode = ISNULL((SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionDifferentDispense'), '96')
+                SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
+
                 EXEC [transfer].[push.errorAcquirer]
                     @transferId = @lastTx,
                     @type = 'atm.lastTransactionDifferentDispense',
                     @message = 'ATM dispensed different amount',
-                    @details = @callParams
+                    @details = @details
         END else
         BEGIN
+            SET @responseCode = '00'
+            SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
+
             EXEC [transfer].[push.confirmAcquirer]
                 @transferId = @lastTx,
                 @transferIdAcquirer = NULL,
                 @type = NULL,
                 @message = NULL,
-                @details = @callParams
+                @details = @details
         END
     end
 
