@@ -164,8 +164,8 @@ module.exports = {
             } else {
                 method = this.bus.importMethod('db/transfer.push.reverse' + where);
             }
-            error = Object.assign({transferDetails: transfer}, error);
-
+            let transferDetails = Object.assign({}, transfer, error.transferDetails);
+            error = Object.assign({}, error, {transferDetails});
             return method({
                 transferId: transfer.transferId,
                 source: where,
@@ -221,22 +221,27 @@ module.exports = {
         }
 
         var ledgerPushExecute = (transfer) => {
-            if (transfer.ledgerPort && (transfer.issuerPort !== transfer.ledgerPort)) {
-                return this.bus.importMethod('db/transfer.push.requestLedger')(transfer)
-                    .then(() => transfer)
-                    .then(this.bus.importMethod(transfer.ledgerPort + '.push.execute'))
-                    .catch(handleError(transfer, 'Ledger'))
-                    .then(result => {
-                        transfer.transferIdLedger = result.transferIdIssuer;
-                        result.transferId = transfer.transferId;
-                        result.transferIdLedger = transfer.transferIdIssuer;
-                        return result;
-                    })
-                    .then(this.bus.importMethod('db/transfer.push.confirmLedger'))
-                    .then(() => transfer);
-            } else {
+            if (!transfer.ledgerPort || transfer.issuerPort === transfer.ledgerPort) {
                 return transfer;
             }
+            return this.bus.importMethod('db/transfer.push.requestLedger')(transfer)
+            .then(() => transfer)
+            .then(this.bus.importMethod(transfer.ledgerPort + '.push.execute'))
+            .catch(handleError(transfer, 'Ledger'))
+            .then(result => {
+                transfer.transferIdLedger = result.transferIdIssuer;
+                result.transferId = transfer.transferId;
+                result.transferIdLedger = transfer.transferIdIssuer;
+                transfer.udfLedger = result.udfIssuer || {};
+                return result;
+            })
+            .then(result => this.bus.importMethod('db/transfer.push.confirmLedger')({
+                transferId: transfer.transferId,
+                transferIdLedger: transfer.transferIdLedger,
+                message: transfer.transferType,
+                details: Object.assign(result, transfer.udfLedger)
+            }))
+            .then(() => transfer);
         };
         var issuerPushExecute = (transfer) => {
             if (canSkip(transfer)) {
