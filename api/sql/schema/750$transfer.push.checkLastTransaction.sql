@@ -27,6 +27,8 @@ BEGIN TRY
         @details XML = @callParams,
         @responseCode varchar(3)
 
+    SET @details.modify('delete (/params/errorMap)[1]')
+
     SELECT TOP 1
         @lastTx = t.transferId,
         @lastSernum = e.udfDetails.value('(/root/sernum)[1]', 'varchar(4)'),
