@@ -205,7 +205,8 @@ module.exports = {
                     throw errors.systemDecline('transfer.push.create');
                 }
             });
-        var merchantTransferValidate = (transfer) => {
+
+        const merchantTransferValidate = (transfer) => {
             if (transfer.merchantPort) {
                 return this.bus.importMethod([transfer.merchantPort, transfer.transferType, 'validate'].join('.'))(transfer)
                     .then(() => transfer);
@@ -214,36 +215,48 @@ module.exports = {
             }
         };
 
-        function canSkip(transfer) { // todo streamline skip logic
+        const canSkip = transfer => { // todo streamline skip logic
             return ((transfer.transferType === 'changePin') && (transfer.issuerFee === 0)) ||
                 ((transfer.transferType === 'sms') && (transfer.issuerFee === 0)) ||
                 (transfer.transferType === 'tia');
-        }
+        };
 
-        var ledgerPushExecute = (transfer) => {
+        const parseResult = (transfer, result, type) => {
+            transfer[`transferId${type}`] = result.transferIdIssuer;
+            transfer.acquirerFee = result.acquirerFee || transfer.acquirerFee;
+            transfer.issuerFee = result.issuerFee || transfer.issuerFee;
+            transfer.transferFee = result.transferFee || transfer.transferFee;
+            result.transferId = transfer.transferId;
+            result[`transferId${type}`] = transfer.transferIdIssuer;
+            transfer[`udf${type}`] = result.udfIssuer || {};
+            return result;
+        };
+
+        const ledgerPushExecute = (transfer) => {
             if (!transfer.ledgerPort || transfer.issuerPort === transfer.ledgerPort) {
                 return transfer;
             }
             return this.bus.importMethod('db/transfer.push.requestLedger')(transfer)
             .then(() => transfer)
             .then(this.bus.importMethod(transfer.ledgerPort + '.push.execute'))
-            .catch(handleError(transfer, 'Ledger'))
             .then(result => {
-                transfer.transferIdLedger = result.transferIdIssuer;
-                result.transferId = transfer.transferId;
-                result.transferIdLedger = transfer.transferIdIssuer;
-                transfer.udfLedger = result.udfIssuer || {};
-                return result;
+                result.transferIdLedger = result.transferIdIssuer;
+                transfer.acquirerFee = transfer.acquirerFee || result.issuerFee;
+                return parseResult(transfer, result, 'Ledger');
             })
+            .catch(handleError(transfer, 'Ledger'))
             .then(result => this.bus.importMethod('db/transfer.push.confirmLedger')({
                 transferId: transfer.transferId,
                 transferIdLedger: transfer.transferIdLedger,
+                acquirerFee: transfer.acquirerFee,
+                transferFee: transfer.transferFee,
                 message: transfer.transferType,
                 details: Object.assign(result, transfer.udfLedger)
             }))
             .then(() => transfer);
         };
-        var issuerPushExecute = (transfer) => {
+
+        const issuerPushExecute = (transfer) => {
             if (canSkip(transfer)) {
                 return transfer;
             }
@@ -265,37 +278,37 @@ module.exports = {
                     transfer.ministatement = result.ministatement;
                 }
                 transfer.balance = result.balance;
-                transfer.transferIdIssuer = result.transferIdIssuer;
-                transfer.issuerEmv = result.issuerEmv;
-                transfer.udfIssuer = result.udfIssuer || {};
-                return result;
+                transfer.issuerFee = transfer.issuerFee || result.issuerFee;
+                return parseResult(transfer, result, 'Issuer');
             })
             .catch(handleError(transfer, 'Issuer'))
             .then(result => this.bus.importMethod('db/transfer.push.confirmIssuer')({
                 transferId: transfer.transferId,
                 transferIdIssuer: transfer.transferIdIssuer,
+                issuerFee: transfer.issuerFee,
+                transferFee: transfer.transferFee,
                 message: transfer.transferType,
-                details: Object.assign(result, transfer.udfIssuer)
+                details: Object.assign({}, result, result.udfIssuer)
             }))
             .then(() => transfer);
         };
-        var merchantTransferExecute = (transfer) => {
-            if (transfer.merchantPort) {
-                return this.bus.importMethod('db/transfer.push.requestMerchant')(transfer)
-                    .then(() => transfer)
-                    .then(this.bus.importMethod([transfer.merchantPort, transfer.transferType, 'execute'].join('.')))
-                    .then(merchantResult => {
-                        transfer.transferIdMerchant = merchantResult.transferIdMerchant;
-                        merchantResult.transferId = transfer.transferId;
-                        merchantResult.transferIdMerchant = transfer.transferIdMerchant;
-                        return merchantResult;
-                    })
-                    .catch(handleError(transfer, 'Merchant'))
-                    .then(this.bus.importMethod('db/transfer.push.confirmMerchant'))
-                    .then(() => transfer);
-            } else {
+
+        const merchantTransferExecute = (transfer) => {
+            if (!transfer.merchantPort) {
                 return transfer;
             }
+            return this.bus.importMethod('db/transfer.push.requestMerchant')(transfer)
+            .then(() => transfer)
+            .then(this.bus.importMethod([transfer.merchantPort, transfer.transferType, 'execute'].join('.')))
+            .then(merchantResult => {
+                transfer.transferIdMerchant = merchantResult.transferIdMerchant;
+                merchantResult.transferId = transfer.transferId;
+                merchantResult.transferIdMerchant = transfer.transferIdMerchant;
+                return merchantResult;
+            })
+            .catch(handleError(transfer, 'Merchant'))
+            .then(this.bus.importMethod('db/transfer.push.confirmMerchant'))
+            .then(() => transfer);
         };
 
         return ruleValidate(this.bus, params)
