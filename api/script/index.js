@@ -251,7 +251,7 @@ module.exports = {
                 acquirerFee: transfer.acquirerFee,
                 transferFee: transfer.transferFee,
                 message: transfer.transferType,
-                details: Object.assign(result, transfer.udfLedger)
+                details: result
             }))
             .then(() => transfer);
         };
@@ -288,7 +288,7 @@ module.exports = {
                 issuerFee: transfer.issuerFee,
                 transferFee: transfer.transferFee,
                 message: transfer.transferType,
-                details: Object.assign({}, result, result.udfIssuer)
+                details: result
             }))
             .then(() => transfer);
         };
