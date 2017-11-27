@@ -44,6 +44,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
     (
         SELECT
             t.[transferId],
+            t.[credentialId],
             t.[transferAmount],
             t.[acquirerFee],
             t.[issuerFee],
@@ -75,6 +76,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
     )
 SELECT
     [transferId],
+    [credentialId],
     [RowNum],
     [recordsTotal],
     [transferAmount] AS transferAmountTotal,
@@ -90,6 +92,7 @@ WHERE
     (RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize))
 UNION ALL SELECT
     NULL AS [transferId],
+    NULL AS [credentialId],
     MIN([recordsTotal]) + ROW_NUMBER() OVER(ORDER BY [transferCurrency]) AS [RowNum],
     MIN([recordsTotal]) + COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal],
     SUM(CASE WHEN success = 1 THEN ISNULL([transferAmount], 0) ELSE 0.0 END) AS transferAmountTotal,
@@ -108,7 +111,7 @@ SELECT 'transfers' AS resultSetName
 
 SELECT
     t.[transferId],
-    'XXXX' + c.cardNumber [cardNumber],
+    r.[credentialId] [cardNumber],
     convert(varchar(19), t.[transferDateTime], 120) transferDateTime,
     t.[sourceAccount],
     t.[destinationAccount],
