@@ -124,10 +124,13 @@ SELECT
     t.[transferCurrency],
     t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') [terminalId],
     t.[requestDetails].value('(/root/terminalName)[1]', 'varchar(40)') [terminalName],
-    ISNULL(t.errorMessage, 'Success') [responseDetails],
     CASE
-        WHEN t.[errorDetails] IS NULL THEN '00'
-        ELSE ISNULL(t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)'), t.[errorDetails].value('(/params/responseCode)[1]', 'varchar(3)'))
+        WHEN t.success = 0 THEN t.errorMessage
+        ELSE 'Success'
+    END [responseDetails],
+    CASE
+        WHEN t.success = 0 THEN ISNULL(t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)'), t.[errorDetails].value('(/params/responseCode)[1]', 'varchar(3)'))
+        ELSE '00'
     END [responseCode],
     t.[issuerTxStateName],
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
