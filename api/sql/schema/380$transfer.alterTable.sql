@@ -8,3 +8,7 @@ BEGIN
 	ALTER TABLE transfer.pending ADD senderPhoneNumber VARCHAR(50) NULL;
 END
 
+IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE [name] = N'reversalDateTime' AND object_id = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+	ALTER TABLE transfer.transfer ADD reversalDateTime DATETIME NULL;
+END
