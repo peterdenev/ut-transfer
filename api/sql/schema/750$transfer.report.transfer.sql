@@ -44,6 +44,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
     (
         SELECT
             t.[transferId],
+            t.[credentialId],
             t.[transferAmount],
             t.[acquirerFee],
             t.[issuerFee],
@@ -75,6 +76,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
     )
 SELECT
     [transferId],
+    [credentialId],
     [RowNum],
     [recordsTotal],
     [transferAmount] AS transferAmountTotal,
@@ -90,6 +92,7 @@ WHERE
     (RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize))
 UNION ALL SELECT
     NULL AS [transferId],
+    NULL AS [credentialId],
     MIN([recordsTotal]) + ROW_NUMBER() OVER(ORDER BY [transferCurrency]) AS [RowNum],
     MIN([recordsTotal]) + COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal],
     SUM(CASE WHEN success = 1 THEN ISNULL([transferAmount], 0) ELSE 0.0 END) AS transferAmountTotal,
@@ -108,7 +111,7 @@ SELECT 'transfers' AS resultSetName
 
 SELECT
     t.[transferId],
-    'XXXX' + c.cardNumber [cardNumber],
+    r.[credentialId] [cardNumber],
     convert(varchar(19), t.[transferDateTime], 120) transferDateTime,
     t.[sourceAccount],
     t.[destinationAccount],
@@ -121,10 +124,13 @@ SELECT
     t.[transferCurrency],
     t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') [terminalId],
     t.[requestDetails].value('(/root/terminalName)[1]', 'varchar(40)') [terminalName],
-    ISNULL(t.errorMessage, 'Success') [responseDetails],
     CASE
-        WHEN t.[errorDetails] IS NULL THEN '00'
-        ELSE ISNULL(t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)'), t.[errorDetails].value('(/params/responseCode)[1]', 'varchar(3)'))
+        WHEN t.success = 0 THEN t.errorMessage
+        ELSE 'Success'
+    END [responseDetails],
+    CASE
+        WHEN t.success = 0 THEN ISNULL(t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)'), t.[errorDetails].value('(/params/responseCode)[1]', 'varchar(3)'))
+        ELSE '00'
     END [responseCode],
     t.[issuerTxStateName],
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
