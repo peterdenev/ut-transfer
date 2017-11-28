@@ -6,11 +6,13 @@ ALTER  PROCEDURE [transfer].[push.reverse]
 AS
 SET NOCOUNT ON
 
+DECLARE @today DATETIME = SYSDATETIMEOFFSET ()
 UPDATE
     [transfer].[transfer]
 SET
     issuerTxState = 3,
-    reversed = 1
+    reversed = 1,
+    reversalDateTime = @today
 WHERE
     transferId = @transferId AND
     issuerTxState = 2
