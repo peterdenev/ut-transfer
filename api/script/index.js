@@ -229,6 +229,7 @@ module.exports = {
             result.transferId = transfer.transferId;
             result[`transferId${type}`] = transfer.transferIdIssuer;
             transfer[`udf${type}`] = result.udfIssuer || {};
+
             return result;
         };
 
@@ -279,6 +280,8 @@ module.exports = {
                 }
                 transfer.balance = result.balance;
                 transfer.issuerFee = transfer.issuerFee || result.issuerFee;
+                transfer.issuerEmv = result.issuerEmv;
+
                 return parseResult(transfer, result, 'Issuer');
             })
             .catch(handleError(transfer, 'Issuer'))
