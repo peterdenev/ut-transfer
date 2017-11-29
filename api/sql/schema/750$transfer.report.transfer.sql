@@ -136,8 +136,12 @@ SELECT
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
     t.[merchantId] [merchantName],
     UPPER(t.[channelType]) [channelType],
-    t.[requestDetails].value('(/root/stan)[1]', 'varchar(6)') [stan],
-    t.[requestDetails].value('(/root/rrn)[1]', 'varchar(12)') [rrn],
+    t.[confirmIssuerDetails].value('(/root/udfIssuer/stan)[1]', 'varchar(6)') [stan],
+    t.[confirmIssuerDetails].value('(/root/udfIssuer/rrn)[1]', 'varchar(12)') [rrn],
+    CASE WHEN t.[transferId] <> t.[transferIdIssuer]
+        THEN t.[confirmIssuerDetails].value('(/root/udfIssuer/authCode)[1]', 'varchar(12)')
+        ELSE t.[transferId]
+    END [authCode],
     NULL [additionalInfo],
     t.style,
     t.alerts,
@@ -174,8 +178,9 @@ UNION ALL SELECT
     NULL AS channelType,
     NULL AS stan,
     NULL AS rrn,
+    NULL AS authCode,
     NULL AS [additionalInfo],
-    NULL AS style,
+    'transferAverage' AS style,
     NULL AS alerts,
     r.rowNum
 FROM

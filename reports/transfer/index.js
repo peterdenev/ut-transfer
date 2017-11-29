@@ -30,7 +30,7 @@ module.exports = (gridStyle) => ({
             { name: 'description', title: 'Description' },
             { name: 'rrn', title: 'RRN' },
             { name: 'stan', title: 'STAN' },
-            { name: 'transferIdIssuer', title: 'Auth Code' },
+            { name: 'authCode', title: 'Auth Code' },
             { name: 'transferAmount', title: 'Transfer Amount' },
             { name: 'issuerFee', title: 'Issuer Fee' },
             { name: 'acquirerFee', title: 'Acquirer Fee' },
