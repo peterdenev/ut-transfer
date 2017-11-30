@@ -24,6 +24,10 @@ SELECT
     request.eventDateTime [requestDateTime],
     request.[type] [requestType],
     request.[message] [requestMessage],
+    requestIssuer.udfDetails [requestIssuerDetails],
+    requestIssuer.eventDateTime [requestIssuerDateTime],
+    requestIssuer.[type] [requestIssuerType],
+    requestIssuer.[message] [requestIssuerMessage],
     confirmIssuer.udfDetails [confirmIssuerDetails],
     confirmIssuer.eventDateTime [confirmIssuerDateTime],
     confirmIssuer.[type] [confirmIssuerType],
@@ -95,6 +99,24 @@ OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
         FROM [transfer].[event]
+        WHERE   [state] = N'request' 
+        AND     [source] = N'issuer'
+        AND     t.transferId = transferId
+        ORDER BY eventId ASC
+    ) requestIssuer
+OUTER APPLY
+    (
+        SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
+        FROM [transfer].[event]
+        WHERE   [state] = N'confirm' 
+        AND     [source] = N'issuer'
+        AND     t.transferId = transferId
+        ORDER BY eventId ASC
+    ) confirmIssuer
+OUTER APPLY
+    (
+        SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
+        FROM [transfer].[event]
         WHERE [state] in (N'abort', N'fail') AND t.transferId = transferId
         ORDER BY eventId ASC
     ) error
@@ -126,15 +148,6 @@ OUTER APPLY
         WHERE [state] = N'fail' AND [type] = N'atm.cashHandlerFault' AND t.transferId = transferId
         ORDER BY eventId ASC
     ) cashAlert
-OUTER APPLY
-    (
-        SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
-        FROM [transfer].[event]
-        WHERE   [state] = N'confirm' 
-        AND     [source] = N'issuer'
-        AND     t.transferId = transferId
-        ORDER BY eventId ASC
-    ) confirmIssuer
 INNER JOIN
     [core].[itemName] n
         ON n.itemNameId = t.transferTypeId
