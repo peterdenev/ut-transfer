@@ -45,6 +45,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
         SELECT
             t.[transferId],
             t.[credentialId],
+            t.[issuerId],
             t.[transferAmount],
             t.[acquirerFee],
             t.[issuerFee],
@@ -77,6 +78,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
 SELECT
     [transferId],
     [credentialId],
+    [issuerId],
     [RowNum],
     [recordsTotal],
     [transferAmount] AS transferAmountTotal,
@@ -93,6 +95,7 @@ WHERE
 UNION ALL SELECT
     NULL AS [transferId],
     NULL AS [credentialId],
+    NULL AS [issuerId],
     MIN([recordsTotal]) + ROW_NUMBER() OVER(ORDER BY [transferCurrency]) AS [RowNum],
     MIN([recordsTotal]) + COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal],
     SUM(CASE WHEN success = 1 THEN ISNULL([transferAmount], 0) ELSE 0.0 END) AS transferAmountTotal,
@@ -136,12 +139,22 @@ SELECT
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
     t.[merchantId] [merchantName],
     UPPER(t.[channelType]) [channelType],
-    t.[requestIssuerDetails].value('(/issuerSerialNumber)[1]', 'varchar(6)') [stan],
-    t.[confirmIssuerDetails].value('(/root/udfIssuer/rrn)[1]', 'varchar(12)') [rrn],
-    CASE WHEN CAST(t.[transferId] AS VARCHAR(50)) <> t.[transferIdIssuer]
-        THEN t.[confirmIssuerDetails].value('(/root/udfIssuer/authCode)[1]', 'varchar(12)')
-        ELSE t.[transferId]
-    END [authCode],
+    CASE
+        WHEN r.[issuerId] <> N'cbs' THEN t.[requestIssuerDetails].value('(/issuerSerialNumber)[1]', 'varchar(6)') -- we request external system
+        WHEN t.[channelType] = N'iso' THEN t.[requestDetails].value('(/root/stan)[1]', 'varchar(6)') -- external system requests us
+        ELSE NULL
+    END [stan],
+    CASE 
+        WHEN t.[channelType] = N'iso' THEN t.[requestDetails].value('(/root/udfIssuer/rrn)[1]', 'varchar(12)')
+        WHEN (r.[issuerId] <> N'cbs' AND t.success = 1) THEN t.[confirmIssuerDetails].value('(/root/udfIssuer/rrn)[1]', 'varchar(12)')
+        WHEN (r.[issuerId] <> N'cbs' AND t.success = 0) THEN t.[errorDetails].value('(/root/transferDetails/udfIssuer/rrn)[1]', 'varchar(12)')
+        ELSE NULL
+    END [rrn],
+    CASE
+        WHEN r.[issuerId] <> N'cbs' THEN t.[confirmIssuerDetails].value('(/root/udfIssuer/authCode)[1]', 'varchar(12)')
+        WHEN (r.[issuerId] = N'cbs' AND t.success = 1) THEN t.[transferId]
+        ELSE NULL
+    END [authCode], -- for approved txn only
     NULL [additionalInfo],
     t.style,
     t.alerts,
