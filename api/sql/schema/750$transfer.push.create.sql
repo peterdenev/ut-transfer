@@ -180,6 +180,8 @@ BEGIN TRY
 
     DECLARE @transferId BIGINT = @@IDENTITY
 
+    SET @udfAcquirer.modify('insert <stan>{sql:variable("@issuerSerialNumber")}</stan> into (/root)[1]')
+
     EXEC [transfer].[push.event]
         @transferId = @transferId,
         @type = 'transfer.push',

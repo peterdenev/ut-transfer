@@ -11,6 +11,11 @@ module.exports = {
             var result = value;
 
             switch (field.name) {
+                case 'stan':
+                    if (!isHeader && result) {
+                        result = (`000000${result}`).slice(-6);
+                    }
+                    break;
                 case 'acquirerFee':
                 case 'issuerFee':
                 case 'transferAmount':
