@@ -138,7 +138,7 @@ SELECT
     UPPER(t.[channelType]) [channelType],
     t.[confirmIssuerDetails].value('(/root/udfIssuer/stan)[1]', 'varchar(6)') [stan],
     t.[confirmIssuerDetails].value('(/root/udfIssuer/rrn)[1]', 'varchar(12)') [rrn],
-    CASE WHEN t.[transferId] <> t.[transferIdIssuer]
+    CASE WHEN CAST(t.[transferId] AS VARCHAR(50)) <> t.[transferIdIssuer]
         THEN t.[confirmIssuerDetails].value('(/root/udfIssuer/authCode)[1]', 'varchar(12)')
         ELSE t.[transferId]
     END [authCode],
