@@ -1,5 +1,6 @@
 import { filterElementTypes } from 'ut-front-react/components/GridToolBox/types';
 import reportStyle from '../../assets/static/css/reportStyle.css';
+import style from './style.css';
 
 let startDate = new Date();
 startDate.setHours(0);
@@ -50,7 +51,7 @@ module.exports = (gridStyle) => ({
         method: 'db/transfer.report.transfer',
         resultsetName: 'transfers',
         rowStyleField: 'style',
-        externalStyle: {...reportStyle, ...gridStyle}
+        externalStyle: {...style, ...reportStyle, ...gridStyle}
     },
     toolbox: {
         showAdvanced: true,
