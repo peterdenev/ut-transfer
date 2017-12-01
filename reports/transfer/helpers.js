@@ -12,7 +12,7 @@ module.exports = {
 
             switch (field.name) {
                 case 'sourceAccount':
-                    if (!isHeader && isNaN(parseInt(result))) {
+                    if (!isHeader && result && isNaN(parseInt(result))) {
                         result = 'N/A';
                     }
                     break;
