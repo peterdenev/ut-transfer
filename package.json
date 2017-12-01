@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.21.0-rc-acapulco.21",
+  "version": "6.21.0-rc-acapulco.22",
   "main": "./index.js",
   "dependencies": {
     "immutable": "^3.8.1",
