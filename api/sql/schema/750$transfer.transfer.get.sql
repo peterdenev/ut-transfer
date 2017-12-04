@@ -4,6 +4,11 @@ ALTER PROCEDURE [transfer].[transfer.get]
     @acquirerCode varchar(50) = NULL, -- acquirer code
     @cardId bigint = NULL, -- card Id
     @localDateTime varchar(14) = NULL, -- local datetime of the transaction
+    @stan varchar(6) = NULL,
+    @rrn varchar(12) = NULL,
+    @transferIdIssuer varchar(50) = NULL,
+    @issuerId varchar(50) = NULL,
+    @pan varchar(32) = NULL,
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 
 AS
@@ -90,11 +95,16 @@ LEFT JOIN
 LEFT JOIN
     [transfer].[pending] tp ON tp.pullTransactionId = t.transferId
 WHERE
-    (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
     (@transferId IS NULL OR t.[transferId] = @transferId) AND
+    (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
+    (@transferIdIssuer IS NULL OR t.[transferIdIssuer] = @transferIdIssuer) AND
+    (@issuerId IS NULL OR t.[issuerId] = @issuerId) AND
     (@cardId IS NULL OR t.cardId = @cardId) AND
     (@localDateTime IS NULL OR t.localDateTime LIKE '%' + @localDateTime) AND
     (@acquirerCode IS NULL OR t.acquirerCode = @acquirerCode) AND
+    (@stan IS NULL OR e.[udfDetails].value('(/root/stan)[1]', 'varchar(6)') = @stan) AND
+    (@rrn IS NULL OR e.[udfDetails].value('(/root/rrn)[1]', 'varchar(12)') = @rrn) AND
+    (@pan IS NULL OR e.[udfDetails].value('(/root/pan)[1]', 'varchar(32)') = @pan) AND
     pullTransactionId IS NOT NULL
 ORDER BY
     t.transferDateTime DESC
@@ -159,11 +169,16 @@ BEGIN
     LEFT JOIN
         [transfer].[pending] tp ON tp.pushTransactionId = t.transferId
     WHERE
-        (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
         (@transferId IS NULL OR t.[transferId] = @transferId) AND
+        (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
+        (@transferIdIssuer IS NULL OR t.[transferIdIssuer] = @transferIdIssuer) AND
+        (@issuerId IS NULL OR t.[issuerId] = @issuerId) AND
         (@cardId IS NULL OR t.cardId = @cardId) AND
         (@localDateTime IS NULL OR t.localDateTime LIKE '%' + @localDateTime) AND
-        (@acquirerCode IS NULL OR t.acquirerCode = @acquirerCode)
+        (@acquirerCode IS NULL OR t.acquirerCode = @acquirerCode) AND
+        (@stan IS NULL OR e.[udfDetails].value('(/root/stan)[1]', 'varchar(6)') = @stan) AND
+        (@rrn IS NULL OR e.[udfDetails].value('(/root/rrn)[1]', 'varchar(12)') = @rrn) AND
+        (@pan IS NULL OR e.[udfDetails].value('(/root/pan)[1]', 'varchar(32)') = @pan)
     ORDER BY
         t.transferDateTime DESC
 END

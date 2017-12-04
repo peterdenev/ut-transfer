@@ -434,6 +434,11 @@ module.exports = {
     'push.reverse': function(params, $meta) {
         var getTransfer = (params) => this.config['transfer.transfer.get']({
             transferId: params.transferId,
+            stan: params.stan,
+            rrn: params.rrn,
+            pan: params.pan,
+            issuerId: params.issuerId,
+            transferIdIssuer: params.transferIdIssuer,
             transferIdAcquirer: params.transferIdAcquirer,
             acquirerCode: params.acquirerCode,
             cardId: params.cardId,
