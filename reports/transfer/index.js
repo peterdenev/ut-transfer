@@ -24,6 +24,7 @@ module.exports = (gridStyle) => ({
     grid: {
         fields: [
             { name: 'transferId', title: 'Trans#' },
+            { name: 'transferIdIssuer', title: 'Issuer Trans#' },
             { name: 'cardNumber', title: 'Card Number' },
             { name: 'transferDateTime', title: 'Transfer Date' },
             { name: 'sourceAccount', title: 'Debit Account' },
