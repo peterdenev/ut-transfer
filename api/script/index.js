@@ -109,6 +109,7 @@ var ruleValidate = (bus, transfer) => {
         operation: transfer.transferType,
         sourceAccount: transfer.sourceAccount,
         destinationAccount: transfer.destinationAccount,
+        sourceCardProductId: transfer.sourceCardProductId,
         amount: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount,
         currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
         isSourceAmount: false
@@ -493,6 +494,7 @@ module.exports = {
                 sourceAccount: result.sourceAccountNumber,
                 sourceAccountName: result.sourceAccountName,
                 destinationAccount: result.destinationAccountNumber,
+                sourceCardProductId: result.sourceCardProductId,
                 destinationAccountName: result.destinationAccountName,
                 issuerId: result.issuerId,
                 ledgerId: result.ledgerId,
