@@ -48,7 +48,7 @@ CREATE TABLE [transfer].[transfer](
     originalTransferId bigint NULL,
     isPreauthorization bit NULL,
     cleared bit NULL,
-    clearingStatusId char(5) NULL,
+    clearingStatusId char(6) NULL,
     description varchar(250), 
     createdOn DATETIMEOFFSET (7), 
     updatedBy BIGINT,

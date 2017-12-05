@@ -9,6 +9,7 @@ CREATE TABLE [transfer].[reverse](
     localDateTime varchar(14),
     networkData varchar(20) NULL,
     transferIdIssuer varchar(50),
+    transferIdAcquirer varchar(50),
     issuerResponseCode varchar(10), 
     issuerResponseMessage varchar(250),
     originalRequest VARCHAR(MAX) NULL,

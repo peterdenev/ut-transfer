@@ -500,8 +500,8 @@ module.exports = {
     'push.executeMc': function(transfer, $meta) {
 
         var incrementalAuthorization = (transfr) => {
-            if (transfr.originalAcquirerTransferId) {
-                return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: transfr.originalAcquirerTransferId})
+            if (transfr.originalAcquirerTransactionId) {
+                return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: transfr.originalAcquirerTransactionId})
                 .then(result => {
                     if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
                         throw errors.acquirerTransferIdNotFound();
@@ -524,7 +524,7 @@ module.exports = {
         };
         return incrementalAuthorization(transfer)
         .then(() => {
-            return this.bus.importMethod('db/transfer.push.create')(transfer)
+            return this.bus.importMethod('db/transfer.push.create')(transfer);
         }).then(pushResult => {
             
             if (transfer.originalRequest) {
@@ -551,7 +551,7 @@ module.exports = {
         
                         return this.bus.importMethod('db/transfer.push.failIssuer')({
                             transferId: transfer.transferId,                
-                            type: error.type || (where + '.error'),
+                            type: error.type || ('unknown.error'),
                             message: error.message,
                             details: Object.assign({}, error, {transferDetails: transfer}),
                             issuerResponseCode: error.issuerResponseCode,
@@ -569,7 +569,7 @@ module.exports = {
         });
     },
     'push.reverseMc': function(params, $meta) {
-        return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: params.acquirerTransferId})
+        return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: params.acquirerOriginalTransactionId})
             .then(result => {
                 if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
                     throw errors.acquirerTransferIdNotFound();
@@ -581,7 +581,7 @@ module.exports = {
                 if (orgTransfer.reversed) {
                     throw errors.transferAlreadyReversed();
                 }
-                if (orgTransfer.cleared || (orgTransfer.clearingStatusId && orgTransfer.clearingStatusId !== 'pendng')) {
+                if (orgTransfer.cleared || (orgTransfer.clearingStatusId && orgTransfer.clearingStatusId !== 'pendng' && orgTransfer.clearingStatusId !== 'forclr')) {
                     throw errors.clearedTransfer();
                 }
                 params.transferId = orgTransfer.transferId;
@@ -642,7 +642,8 @@ module.exports = {
                     transferId: params.transferId,
                     reverseAmount: params.amount.replacement ? params.replacementAmount : params.transferAmount,
                     isPartial: params.amount.replacement ? 1 : 0,
-                    issuerId: orgTransfer.issuerId
+                    issuerId: orgTransfer.issuerId,
+                    transferIdAcquirer: params.acquirerTransactionId
                 });
             }).then((res) => {
                 params.reverseId = res[0][0].reverseId;

@@ -145,6 +145,7 @@ BEGIN TRY
         sourceAccount,
         destinationAccount,
         expireTime,
+        issuerTxState,
         issuerId,
         ledgerId,
         transferCurrency,
@@ -162,7 +163,7 @@ BEGIN TRY
         originalRequest,
         originalTransferId,
         isPreauthorization,
-	   clearingStatusId,
+	    clearingStatusId,
         createdOn,
         updatedOn
     )
@@ -198,6 +199,7 @@ BEGIN TRY
         @sourceAccount,
         @destinationAccount,
         ISNULL(@expireTime, DATEADD(SECOND, @expireSeconds, @transferDateTime)),
+        1,
         @issuerId,
         @ledgerId,
         @transferCurrency,
@@ -215,7 +217,7 @@ BEGIN TRY
 		@originalRequest,
         @originalTransferId,
         @isPreauthorization,
-	   @clearingStatusId,
+	    @clearingStatusId,
         SYSDATETIMEOFFSET(),
         SYSDATETIMEOFFSET()
     DECLARE @transferId BIGINT = @@IDENTITY

@@ -10,9 +10,10 @@ DECLARE @parentItemNameId bigint
  IF NOT EXISTS(select top 1 1 from [transfer].[clearingStatus])
  BEGIN
  INSERT INTO [transfer].[clearingStatus]
- VALUES('pendi','pending' ),
- ('forcl','for clearing' ),
- ('clred','cleared' )
+ VALUES('pendng','Pending' ),
+ ('forclr','For Clearing' ),
+ ('sentcl','Sent For Clearing' ),
+ ('cleard','Cleared' )
  END
   
   
