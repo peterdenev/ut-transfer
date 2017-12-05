@@ -20,7 +20,7 @@ export function transferPartnersPagination(state = defaultState, action) {
                 .mergeIn(['pagination'], action.params);
         case FETCH_PARTNERS:
             if (action.result) {
-                return state.set('pagination', immutable.fromJS(action.result.pagination[0]) || defaultState.get('pagination'));
+                return state.set('pagination', immutable.fromJS(action.result.pagination[0]) || state.get('pagination') || defaultState.get('pagination'));
             }
             break;
         case CLEAR_FILTERS:
