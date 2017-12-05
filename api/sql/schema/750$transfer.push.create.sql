@@ -37,7 +37,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @posData varchar(25),
     @transferType varchar(25),
     @transferPending transfer.pendingTT READONLY,
-    @clearingStatusId CHAR(5),
+    @clearingStatusId CHAR(6),
     @userAvailableAccounts [core].[arrayList] READONLY,
     @meta core.metaDataTT READONLY
 AS
