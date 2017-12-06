@@ -35,5 +35,7 @@ module.exports = {
     merchantRejectFailure: create('rejectFailure', Transfer, 'Merchant payment reject failure'),
     invalidTransferType: create('invalidTransferType', Transfer, 'Invalid transfer type'),
     unknownIssuer: create('unknownIssuer', Transfer, 'Unknown issuer'),
-    invalidIssuer: create('invalidIssuer', Transfer, 'Invalid issuer')
+    invalidIssuer: create('invalidIssuer', Transfer, 'Invalid issuer'),
+    issuerNotConnected: create('issuerNotConnected', Transfer, 'No connection to issuer'),
+    issuerTimeout: create('issuerTimeout', Transfer, 'Issuer times out')
 };

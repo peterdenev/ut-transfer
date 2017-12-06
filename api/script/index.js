@@ -17,7 +17,8 @@ const DECLINED = {
         'transfer.invalidSavingsAccount',
         'transfer.invalidAccountType',
         'transfer.genericDecline',
-        'transfer.incorrectPin'
+        'transfer.incorrectPin',
+        'transfer.issuerNotConnected'
     ],
     merchant: ['merchant.genericDecline']
 };
