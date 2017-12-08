@@ -10,6 +10,7 @@ USING
         ('balance','Balance enquiry'),
         ('ministatement','Mini statement enquiry'),
         ('topup', 'Top up'),
+        ('checkbook', 'Checkbook reorder'),
         ('bill', 'Bill payment'),
         ('sale', 'Sale'),
         ('sms', 'SMS registration'),
