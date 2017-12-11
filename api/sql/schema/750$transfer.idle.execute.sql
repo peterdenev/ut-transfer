@@ -156,6 +156,7 @@ BEGIN TRY
             t.transferIdAcquirer,
             t.sourceAccount,
             t.destinationAccount,
+            t.channelType,
             cin.itemCode
         FROM
             [transfer].[transfer] t
