@@ -19,7 +19,8 @@ module.exports = {
                 'changePin',
                 'loanDisburse',
                 'loanRepay',
-                'forex'
+                'forex',
+                'walletToWallet'
             ]
         ),
         acquirerCode: joi.string().allow(null),

@@ -4,7 +4,8 @@ module.exports = () => ({
         currency: require('./currency'),
         transfer: require('./api/script'),
         errors: require('./errors'),
-        'db/transfer': require('./api/sql')
+        'db/transfer': require('./api/sql'),
+        transferHTTP: require('./http')
     },
     validations: {
         transfer: require('./validations/transfer'),
