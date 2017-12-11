@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.7.5-nbv.6",
+  "version": "6.7.5-nbv.7",
   "main": "./index.js",
   "dependencies": {
     "joi": "10.0.6",
