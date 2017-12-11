@@ -553,7 +553,7 @@ module.exports = {
                             transferId: transfer.transferId,                
                             type: error.type || ('unknown.error'),
                             message: error.message,
-                            details: Object.assign({}, error, {transferDetails: transfer}),
+                            details: error.message,
                             issuerResponseCode: error.issuerResponseCode,
                             issuerResponseMessage: error.issuerResponseMessage
                         }).then(() => {
