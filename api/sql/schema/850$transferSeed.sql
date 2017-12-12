@@ -34,8 +34,13 @@ DECLARE @parentItemNameId bigint
     (12,'Forward was confirmed' ),
     (13,'Forward was denied' ),
     (14,'Forward timed out or returned unknown error' )
-
-
- 
  END
   
+/*requestSource*/
+ IF NOT EXISTS(select top 1 1 from [transfer].[requestSource])
+ BEGIN
+ INSERT INTO [transfer].[requestSource]
+ VALUES('aquire','Aquirer' ),
+ ('switch','SG Switch' ),
+ ('issuer','Issuer' )
+ END
