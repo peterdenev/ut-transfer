@@ -1,8 +1,5 @@
 ALTER PROCEDURE [transfer].[push.requestIssuer]
-    @transferId bigint,
-    @type varchar(50),
-    @message varchar(250),
-    @details XML
+    @transferId bigint
 AS
 SET NOCOUNT ON
 
@@ -11,18 +8,6 @@ UPDATE
 SET
     issuerTxState = 1
 WHERE
-    transferId = @transferId AND
-    issuerTxState is NULL
+    transferId = @transferId AND issuerTxState is NULL
 
-DECLARE @COUNT int = @@ROWCOUNT
-SET @type = ISNULL (@type, 'transfer.push.requestIssuer')
-
-EXEC [transfer].[push.event]
-    @transferId = @transferId,
-    @type = @type,
-    @state = 'request',
-    @source = 'issuer',
-    @message = @message,
-    @udfDetails = @details
-
-IF @COUNT <> 1 RAISERROR('transfer.requestIssuer', 16, 1);
+IF @@ROWCOUNT <> 1 RAISERROR('transfer.requestIssuer', 16, 1);

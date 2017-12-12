@@ -133,7 +133,8 @@ BEGIN TRY
         issuerFee,
         transferFee,
         description,
-        reversed
+        reversed,
+        issuerSerialNumber
     )
     OUTPUT
         INSERTED.*,
@@ -176,7 +177,8 @@ BEGIN TRY
         @issuerFee,
         @transferFee,
         @description,
-        0
+        0,
+        @issuerSerialNumber
 
     DECLARE @transferId BIGINT = @@IDENTITY
 

@@ -142,7 +142,7 @@ BEGIN TRY
             p.port ledgerPort,
             t.cardId,
             'push' transferType,
-            ISNULL(ei.udfDetails.value('(/issuerSerialNumber)[1]', 'bigint'), t.transferId) trace,
+            t.issuerSerialNumber,
             t.transferAmount,
             t.transferFee,
             t.acquirerFee,
@@ -164,8 +164,6 @@ BEGIN TRY
             core.itemName cin ON cin.itemNameId = t.transferTypeId
         LEFT JOIN
             [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
-        LEFT JOIN
-            [transfer].[event] ei ON ei.transferId = t.transferId AND ei.source = 'issuer' AND ei.type = 'transfer.push.requestIssuer'
         LEFT JOIN
             [transfer].[partner] p ON p.partnerId = t.ledgerId
         WHERE

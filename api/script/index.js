@@ -235,9 +235,8 @@ module.exports = {
             transfer.acquirerFee = result.acquirerFee || transfer.acquirerFee;
             transfer.issuerFee = result.issuerFee || transfer.issuerFee;
             transfer.transferFee = result.transferFee || transfer.transferFee;
-            result.transferId = transfer.transferId;
-            result[`transferId${type}`] = transfer.transferIdIssuer;
             transfer[`udf${type}`] = result.udfIssuer || {};
+            result.transferId = transfer.transferId;
 
             return result;
         };
@@ -274,12 +273,7 @@ module.exports = {
                 throw errors.invalidIssuer();
             }
             return this.bus.importMethod('db/transfer.push.requestIssuer')({
-                transferId: transfer.transferId,
-                transferIdIssuer: transfer.transferIdIssuer,
-                message: transfer.transferType,
-                details: {
-                    issuerSerialNumber: transfer.issuerSerialNumber
-                }
+                transferId: transfer.transferId
             })
             .then(() => transfer)
             .then(this.bus.importMethod(transfer.issuerPort + '.push.execute'))
@@ -288,7 +282,6 @@ module.exports = {
                     transfer.ministatement = result.ministatement;
                 }
                 transfer.balance = result.balance;
-                transfer.issuerFee = transfer.issuerFee || result.issuerFee;
                 transfer.issuerEmv = result.issuerEmv;
 
                 return parseResult(transfer, result, 'Issuer');
