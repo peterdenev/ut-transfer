@@ -13,7 +13,7 @@ END
 SELECT 'settlement' as resultSetName
 SELECT
     0,
-    p.name [productName],
+    cardProductName [productName],
     n.itemName [transferType],
     SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
     SUM(CASE WHEN v.success = 1 THEN 1 END) [transferCount],
@@ -24,9 +24,7 @@ SELECT
 FROM
     [transfer].vTransfer v
 JOIN
-    card.card c ON c.cardId = v.cardId
-JOIN
-    card.product p ON c.productId = p.productId
+    card.vCard c ON c.cardId = v.cardId
 JOIN
     core.itemName n ON n.itemNameId = v.transferTypeId
 WHERE
@@ -35,7 +33,7 @@ WHERE
     v.settlementDate < DATEADD(DAY, DATEDIFF(DAY, 0, ISNULL(@settlementDate, GETDATE())), 1) AND
     v.channelType = 'iso'
 GROUP BY
-    p.name,
+    c.cardProductName,
     n.itemName
 UNION ALL SELECT
     1,
@@ -50,9 +48,7 @@ UNION ALL SELECT
 FROM
     [transfer].vTransfer v
 JOIN
-    card.card c ON c.cardId = v.cardId
-JOIN
-    card.product p ON c.productId = p.productId
+    card.vCard c ON c.cardId = v.cardId
 JOIN
     core.itemName n ON n.itemNameId = v.transferTypeId
 WHERE
@@ -62,7 +58,7 @@ WHERE
     v.channelType = 'iso'
 UNION ALL SELECT
     2,
-    p.name [Card],
+    cardProductName [Card],
     n.itemName [Tran_Desc],
     SUM(CASE WHEN v.success = 1 AND n.itemCode IN ('sale', 'withdraw') THEN transferAmount END) [transferAmount],
     SUM(CASE WHEN v.success = 1 THEN 1 END) [transferCount],
@@ -73,18 +69,16 @@ UNION ALL SELECT
 FROM
     [transfer].vTransfer v
 JOIN
-    card.card c ON c.cardId = v.cardId
+    card.vCard c ON c.cardId = v.cardId
 JOIN
-    card.product p ON c.productId = p.productId
-JOIN
-    core.itemName n ON n.itemNameId = v.transferTypeId
+    [core].[itemName] n ON n.itemNameId = v.transferTypeId
 WHERE
     v.issuerTxState in (2,3) AND
     v.settlementDate >= DATEADD(DAY, DATEDIFF(DAY, 0, ISNULL(@settlementDate, GETDATE())), 0) AND
     v.settlementDate < DATEADD(DAY, DATEDIFF(DAY, 0, ISNULL(@settlementDate, GETDATE())), 1) AND
-    p.issuerId != 'cbs'
+    c.issuerId != 'cbs'
 GROUP BY
-    p.name,
+    cardProductName,
     n.itemName
 UNION ALL SELECT
     3,
@@ -99,15 +93,13 @@ UNION ALL SELECT
 FROM
     [transfer].vTransfer v
 JOIN
-    card.card c ON c.cardId = v.cardId
-JOIN
-    card.product p ON c.productId = p.productId
+    card.vCard c ON c.cardId = v.cardId
 JOIN
     core.itemName n ON n.itemNameId = v.transferTypeId
 WHERE
     v.issuerTxState IN (2,3) AND
     v.settlementDate >= DATEADD(DAY, DATEDIFF(DAY, 0, ISNULL(@settlementDate, GETDATE())), 0) AND
     v.settlementDate < DATEADD(DAY, DATEDIFF(DAY, 0, ISNULL(@settlementDate, GETDATE())), 1) AND
-    p.issuerId != 'cbs'
+    c.issuerId != 'cbs'
 ORDER BY
     1,2,3
