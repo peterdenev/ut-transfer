@@ -1,3 +1,8 @@
+<a name="6.21.0"></a>
+# [6.21.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.21.0-rc-acapulco.32...v6.21.0) (2017-12-14)
+
+
+
 <a name="6.20.0"></a>
 # [6.20.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.19.1...v6.20.0) (2017-10-25)
 
