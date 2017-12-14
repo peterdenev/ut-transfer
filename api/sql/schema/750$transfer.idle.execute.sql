@@ -152,6 +152,7 @@ BEGIN TRY
             t.settlementDate issuerSettlementDate,
             t.merchantType,
             e.udfDetails udfAcquirer,
+            er.udfDetails udfAcquirerResponse,
             t.transferId,
             t.transferIdAcquirer,
             t.sourceAccount,
@@ -166,6 +167,12 @@ BEGIN TRY
             [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
         LEFT JOIN
             [transfer].[partner] p ON p.partnerId = t.ledgerId
+        OUTER APPLY
+            (SELECT TOP 1
+                udfDetails
+            FROM [transfer].[event]
+            WHERE transferId = t.transferId AND source = 'acquirer' AND state <> 'request'
+            ORDER BY eventDateTime DESC) AS er
         WHERE
             t.transferId = @txid
         ORDER BY
