@@ -24,6 +24,14 @@ SELECT
     request.eventDateTime [requestDateTime],
     request.[type] [requestType],
     request.[message] [requestMessage],
+    requestIssuer.udfDetails [requestIssuerDetails],
+    requestIssuer.eventDateTime [requestIssuerDateTime],
+    requestIssuer.[type] [requestIssuerType],
+    requestIssuer.[message] [requestIssuerMessage],
+    confirmIssuer.udfDetails [confirmIssuerDetails],
+    confirmIssuer.eventDateTime [confirmIssuerDateTime],
+    confirmIssuer.[type] [confirmIssuerType],
+    confirmIssuer.[message] [confirmIssuerMessage],
     error.udfDetails [errorDetails],
     error.eventDateTime [errorDateTime],
     error.[type] [errorType],
@@ -87,6 +95,24 @@ OUTER APPLY
         AND     t.transferId = transferId
         ORDER BY eventId ASC
     ) request
+OUTER APPLY
+    (
+        SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
+        FROM [transfer].[event]
+        WHERE   [state] = N'request' 
+        AND     [source] = N'issuer'
+        AND     t.transferId = transferId
+        ORDER BY eventId ASC
+    ) requestIssuer
+OUTER APPLY
+    (
+        SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
+        FROM [transfer].[event]
+        WHERE   [state] = N'confirm' 
+        AND     [source] = N'issuer'
+        AND     t.transferId = transferId
+        ORDER BY eventId ASC
+    ) confirmIssuer
 OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime

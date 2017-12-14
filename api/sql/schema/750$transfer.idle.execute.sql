@@ -142,11 +142,11 @@ BEGIN TRY
             p.port ledgerPort,
             t.cardId,
             'push' transferType,
-            -- CASE
-            --     WHEN channelType='ISO' THEN STAN
-            --     ELSE RIGHT('000000' + CAST(id % 1000000 AS VARCHAR),6)
-            -- END stan,
+            t.issuerSerialNumber,
             t.transferAmount,
+            t.transferFee,
+            t.acquirerFee,
+            t.issuerFee,
             t.transferCurrency,
             t.localDateTime,
             t.settlementDate issuerSettlementDate,
@@ -156,6 +156,7 @@ BEGIN TRY
             t.transferIdAcquirer,
             t.sourceAccount,
             t.destinationAccount,
+            t.channelType,
             cin.itemCode
         FROM
             [transfer].[transfer] t

@@ -11,6 +11,16 @@ module.exports = {
             var result = value;
 
             switch (field.name) {
+                case 'sourceAccount':
+                    if (!isHeader && result && isNaN(parseInt(result))) {
+                        result = 'N/A';
+                    }
+                    break;
+                case 'stan':
+                    if (!isHeader && result) {
+                        result = (`000000${result}`).slice(-6);
+                    }
+                    break;
                 case 'acquirerFee':
                 case 'issuerFee':
                 case 'transferAmount':

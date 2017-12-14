@@ -8,7 +8,6 @@ UPDATE
 SET
     issuerTxState = 1
 WHERE
-    transferId = @transferId AND
-    issuerTxState is NULL
+    transferId = @transferId AND issuerTxState is NULL
 
 IF @@ROWCOUNT <> 1 RAISERROR('transfer.requestIssuer', 16, 1);

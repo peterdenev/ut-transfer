@@ -1,5 +1,6 @@
 import { filterElementTypes } from 'ut-front-react/components/GridToolBox/types';
 import reportStyle from '../../assets/static/css/reportStyle.css';
+import style from './style.css';
 
 let startDate = new Date();
 startDate.setHours(0);
@@ -23,12 +24,15 @@ module.exports = (gridStyle) => ({
     grid: {
         fields: [
             { name: 'transferId', title: 'Trans#' },
+            { name: 'transferIdIssuer', title: 'Issuer Trans#' },
             { name: 'cardNumber', title: 'Card Number' },
             { name: 'transferDateTime', title: 'Transfer Date' },
             { name: 'sourceAccount', title: 'Debit Account' },
             { name: 'destinationAccount', title: 'Credit Account' },
             { name: 'description', title: 'Description' },
-            { name: 'transferIdAcquirer', title: 'RRN' },
+            { name: 'rrn', title: 'RRN' },
+            { name: 'stan', title: 'STAN' },
+            { name: 'authCode', title: 'Auth Code' },
             { name: 'transferAmount', title: 'Transfer Amount' },
             { name: 'issuerFee', title: 'Issuer Fee' },
             { name: 'acquirerFee', title: 'Acquirer Fee' },
@@ -36,17 +40,19 @@ module.exports = (gridStyle) => ({
             { name: 'terminalId', title: 'Device Id' },
             { name: 'terminalName', title: 'Device Location' },
             { name: 'responseCode', title: 'Response Code' },
+            { name: 'responseDetails', title: 'Response Details' },
             { name: 'issuerTxStateName', title: 'Issuer State' },
             { name: 'reversalCode', title: 'Reversal Code' },
             { name: 'merchantName', title: 'Merchant' },
             { name: 'additionalInfo', title: 'Additional Info' },
-            { name: 'alerts', title: 'Alerts' }
+            { name: 'alerts', title: 'Alerts' },
+            { name: 'channelType', title: 'Channel Type' }
         ],
         allowColumnConfig: true,
         method: 'db/transfer.report.transfer',
         resultsetName: 'transfers',
         rowStyleField: 'style',
-        externalStyle: {...reportStyle, ...gridStyle}
+        externalStyle: {...style, ...reportStyle, ...gridStyle}
     },
     toolbox: {
         showAdvanced: true,
@@ -92,6 +98,17 @@ module.exports = (gridStyle) => ({
                 params: {alias: ['operation']},
                 map: {display: 'display', value: 'value'}
             }
+        },
+        {
+            name: 'channelType',
+            label: 'Channel Type',
+            placeholder: 'Channel Type',
+            type: filterElementTypes.dropDown,
+            canSelectPlaceholder: true,
+            data: [
+                { key: 'atm', name: 'ATM' },
+                { key: 'iso', name: 'ISO' }
+            ]
         },
         {
             labelFrom: 'Date from',

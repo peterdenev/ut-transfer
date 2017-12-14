@@ -1,5 +1,5 @@
 ALTER PROCEDURE [transfer].[report.transfer]
-    @cardNumber varchar(20),
+    @cardNumber varchar(32),
     @accountNumber varchar(100),
     @deviceId varchar(100),
     @processingCode varchar(100),
@@ -7,6 +7,7 @@ ALTER PROCEDURE [transfer].[report.transfer]
     @endDate datetime,
     @issuerTxState int,
     @merchantName varchar(100),
+    @channelType varchar(50),
     @pageNumber int, -- page number for result
     @pageSize int, -- page size of result
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
@@ -43,6 +44,8 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
     (
         SELECT
             t.[transferId],
+            t.[credentialId],
+            t.[issuerId],
             t.[transferAmount],
             t.[acquirerFee],
             t.[issuerFee],
@@ -70,9 +73,12 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@deviceId IS NULL OR tl.terminalId LIKE '%' + @deviceId + '%')
             AND (@processingCode IS NULL OR t.[transferTypeId] = @processingCode)
             AND (@merchantName IS NULL OR t.[merchantId] LIKE '%' + @merchantName + '%')
+            AND (@channelType IS NULL OR t.[channelType] = @channelType )
     )
 SELECT
     [transferId],
+    [credentialId],
+    [issuerId],
     [RowNum],
     [recordsTotal],
     [transferAmount] AS transferAmountTotal,
@@ -88,6 +94,8 @@ WHERE
     (RowNum BETWEEN @startRow AND @endRow) OR (@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize))
 UNION ALL SELECT
     NULL AS [transferId],
+    NULL AS [credentialId],
+    NULL AS [issuerId],
     MIN([recordsTotal]) + ROW_NUMBER() OVER(ORDER BY [transferCurrency]) AS [RowNum],
     MIN([recordsTotal]) + COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal],
     SUM(CASE WHEN success = 1 THEN ISNULL([transferAmount], 0) ELSE 0.0 END) AS transferAmountTotal,
@@ -106,22 +114,47 @@ SELECT 'transfers' AS resultSetName
 
 SELECT
     t.[transferId],
-    'XXXX' + c.cardNumber [cardNumber],
+    r.[credentialId] [cardNumber],
     convert(varchar(19), t.[transferDateTime], 120) transferDateTime,
     t.[sourceAccount],
     t.[destinationAccount],
     t.[transferType] [description],
     t.[transferIdAcquirer],
+    t.[transferIdIssuer],
     t.[transferAmount],
     t.[acquirerFee],
     t.[issuerFee],
     t.[transferCurrency],
     t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') [terminalId],
     t.[requestDetails].value('(/root/terminalName)[1]', 'varchar(40)') [terminalName],
-    ISNULL(t.errorMessage, 'Success') [responseCode],
+    CASE
+        WHEN t.success = 0 THEN t.errorMessage
+        ELSE 'Success'
+    END [responseDetails],
+    CASE
+        WHEN t.success = 0 THEN ISNULL(t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)'), t.[errorDetails].value('(/params/responseCode)[1]', 'varchar(3)'))
+        ELSE '00'
+    END [responseCode],
     t.[issuerTxStateName],
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
     t.[merchantId] [merchantName],
+    UPPER(t.[channelType]) [channelType],
+    CASE
+        WHEN r.[issuerId] <> N'cbs' THEN t.[requestIssuerDetails].value('(/issuerSerialNumber)[1]', 'varchar(6)') -- we request external system
+        WHEN t.[channelType] = N'iso' THEN t.[requestDetails].value('(/root/stan)[1]', 'varchar(6)') -- external system requests us
+        ELSE NULL
+    END [stan],
+    CASE 
+        WHEN t.[channelType] = N'iso' THEN t.[requestDetails].value('(/root/udfIssuer/rrn)[1]', 'varchar(12)')
+        WHEN (r.[issuerId] <> N'cbs' AND t.success = 1) THEN t.[confirmIssuerDetails].value('(/root/udfIssuer/rrn)[1]', 'varchar(12)')
+        WHEN (r.[issuerId] <> N'cbs' AND t.success = 0) THEN t.[errorDetails].value('(/root/transferDetails/udfIssuer/rrn)[1]', 'varchar(12)')
+        ELSE NULL
+    END [rrn],
+    CASE
+        WHEN r.[issuerId] <> N'cbs' THEN t.[confirmIssuerDetails].value('(/root/udfIssuer/authCode)[1]', 'varchar(12)')
+        WHEN (r.[issuerId] = N'cbs' AND t.success = 1) THEN t.[transferId]
+        ELSE NULL
+    END [authCode], -- for approved txn only
     NULL [additionalInfo],
     t.style,
     t.alerts,
@@ -142,19 +175,25 @@ UNION ALL SELECT
     NULL AS sourceAccount,
     NULL AS destinationAccount,
     'TOTAL Successful' AS [description],
-    CAST(r.recordsTotalSuccessfull AS NVARCHAR(50)) AS transferIdAcquirer,
+    CAST(r.recordsTotalSuccessfull AS NVARCHAR(50)) AS transferIdIssuer,
+    NULL AS transferIdAcquirer,
     r.transferAmountTotal AS transferAmount,
     r.acquirerFeeTotal,
     r.issuerFeeTotal,
     r.[transferCurrency],
     NULL AS terminalId,
     NULL AS terminalName,
+    NULL AS responseDetails,
     NULL AS responseCode,
     NULL AS issuerTxStateName,
     NULL AS reversalCode,
     NULL AS merchantName,
+    NULL AS channelType,
+    NULL AS stan,
+    NULL AS rrn,
+    NULL AS authCode,
     NULL AS [additionalInfo],
-    NULL AS style,
+    'transferAverage' AS style,
     NULL AS alerts,
     r.rowNum
 FROM
