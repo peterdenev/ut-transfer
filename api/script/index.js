@@ -30,20 +30,17 @@ var processReversal = (bus, log, $meta) => params => {
 
     var portReversal = (port, reversal) => {
         if (port && reversal.transferType && reversal.operation) {
-            var $postReversalMeta = Object.assign($meta, {method: `${port}.${reversal.transferType}.${reversal.operation}`});
-            return bus.importMethod($postReversalMeta.method)(reversal, $postReversalMeta);
+            return bus.importMethod(`${port}.${reversal.transferType}.${reversal.operation}`, {timeout: 30000})(reversal, $meta);
         } else {
             return Promise.resolve(reversal);
         }
     };
 
-    var dbPushReverse = reverse => {
-        var $pushReverseMeta = Object.assign($meta, {method: 'db/transfer.push.reverse'});
-        return bus.importMethod($pushReverseMeta.method)(reverse, $pushReverseMeta)
-            .then(pushResult => {
-                return reverse;
-            });
-    };
+    var dbPushReverse = reverse =>
+        bus.importMethod('db/transfer.push.reverse')(reverse, $meta)
+        .then(pushResult => {
+            return reverse;
+        });
 
     var reverse = reversal => {
         transferId = reversal.transferId;
@@ -83,7 +80,8 @@ var processReversal = (bus, log, $meta) => params => {
     };
 
     var failReversal = reversalError => {
-        return Promise.resolve(transferId && bus.importMethod('db/transfer.push.failReversal')({
+        let connected = !['port.notConnected'].includes(reversalError && reversalError.type);
+        return Promise.resolve(connected && transferId && bus.importMethod('db/transfer.push.failReversal')({
             transferId,
             type: reversalError.type || ('issuer.error'),
             message: reversalError.message,
@@ -106,11 +104,7 @@ var processReversal = (bus, log, $meta) => params => {
 
 var ruleValidate = (bus, transfer) => {
     return Promise.resolve()
-        .then(() => {
-            if (transfer.abortAcquirer) {
-                return Promise.reject(transfer.abortAcquirer);
-            }
-        })
+        .then(() => transfer.abortAcquirer && Promise.reject(transfer.abortAcquirer))
         .then(() => bus.importMethod('db/rule.decision.lookup')({
             channelId: transfer.channelId,
             operation: transfer.transferType,
@@ -422,16 +416,41 @@ module.exports = {
             .then(handlePendingTransfer)
             .catch(handleError(params));
     },
+    start: function() {
+        this.idlePorts = new Set();
+    },
     'idle.execute': function(params, $meta) {
         $meta.mtid = 'discard';
-        return this.bus.importMethod('db/transfer.idle.execute')(params)
+        params && params.issuerPort && this.idlePorts.add(params.issuerPort);
+        if (this.idleExecuting) {
+            return false;
+        } else {
+            let ports = Array.from(this.idlePorts).map(value => ({value}));
+            this.idlePorts.clear();
+            let finish = () => {
+                this.idleExecuting = false;
+                this.idlePorts.size && this.publish({}, {mtid: 'notification', method: 'transfer.idle.execute'});
+            };
+            this.idleExecuting = true;
+            Promise.resolve()
+            .then(() => this.bus.importMethod('db/transfer.idle.execute')({
+                count: 10,
+                ports
+            }))
             .then(idleResult => {
                 if (idleResult && idleResult.transferInfo && Array.isArray(idleResult.transferInfo) && idleResult.transferInfo.length > 0) {
-                    let reversObj = Object.assign(idleResult.transferInfo[0], {split: idleResult.split});
-                    return reversObj && reversObj.transferId && processReversal(this.bus, this.log, $meta)(reversObj);
+                    let reverse = processReversal(this.bus, this.log, $meta);
+                    return Promise.all(idleResult.transferInfo.map(transfer => {
+                        transfer.split = (idleResult.split || []).filter(split => split.transferId === transfer.transferId);
+                        return reverse(transfer);
+                    }));
                 }
-                return Promise.resolve();
-            });
+                return false;
+            })
+            .then(finish, finish)
+            .catch(error => this.error(error));
+            return true;
+        }
     },
     'push.reverse': function(params, $meta) {
         var getTransfer = (params) => this.config['transfer.transfer.get']({
