@@ -33,7 +33,7 @@ DECLARE @transfer AS TABLE (transferId bigint, transferTypeId bigint, acquirerCo
                             cardId bigint, sourceAccount varchar(50), destinationAccount varchar(50), expireTime datetime, expireCount int, reversed bit, retryTime datetime,
                             retryCount int, ledgerTxState smallint, issuerTxState smallint, acquirerTxState smallint, merchantTxState smallint, issuerId varchar(50), ledgerId varchar(50),
                             transferCurrency varchar(3), transferAmount money,  acquirerFee money, issuerFee money, transferFee money,[description] varchar(250), issuerPort varchar(50),
-                            ledgerPort varchar(50),udfAcquirer xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max))
+                            ledgerPort varchar(50),udfAcquirer xml, udfAcquirerResponse xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max))
 
 -- get by pull transaction id
 INSERT INTO
@@ -79,6 +79,7 @@ SELECT TOP 1
     pi.port,
     pl.port,
     e.udfDetails,
+    er.udfDetails,
     tp.pendingId,
     tp.pullTransactionId,
     tp.pushTransactionId,
@@ -94,6 +95,12 @@ LEFT JOIN
     [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
 LEFT JOIN
     [transfer].[pending] tp ON tp.pullTransactionId = t.transferId
+OUTER APPLY
+        (SELECT TOP 1
+            udfDetails
+         FROM [transfer].[event]
+         WHERE transferId = t.transferId AND source = 'acquirer' AND state <> 'request'
+         ORDER BY eventDateTime DESC) AS er
 WHERE
     (@transferId IS NULL OR t.[transferId] = @transferId) AND
     (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
@@ -153,6 +160,7 @@ BEGIN
         pi.port,
         pl.port,
         e.udfDetails,
+        er.udfDetails,
         tp.pendingId,
         tp.pullTransactionId,
         tp.pushTransactionId,
@@ -168,6 +176,12 @@ BEGIN
         [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
     LEFT JOIN
         [transfer].[pending] tp ON tp.pushTransactionId = t.transferId
+    OUTER APPLY
+        (SELECT TOP 1
+            udfDetails
+         FROM [transfer].[event]
+         WHERE transferId = t.transferId AND source = 'acquirer' AND state <> 'request'
+         ORDER BY eventDateTime DESC) AS er
     WHERE
         (@transferId IS NULL OR t.[transferId] = @transferId) AND
         (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
@@ -225,7 +239,8 @@ SELECT
     [description],
     issuerPort,
     ledgerPort,
-    udfAcquirer
+    udfAcquirer,
+    udfAcquirerResponse
 FROM
     @transfer t
 JOIN

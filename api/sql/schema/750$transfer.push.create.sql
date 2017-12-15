@@ -144,7 +144,6 @@ BEGIN TRY
         @merchantSettings merchantSettings,
         @issuerMode issuerMode,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @issuerSettlementDate, 120),'-',''),':',''),' ','') issuerSettlementDate,
-        @issuerSerialNumber issuerSerialNumber,
         @issuerSettings issuerSettings,
         @issuerPort issuerPort,
         @ledgerPort ledgerPort,
