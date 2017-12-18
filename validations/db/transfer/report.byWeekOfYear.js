@@ -7,12 +7,11 @@ module.exports = {
             field: joi.string(),
             dir: joi.string().valid(['asc', 'desc', ''])
         }),
-        pagination: joi.any(),
         startDate: joi.string().allow('', null),
         endDate: joi.string().allow('', null),
         transferCurrency: joi.string().length(3)
     }),
     result: joi.object().keys({
-        transferWeekOfYear: joi.array()
+        transferWeekOfYear: joi.any()
     })
 };

@@ -5,6 +5,7 @@ module.exports = {
         return (value, field, data, isHeader) => {
             var classNames = ['cell'];
             var result = value;
+
             switch (field.name) {
                 case 'transferDateTime':
                     if (!isHeader) {
@@ -17,7 +18,7 @@ module.exports = {
                 case 'amountTransaction':
                 case 'amountBilling':
                 case 'transferAmount':
-                    if (!isHeader && value) {
+                    if (!isHeader) {
                         result = formatNumber(value.toString().replace(/\s\%$/, '')); // format & remove '%'
                         classNames.push('textColorBlue');
                     }
@@ -29,6 +30,7 @@ module.exports = {
             if (allowHtml) {
                 return evalResult(result, 'div', classNames, nodeContext);
             }
+
             return result;
         };
     }

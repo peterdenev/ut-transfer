@@ -35,7 +35,7 @@ module.exports = (gridStyle) => ({
     },
     toolbox: {
         showAdvanced: true,
-        maxVisibleInputs: 5,
+        maxVisibleInputs: 7,
         filterAutoFetch: false
     },
     filters: [

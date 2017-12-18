@@ -50,6 +50,9 @@ module.exports = (gridStyle) => ({
             name: 'settlementDate',
             type: filterElementTypes.datePicker,
             defaultValue: date
+        },
+        {
+            type: filterElementTypes.searchBtn, validateFilter: false
         }
     ],
     order: {

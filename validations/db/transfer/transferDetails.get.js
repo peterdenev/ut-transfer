@@ -7,7 +7,6 @@ module.exports = {
             field: joi.string(),
             dir: joi.string().valid(['asc', 'desc', ''])
         }),
-        pagination: joi.any(),
         pageSize: joi.number(),
         pageNumber: joi.number(),
         startDate: joi.string().allow('', null),
@@ -17,7 +16,7 @@ module.exports = {
         deviceID: joi.string()
     }),
     result: joi.object().keys({
-        transferDetails: joi.array(),
+        transferDetails: joi.any(),
         pagination: joi.array().items(joi.object().keys({
             pageSize: joi.number(),
             pageNumber: joi.number(),
