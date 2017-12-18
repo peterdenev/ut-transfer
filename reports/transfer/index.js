@@ -22,11 +22,11 @@ module.exports = (gridStyle) => ({
             { name: 'additionalInfo', title: 'ADDITIONAL INFO' },
             { name: 'alerts', title: 'ALERTS' }
         ],
-        allowColumnConfig: true,
         method: 'db/transfer.report.transfer',
         resultsetName: 'transfers',
-        rowStyleField: 'style',
-        externalStyle: gridStyle
+        allowColumnConfig: true,
+        externalStyle: gridStyle,
+        rowStyleField: 'style'
     },
     export: {
         method: 'db/transfer.report.transfer',
@@ -35,7 +35,7 @@ module.exports = (gridStyle) => ({
     },
     toolbox: {
         showAdvanced: true,
-        maxVisibleInputs: 7,
+        maxVisibleInputs: 3,
         filterAutoFetch: false
     },
     filters: [
