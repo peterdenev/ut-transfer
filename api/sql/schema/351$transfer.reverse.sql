@@ -5,6 +5,7 @@ CREATE TABLE [transfer].[reverse](
     isPartial BIT null,
     issuerTxState smallint,
     issuerId varchar(50),
+    issuerChannelId char(4) NULL,
     transferDateTime datetime2(0) NOT NULL,
     localDateTime varchar(14),
     networkData varchar(20) NULL,

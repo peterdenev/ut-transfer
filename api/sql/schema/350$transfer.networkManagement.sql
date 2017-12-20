@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [transfer].[networkManagement](
     networkManagementId bigint IDENTITY(1,1) NOT NULL,
     mti char(4),
+    issuerChannelId char(4) NULL,
     issuerTxState smallint,
     acquirerTxState smallint,
     requestSourceId char(6),

@@ -498,7 +498,6 @@ module.exports = {
     },
 
     'push.executeMc': function(transfer, $meta) {
-
         var incrementalAuthorization = (transfr) => {
             if (transfr.originalAcquirerTransactionId) {
                 return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: transfr.originalAcquirerTransactionId})
@@ -526,40 +525,37 @@ module.exports = {
         .then(() => {
             return this.bus.importMethod('db/transfer.push.create')(transfer);
         }).then(pushResult => {
-            
             if (transfer.originalRequest) {
                 delete transfer.originalRequest;
             }
             if (transfer.originalTransferId) {
                 delete transfer.originalTransferId;
             }
-            
+
             pushResult = pushResult && pushResult[0] && pushResult[0][0];
             if (pushResult && pushResult.transferId) {
                 transfer.transferId = pushResult.transferId;
                 transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
                 transfer.localDateTime = pushResult.localDateTime;
                 transfer.issuerPort = pushResult.issuerPort;
-                let issuerResponseCode = '';
+
                 return this.bus.importMethod(transfer.issuerPort + '.push.execute')(transfer)
                 .then((res) => {
-                        res.transferId = transfer.transferId;
-                        issuerResponseCode = res.issuerResponseCode;
-                        return this.bus.importMethod('db/transfer.push.confirmIssuer')(res)
+                    res.transferId = transfer.transferId;
+                    return this.bus.importMethod('db/transfer.push.confirmIssuer')(res)
                         .then(() => res);
-                    }, (error) => {
-        
-                        return this.bus.importMethod('db/transfer.push.failIssuer')({
-                            transferId: transfer.transferId,                
-                            type: error.type || ('unknown.error'),
-                            message: error.message,
-                            details: error.message,
-                            issuerResponseCode: error.issuerResponseCode,
-                            issuerResponseMessage: error.issuerResponseMessage
-                        }).then(() => {
-                            throw error;
-                        });
-                    }
+                }, (error) => {
+                    return this.bus.importMethod('db/transfer.push.failIssuer')({
+                        transferId: transfer.transferId,
+                        type: error.type || ('unknown.error'),
+                        message: error.message,
+                        details: error.message,
+                        issuerResponseCode: error.issuerResponseCode,
+                        issuerResponseMessage: error.issuerResponseMessage
+                    }).then(() => {
+                        throw error;
+                    });
+                }
                 );
             } else {
                 throw errors.systemDecline('transfer.push.create');

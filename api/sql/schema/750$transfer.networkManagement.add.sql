@@ -4,7 +4,8 @@ ALTER PROCEDURE [transfer].[networkManagement.add]
     @originalResponse VARCHAR(MAX),
     @mti char(4),
     @requestSourceId char(6),
-	@responseCode varchar(10)
+	@responseCode varchar(10),
+    @issuerChannelId char(4)
 AS
 DECLARE  @networkManagementId BIGINT
 INSERT INTO [transfer].[networkManagement]
@@ -13,6 +14,7 @@ INSERT INTO [transfer].[networkManagement]
            ,[originalRequest]
            ,[originalResponse]
 		   ,[mti]
+           ,[issuerChannelId]
 		   ,[requestSourceId]
 		   ,[responseCode]  
            ,[createdOn])
@@ -22,6 +24,7 @@ VALUES (
     @originalRequest,
     @originalResponse,
 	@mti,
+    @issuerChannelId,
 	@requestSourceId,
 	@responseCode,
     SYSDATETIMEOFFSET()

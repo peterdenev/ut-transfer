@@ -3,6 +3,7 @@ ALTER PROCEDURE [transfer].[push.reverseCreate]
     @reverseAmount money,
     @isPartial BIT = 0,
     @issuerId varchar(50),
+    @issuerChannelId char(4),
     @transferIdAcquirer varchar(50) = NULL,
     @transferDateTime datetime2(0) = NULL,
     @localDateTime varchar(14) = NULL
@@ -15,6 +16,7 @@ INSERT INTO
     isPartial,
     issuerTxState,
     issuerId,
+    issuerChannelId,
     transferDateTime,
     localDateTime,
     transferIdAcquirer,
@@ -27,6 +29,7 @@ VALUES (
     @isPartial,
     1,
     @issuerId,
+    @issuerChannelId,
     ISNULL(@transferDateTime, GETDATE()),
     @localDateTime,
     @transferIdAcquirer,

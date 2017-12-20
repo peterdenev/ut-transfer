@@ -44,3 +44,11 @@ DECLARE @parentItemNameId bigint
  ('switch','SG Switch' ),
  ('issuer','Issuer' )
  END
+
+ /*issuerChannel*/
+ IF NOT EXISTS(select top 1 1 from [transfer].[issuerChannel])
+ BEGIN
+ INSERT INTO [transfer].[issuerChannel]
+ VALUES('mip1','MIP 1' ),
+ ('mip2','MIP 2' )
+ END
