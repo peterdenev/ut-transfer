@@ -159,7 +159,9 @@ BEGIN TRY
             t.reversed,
             t.reversedLedger,
             u.reverseIssuer,
-            u.reverseLedger
+            u.reverseLedger,
+            t.issuerId,
+            t.ledgerId
         FROM
             @updated u
         JOIN
