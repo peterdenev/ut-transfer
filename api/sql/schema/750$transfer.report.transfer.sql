@@ -64,7 +64,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
         LEFT JOIN
             [atm].[terminal] tl ON tl.actorId = t.channelId
         WHERE
-            (@transferId IS NULL OR (t.[transferId] = @transferId OR t.transferId LIKE '%' + @transferId + '%'))
+            (@transferId IS NULL OR (t.[transferId] = @transferId OR t.transferId LIKE '%' + CAST(@transferId AS VARCHAR(50)) + '%'))
             AND (@accountNumber IS NULL OR t.[sourceAccount] LIKE '%' + @accountNumber + '%')
             AND (@startDate IS NULL OR t.[transferDateTime] >= @startDate)
             AND (@endDate IS NULL OR t.[transferDateTime] <= @endDate)
@@ -182,7 +182,6 @@ UNION ALL SELECT
     NULL AS reversalCode,
     NULL AS merchantName,
     NULL AS channelType,
-    NULL AS stan,
     NULL AS rrn,
     NULL AS authCode,
     NULL AS [additionalInfo],

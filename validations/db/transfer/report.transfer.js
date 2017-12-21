@@ -6,6 +6,7 @@ module.exports = {
     notes: ['transfer report'],
     tags: ['list', 'transfer', 'report'],
     params: joi.object({
+        transferId: joi.number(),
         cardNumber: joi.string().max(20),
         accountNumber: joi.string().max(100),
         deviceId: joi.string().max(100),
