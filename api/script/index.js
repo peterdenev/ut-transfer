@@ -57,7 +57,8 @@ const processReversal = (bus, log, $meta) => transfer => {
             .catch(error => {
                 log.error && log.error(error);
                 return Promise.reject(reversalError);
-            });
+            })
+            .then(() => Promise.reject(reversalError));
         });
     };
     return bus.importMethod('db/transfer.push.reverse')(transfer, $meta).then(() => {
