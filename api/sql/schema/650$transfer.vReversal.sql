@@ -16,5 +16,5 @@ JOIN
         (t.ledgerTxState IN (7,9) AND p.mode IN ('online', 'offline'))                                        --tx timed out during offline and current mode is online/offline
     ) AND  p.partnerId = t.ledgerId))
 WHERE
-    t.reversed = 0 AND
-    t.expireTime <= GETDATE()
+    t.reversed = 0 OR
+    t.reversedLedger = 0

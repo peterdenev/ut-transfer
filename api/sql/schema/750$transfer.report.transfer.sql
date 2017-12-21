@@ -1,4 +1,5 @@
 ALTER PROCEDURE [transfer].[report.transfer]
+    @transferId bigint,
     @cardNumber varchar(32),
     @accountNumber varchar(100),
     @deviceId varchar(100),
@@ -63,7 +64,8 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
         LEFT JOIN
             [atm].[terminal] tl ON tl.actorId = t.channelId
         WHERE
-            (@accountNumber IS NULL OR t.[sourceAccount] LIKE '%' + @accountNumber + '%')
+            (@transferId IS NULL OR (t.[transferId] = @transferId OR t.transferId LIKE '%' + @transferId + '%'))
+            AND (@accountNumber IS NULL OR t.[sourceAccount] LIKE '%' + @accountNumber + '%')
             AND (@startDate IS NULL OR t.[transferDateTime] >= @startDate)
             AND (@endDate IS NULL OR t.[transferDateTime] <= @endDate)
             AND (@issuerTxState IS NULL OR t.[issuerTxState] = @issuerTxState)
@@ -73,7 +75,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@deviceId IS NULL OR tl.terminalId LIKE '%' + @deviceId + '%')
             AND (@processingCode IS NULL OR t.[transferTypeId] = @processingCode)
             AND (@merchantName IS NULL OR t.[merchantId] LIKE '%' + @merchantName + '%')
-            AND (@channelType IS NULL OR t.[channelType] = @channelType )
+            AND (@channelType IS NULL OR t.[channelType] = @channelType)
     )
 SELECT
     [transferId],
@@ -131,30 +133,21 @@ SELECT
         WHEN t.success = 0 THEN t.errorMessage
         ELSE 'Success'
     END [responseDetails],
-    CASE
-        WHEN t.success = 0 THEN ISNULL(t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)'), t.[errorDetails].value('(/params/responseCode)[1]', 'varchar(3)'))
-        ELSE '00'
-    END [responseCode],
+    ISNULL(ISNULL(
+        t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)'),
+        t.[errorDetails].value('(/params/responseCode)[1]', 'varchar(3)')
+    ), CASE WHEN t.success = 1 THEN '00' ELSE '96' END
+    ) [responseCode],
     t.[issuerTxStateName],
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
     t.[merchantId] [merchantName],
     UPPER(t.[channelType]) [channelType],
-    CASE
-        WHEN r.[issuerId] <> N'cbs' THEN t.[requestIssuerDetails].value('(/issuerSerialNumber)[1]', 'varchar(6)') -- we request external system
-        WHEN t.[channelType] = N'iso' THEN t.[requestDetails].value('(/root/stan)[1]', 'varchar(6)') -- external system requests us
-        ELSE NULL
+    CASE t.channelType
+        WHEN 'iso' THEN t.transferIdAcquirer
+        WHEN 'atm' THEN t.issuerSerialNumber
+        ELSE t.transferId
     END [stan],
-    CASE 
-        WHEN t.[channelType] = N'iso' THEN t.[requestDetails].value('(/root/udfIssuer/rrn)[1]', 'varchar(12)')
-        WHEN (r.[issuerId] <> N'cbs' AND t.success = 1) THEN t.[confirmIssuerDetails].value('(/root/udfIssuer/rrn)[1]', 'varchar(12)')
-        WHEN (r.[issuerId] <> N'cbs' AND t.success = 0) THEN t.[errorDetails].value('(/root/transferDetails/udfIssuer/rrn)[1]', 'varchar(12)')
-        ELSE NULL
-    END [rrn],
-    CASE
-        WHEN r.[issuerId] <> N'cbs' THEN t.[confirmIssuerDetails].value('(/root/udfIssuer/authCode)[1]', 'varchar(12)')
-        WHEN (r.[issuerId] = N'cbs' AND t.success = 1) THEN t.[transferId]
-        ELSE NULL
-    END [authCode], -- for approved txn only
+    t.retrievalReferenceNumber [rrn],
     NULL [additionalInfo],
     t.style,
     t.alerts,

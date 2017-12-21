@@ -6,7 +6,9 @@ DECLARE @callParams XML
 DECLARE @updated TABLE(
     txid bigint,
     mtid varchar(4),
-    opcode varchar(20)
+    opcode varchar(20),
+    reverseIssuer bit,
+    reverseLedger bit
 )
 BEGIN TRY
     -- forward stored
@@ -57,20 +59,23 @@ BEGIN TRY
                 WHEN 20 > expireCount THEN DATEADD(HOUR, 1, GETDATE())
             END
         OUTPUT
-            INSERTED.transferId, '420', 'reverse'
+            INSERTED.transferId, '420', 'reverse', r.reverseIssuer, r.reverseLedger
         INTO
-            @updated(txid, mtid, opcode)
-        WHERE
-            transferId IN (
-                SELECT TOP (@count)
-                    transferId
-                FROM
-                    [transfer].[sReversal]
-                WHERE
-                    port IN (SELECT value FROM @ports)
-                ORDER
-                    BY expireTime, transferId
-            )
+            @updated(txid, mtid, opcode, reverseIssuer, reverseLedger)
+        FROM
+            [transfer].[transfer] t
+        JOIN (
+            SELECT TOP (@count)
+                transferId, reverseIssuer, reverseLedger
+            FROM
+                [transfer].[sReversal]
+            WHERE
+                port IN (SELECT value FROM @ports) AND
+                expireTime <= GETDATE() AND
+                (reverseIssuer = 1 OR reverseLedger = 1)
+            ORDER
+                BY expireTime, transferId 
+        ) r ON r.transferId = t.transferId
     END
 
     SELECT @count = @count - COUNT(*) FROM @updated
@@ -141,13 +146,20 @@ BEGIN TRY
             t.settlementDate issuerSettlementDate,
             t.merchantType,
             e.udfDetails udfAcquirer,
-            er.udfDetails udfAcquirerResponse,
+            er.udfDetails acquirerError,
+            er.type acquirerErrorType,
             t.transferId,
             t.transferIdAcquirer,
+            CASE WHEN t.issuerTxState = 1 THEN 1 ELSE 0 END [issuerTimeout],
             t.sourceAccount,
             t.destinationAccount,
             t.channelType,
-            cin.itemCode
+            cin.itemCode,
+            t.retrievalReferenceNumber,
+            t.reversed,
+            t.reversedLedger,
+            u.reverseIssuer,
+            u.reverseLedger
         FROM
             @updated u
         JOIN
@@ -162,11 +174,11 @@ BEGIN TRY
             [transfer].[partner] ip ON ip.partnerId = t.issuerId
         OUTER APPLY (
             SELECT TOP 1
-                udfDetails
+                udfDetails, [type]
             FROM
                 [transfer].[event]
             WHERE
-                transferId = t.transferId AND source = 'acquirer' AND state <> 'request'
+                transferId = t.transferId AND source = 'acquirer' AND state = 'fail'
             ORDER BY
                 eventDateTime DESC
         ) AS er

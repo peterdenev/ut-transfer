@@ -165,3 +165,18 @@ BEGIN
   ALTER TABLE [transfer].[transfer] ADD issuerSerialNumber bigint
 END
 
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'retrievalReferenceNumber' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD retrievalReferenceNumber varchar(12)
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'reversedLedger' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD reversedLedger bit
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'expireCountLedger' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD expireCountLedger int
+END
+

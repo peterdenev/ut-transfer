@@ -25,81 +25,56 @@ const DECLINED = {
 var errors = require('../../errors');
 var currency = require('../../currency');
 
-var processReversal = (bus, log, $meta) => params => {
-    var transferId;
-
-    var portReversal = (port, reversal) => {
-        if (port && reversal.transferType && reversal.operation) {
-            return bus.importMethod(`${port}.${reversal.transferType}.${reversal.operation}`, {timeout: 30000})(reversal, $meta);
-        } else {
-            return Promise.resolve(reversal);
-        }
-    };
-
-    var dbPushReverse = reverse =>
-        bus.importMethod('db/transfer.push.reverse')(reverse, $meta)
-        .then(pushResult => {
-            return reverse;
-        });
-
-    var reverse = reversal => {
-        transferId = reversal.transferId;
-        if (reversal && !reversal.reversed) { // reverse only transaction that have NOT been reversed
-            reversal.udfAcquirer && (reversal.udfAcquirer.mti = reversal.mti);
-            reversal.amount = {
-                transfer: currency.amount(reversal.transferCurrency, reversal.transferAmount)
-            };
-
-            // prepare reversal object for postReversal
-            if (!reversal.operation) {
-                reversal.operation = 'reverse';
-            }
-            if (!reversal.transferType) {
-                reversal.transferType = 'push';
-            }
-
-            return reversal && portReversal(reversal.issuerPort, reversal)
-            .then(result => {
-                if (reversal.issuerPort === reversal.ledgerPort) {
-                    return reversal;
-                } else {
-                    return portReversal(reversal.ledgerPort, reversal)
-                    .then(() => reversal);
-                }
-            });
-        } else {
-            throw errors.transferAlreadyReversed();
-        }
-    };
-
-    var confirmReversal = reversalResult => {
-        return transferId && bus.importMethod('db/transfer.push.confirmReversal')({transferId})
-        .then(function(confirmReversalResult) {
-            return reversalResult;
-        });
-    };
-
-    var failReversal = reversalError => {
-        let connected = !['port.notConnected'].includes(reversalError && reversalError.type);
-        return Promise.resolve(connected && transferId && bus.importMethod('db/transfer.push.failReversal')({
-            transferId,
-            type: reversalError.type || ('issuer.error'),
-            message: reversalError.message,
-            details: reversalError
-        }))
+const processReversal = (bus, log, $meta) => transfer => {
+    if (!transfer || !transfer.transferId) {
+        throw errors.notFound();
+    }
+    if (transfer.reversed && (transfer.issuerId === transfer.ledgerId || transfer.reversedLedger)) {
+        throw errors.transferAlreadyReversed();
+    }
+    const reverse = (port, target) => {
+        let method = `${port}.${transfer.transferType}.${transfer.operation}`;
+        return bus.importMethod(method, {timeout: 30000})(transfer, $meta)
         .catch(error => {
-            log.error && log.error(error);
-            return Promise.reject(reversalError);
-        })// .this is intentionally after catch as we do not want to log the reversalError
+            if (error.type === 'transfer.transferAlreadyReversed') {
+                return transfer;
+            }
+            throw error;
+        })
+        .then(() => bus.importMethod(`db/transfer.push.confirmReversal${target}`)(transfer))
         .then(() => {
-            return Promise.reject(reversalError);
+            transfer[`reversed${{Issuer: '', Ledger: 'Ledger'}[target]}`] = true;
+            return transfer;
+        })
+        .catch(reversalError => {
+            let connected = !['port.notConnected', 'transfer.issuerNotConnected'].includes(reversalError && reversalError.type);
+            return Promise.resolve(connected && bus.importMethod(`db/transfer.push.failReversal${target}`)({
+                transferId: transfer.transferId,
+                type: reversalError.type || (`${target.toLowerCase()}.error`),
+                message: reversalError.message,
+                details: reversalError
+            }))
+            .catch(error => {
+                log.error && log.error(error);
+                return Promise.reject(reversalError);
+            });
         });
     };
-
-    return dbPushReverse(params)
-        .then(reverse)
-        .then(confirmReversal)
-        .catch(failReversal);
+    return bus.importMethod('db/transfer.push.reverse')(transfer, $meta).then(() => {
+        transfer.operation = transfer.operation || 'reverse';
+        transfer.transferType = transfer.transferType || 'push';
+        transfer.amount = {
+            transfer: currency.amount(transfer.transferCurrency, transfer.transferAmount)
+        };
+        if (transfer.udfAcquirer) {
+            transfer.udfAcquirer.mti = transfer.mti;
+        }
+        return Promise.all([
+            transfer.reverseIssuer && reverse(transfer.issuerPort, 'Issuer'),
+            transfer.reverseLedger && reverse(transfer.ledgerPort, 'Ledger') // eslint-disable-line
+        ])
+        .then(() => transfer);
+    });
 };
 
 var ruleValidate = (bus, transfer) => {
@@ -277,7 +252,8 @@ module.exports = {
                 }
                 transfer.balance = result.balance;
                 transfer.issuerEmv = result.issuerEmv;
-
+                transfer.retrievalReferenceNumber = result.retrievalReferenceNumber;
+                transfer.settlementDate = result.settlementDate;
                 return parseResult(transfer, result, 'Issuer');
             })
             .catch(handleError(transfer, 'Issuer'))
@@ -286,6 +262,8 @@ module.exports = {
                 transferIdIssuer: transfer.transferIdIssuer,
                 issuerFee: transfer.issuerFee,
                 transferFee: transfer.transferFee,
+                retrievalReferenceNumber: transfer.retrievalReferenceNumber,
+                settlementDate: transfer.settlementDate,
                 message: transfer.transferType,
                 details: result
             }))
@@ -455,12 +433,11 @@ module.exports = {
     'push.reverse': function(params, $meta) {
         var getTransfer = (params) => this.config['transfer.transfer.get']({
             transferId: params.transferId,
-            stan: params.stan,
-            rrn: params.rrn,
+            transferIdAcquirer: params.transferIdAcquirer,
+            retrievalReferenceNumber: params.retrievalReferenceNumber,
             pan: params.pan,
             issuerId: params.issuerId,
             transferIdIssuer: params.transferIdIssuer,
-            transferIdAcquirer: params.transferIdAcquirer,
             acquirerCode: params.acquirerCode,
             cardId: params.cardId,
             localDateTime: params.localDateTime

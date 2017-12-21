@@ -24,7 +24,7 @@ module.exports = (gridStyle) => ({
     grid: {
         fields: [
             { name: 'transferId', title: 'Trans#' },
-            { name: 'transferIdIssuer', title: 'Issuer Trans#' },
+            { name: 'transferIdIssuer', title: 'Auth code' },
             { name: 'cardNumber', title: 'Card Number' },
             { name: 'transferDateTime', title: 'Transfer Date' },
             { name: 'sourceAccount', title: 'Debit Account' },
@@ -32,7 +32,6 @@ module.exports = (gridStyle) => ({
             { name: 'description', title: 'Description' },
             { name: 'rrn', title: 'RRN' },
             { name: 'stan', title: 'STAN' },
-            { name: 'authCode', title: 'Auth Code' },
             { name: 'transferAmount', title: 'Transfer Amount' },
             { name: 'issuerFee', title: 'Issuer Fee' },
             { name: 'acquirerFee', title: 'Acquirer Fee' },
@@ -60,6 +59,7 @@ module.exports = (gridStyle) => ({
         filterAutoFetch: false
     },
     filters: [
+        { name: 'transferId', label: 'Trans#', placeholder: 'Trans#', type: filterElementTypes.searchBox },
         { name: 'cardNumber', label: 'Card Number', placeholder: 'Card Number', type: filterElementTypes.searchBox },
         { name: 'accountNumber', label: 'Account Number', placeholder: 'Account Number', type: filterElementTypes.searchBox },
         { name: 'deviceId', label: 'Device ID', placeholder: 'Device ID', type: filterElementTypes.searchBox },

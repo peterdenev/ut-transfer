@@ -5,6 +5,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @localDateTime varchar(14),
     @settlementDate varchar(14),
     @transferIdAcquirer varchar(50),
+    @retrievalReferenceNumber varchar(12),
     @channelId bigint,
     @channelType varchar(50),
     @ordererId bigint,
@@ -134,6 +135,8 @@ BEGIN TRY
         transferFee,
         description,
         reversed,
+        reversedLedger,  
+        retrievalReferenceNumber,
         issuerSerialNumber
     )
     OUTPUT
@@ -177,6 +180,8 @@ BEGIN TRY
         @transferFee,
         @description,
         0,
+        0,
+        @retrievalReferenceNumber,
         @issuerSerialNumber
 
     DECLARE @transferId BIGINT = @@IDENTITY

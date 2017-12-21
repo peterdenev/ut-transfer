@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[push.failReversal]
+ALTER PROCEDURE [transfer].[push.failReversalLedger]
     @transferId bigint,
     @type varchar(50),
     @message varchar(250),
@@ -9,7 +9,7 @@ SET NOCOUNT ON
 UPDATE
     [transfer].[transfer]
 SET
-    expireCount = ISNULL(expireCount, 0) + 1
+    expireCountLedger = ISNULL(expireCountLedger, 0) + 1
 WHERE
     transferId = @transferId
 
@@ -17,6 +17,6 @@ EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
     @state = 'failReversal',
-    @source = 'issuer',
+    @source = 'ledger',
     @message = @message,
     @udfDetails = @details

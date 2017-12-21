@@ -1,11 +1,10 @@
 ALTER PROCEDURE [transfer].[transfer.get]
-    @transferIdAcquirer NVARCHAR (50) = NULL, -- the front end transfer id
+    @transferIdAcquirer NVARCHAR (50) = NULL, -- the acquirer transfer id
     @transferId BIGINT = NULL, -- the transfer id
     @acquirerCode varchar(50) = NULL, -- acquirer code
     @cardId bigint = NULL, -- card Id
     @localDateTime varchar(14) = NULL, -- local datetime of the transaction
-    @stan varchar(6) = NULL,
-    @rrn varchar(12) = NULL,
+    @retrievalReferenceNumber varchar(12) = NULL,
     @transferIdIssuer varchar(50) = NULL,
     @issuerId varchar(50) = NULL,
     @pan varchar(32) = NULL,
@@ -30,10 +29,10 @@ END
 DECLARE @transfer AS TABLE (transferId bigint, transferTypeId bigint, acquirerCode varchar(50), transferIdAcquirer varchar(50), transferIdLedger varchar(50),
                             transferIdIssuer varchar(50), transferIdMerchant varchar(50), transferDateTime datetime, localDateTime varchar(14), issuerSettlementDate date, channelId bigint,
                             channelType varchar(50), ordererId bigint, merchantId varchar(50), merchantInvoice varchar(50), merchantPort varchar(50), merchantType varchar(50),
-                            cardId bigint, sourceAccount varchar(50), destinationAccount varchar(50), expireTime datetime, expireCount int, reversed bit, retryTime datetime,
+                            cardId bigint, sourceAccount varchar(50), destinationAccount varchar(50), expireTime datetime, expireCount int, expireCountLedger int, reversed bit, reversedLedger bit, reverseIssuer bit, reverseLedger bit, retryTime datetime,
                             retryCount int, ledgerTxState smallint, issuerTxState smallint, acquirerTxState smallint, merchantTxState smallint, issuerId varchar(50), ledgerId varchar(50),
                             transferCurrency varchar(3), transferAmount money,  acquirerFee money, issuerFee money, transferFee money,[description] varchar(250), issuerPort varchar(50),
-                            ledgerPort varchar(50),udfAcquirer xml, udfAcquirerResponse xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max))
+                            ledgerPort varchar(50),udfAcquirer xml, acquirerError xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max))
 
 -- get by pull transaction id
 INSERT INTO
@@ -61,7 +60,11 @@ SELECT TOP 1
     t.destinationAccount,
     t.expireTime,
     t.expireCount,
+    t.expireCountLedger,
     t.reversed,
+    t.reversedLedger,
+    t.reversed ^ 1 AS reverseIssuer,
+    CASE WHEN t.reversedLedger = 0 AND t.issuerId != t.ledgerId THEN 1 ELSE 0 END as reverseLedger,
     t.retryTime,
     t.retryCount,
     t.ledgerTxState,
@@ -95,12 +98,16 @@ LEFT JOIN
     [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
 LEFT JOIN
     [transfer].[pending] tp ON tp.pullTransactionId = t.transferId
-OUTER APPLY
-        (SELECT TOP 1
-            udfDetails
-         FROM [transfer].[event]
-         WHERE transferId = t.transferId AND source = 'acquirer' AND state <> 'request'
-         ORDER BY eventDateTime DESC) AS er
+OUTER APPLY (
+    SELECT TOP 1
+        udfDetails
+    FROM
+        [transfer].[event]
+    WHERE
+        transferId = t.transferId AND source = 'acquirer' AND state = 'fail'
+    ORDER BY
+        eventDateTime DESC
+) AS er
 WHERE
     (@transferId IS NULL OR t.[transferId] = @transferId) AND
     (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
@@ -109,8 +116,7 @@ WHERE
     (@cardId IS NULL OR t.cardId = @cardId) AND
     (@localDateTime IS NULL OR t.localDateTime LIKE '%' + @localDateTime) AND
     (@acquirerCode IS NULL OR t.acquirerCode = @acquirerCode) AND
-    (@stan IS NULL OR e.[udfDetails].value('(/root/stan)[1]', 'varchar(6)') = @stan) AND
-    (@rrn IS NULL OR e.[udfDetails].value('(/root/rrn)[1]', 'varchar(12)') = @rrn) AND
+    (@retrievalReferenceNumber IS NULL OR t.retrievalReferenceNumber = @retrievalReferenceNumber) AND
     (@pan IS NULL OR e.[udfDetails].value('(/root/pan)[1]', 'varchar(32)') = @pan) AND
     pullTransactionId IS NOT NULL
 ORDER BY
@@ -142,7 +148,11 @@ BEGIN
         t.destinationAccount,
         t.expireTime,
         t.expireCount,
+        t.expireCountLedger,
         t.reversed,
+        t.reversedLedger,
+        t.reversed ^ 1 AS reverseIssuer,
+        CASE WHEN t.reversedLedger = 0 AND t.issuerId != t.ledgerId THEN 1 ELSE 0 END as reverseLedger,
         t.retryTime,
         t.retryCount,
         t.ledgerTxState,
@@ -176,12 +186,16 @@ BEGIN
         [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
     LEFT JOIN
         [transfer].[pending] tp ON tp.pushTransactionId = t.transferId
-    OUTER APPLY
-        (SELECT TOP 1
+    OUTER APPLY (
+        SELECT TOP 1
             udfDetails
-         FROM [transfer].[event]
-         WHERE transferId = t.transferId AND source = 'acquirer' AND state <> 'request'
-         ORDER BY eventDateTime DESC) AS er
+        FROM
+            [transfer].[event]
+        WHERE
+            transferId = t.transferId AND source = 'acquirer' AND state = 'fail'
+        ORDER BY
+            eventDateTime DESC
+    ) AS er
     WHERE
         (@transferId IS NULL OR t.[transferId] = @transferId) AND
         (@transferIdAcquirer IS NULL OR t.[transferIdAcquirer] = @transferIdAcquirer) AND
@@ -190,8 +204,7 @@ BEGIN
         (@cardId IS NULL OR t.cardId = @cardId) AND
         (@localDateTime IS NULL OR t.localDateTime LIKE '%' + @localDateTime) AND
         (@acquirerCode IS NULL OR t.acquirerCode = @acquirerCode) AND
-        (@stan IS NULL OR e.[udfDetails].value('(/root/stan)[1]', 'varchar(6)') = @stan) AND
-        (@rrn IS NULL OR e.[udfDetails].value('(/root/rrn)[1]', 'varchar(12)') = @rrn) AND
+        (@retrievalReferenceNumber IS NULL OR t.retrievalReferenceNumber = @retrievalReferenceNumber) AND
         (@pan IS NULL OR e.[udfDetails].value('(/root/pan)[1]', 'varchar(32)') = @pan)
     ORDER BY
         t.transferDateTime DESC
@@ -222,7 +235,11 @@ SELECT
     destinationAccount,
     expireTime,
     expireCount,
+    expireCountLedger,
     reversed,
+    reversedLedger,
+    reverseIssuer,
+    reverseLedger,
     retryTime,
     retryCount,
     ledgerTxState,
@@ -240,7 +257,7 @@ SELECT
     issuerPort,
     ledgerPort,
     udfAcquirer,
-    udfAcquirerResponse
+    acquirerError
 FROM
     @transfer t
 JOIN

@@ -1,8 +1,10 @@
 ALTER PROCEDURE [transfer].[push.confirmIssuer]
     @transferId bigint,
     @transferIdIssuer varchar(50),
+    @retrievalReferenceNumber varchar(12),
     @issuerFee money,
     @transferFee money,
+    @settlementDate date,
     @type varchar(50),
     @message varchar(250),
     @details XML
@@ -13,8 +15,10 @@ UPDATE
     [transfer].[transfer]
 SET
     transferIdIssuer = @transferIdIssuer,
-    issuerFee = CASE WHEN @issuerFee IS NULL THEN issuerFee ELSE @issuerFee END,
-    transferFee = CASE WHEN @transferFee IS NULL THEN transferFee ELSE @transferFee END,
+    issuerFee = ISNULL(@issuerFee, issuerFee),
+    transferFee = ISNULL(@transferFee, transferFee),
+    settlementDate = ISNULL(@settlementDate, settlementDate),
+    retrievalReferenceNumber = ISNULL(@retrievalReferenceNumber, retrievalReferenceNumber),
     issuerTxState = 2
 WHERE
     transferId = @transferId AND
