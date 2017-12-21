@@ -29,7 +29,7 @@ const processReversal = (bus, log, $meta) => transfer => {
     if (!transfer || !transfer.transferId) {
         throw errors.notFound();
     }
-    if (transfer.reversed && (transfer.issuerId === transfer.ledgerId || transfer.reversedLedger)) {
+    if (transfer.reversed && transfer.reversedLedger) {
         throw errors.transferAlreadyReversed();
     }
     const reverse = (port, target) => {
