@@ -33,6 +33,7 @@
     "check": "ut-check",
     "cover": "ut-cover",
     "lint-js": "ut-lint-js .",
+    "lint-sql": "ut-lint-sql",
     "postpublish": "ut-postpublish",
     "postversion": "ut-postversion",
     "precommit": "ut-precommit",
