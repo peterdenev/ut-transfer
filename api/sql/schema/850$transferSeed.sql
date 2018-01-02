@@ -52,3 +52,13 @@ DECLARE @parentItemNameId bigint
  VALUES('mip1','MIP 1' ),
  ('mip2','MIP 2' )
  END
+
+ /*reverseQueueStatus*/
+ IF NOT EXISTS(select top 1 1 from [transfer].[reverseQueueStatus])
+ BEGIN
+ INSERT INTO [transfer].[reverseQueueStatus]
+ VALUES('fail','Failed' ),
+ ('pend','Pending' ),
+ ('sent','Sent' ),
+ ('sndg','Sending' )
+ END

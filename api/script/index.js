@@ -279,8 +279,6 @@ module.exports = {
                 return transfer;
             }
         };
-        
-        
 
         return ruleValidate(this.bus, params)
 
@@ -525,9 +523,9 @@ module.exports = {
         .then(() => {
             return this.bus.importMethod('db/transfer.push.create')(transfer);
         }).then(pushResult => {
-            if (transfer.originalRequest) {
-                delete transfer.originalRequest;
-            }
+            // if (transfer.originalRequest) {
+            //     delete transfer.originalRequest;
+            // }
             if (transfer.originalTransferId) {
                 delete transfer.originalTransferId;
             }
@@ -545,13 +543,22 @@ module.exports = {
                     return this.bus.importMethod('db/transfer.push.confirmIssuer')(res)
                         .then(() => res);
                 }, (error) => {
+                    let queueReversal = error.type === 'port.timeout';
+                    let originalRequest = {
+                        cardDetails: transfer.cardDetails,
+                        transactionCaptureMode: transfer.transactionCaptureMode
+                    };
                     return this.bus.importMethod('db/transfer.push.failIssuer')({
                         transferId: transfer.transferId,
                         type: error.type || ('unknown.error'),
                         message: error.message,
                         details: error.message,
                         issuerResponseCode: error.issuerResponseCode,
-                        issuerResponseMessage: error.issuerResponseMessage
+                        issuerResponseMessage: error.issuerResponseMessage,
+                        transferIdAcquirer: transfer.transferIdAcquirer,
+                        queueReversal: queueReversal,
+                        issuerChannelId: transfer.issuerChannelId,
+                        originalRequest: JSON.stringify(originalRequest)
                     }).then(() => {
                         throw error;
                     });
@@ -588,12 +595,12 @@ module.exports = {
                 params.udfAcquirer.mti = '400';
                 params.udfAcquirer.processingCode = orgTransfer.processingCode;
                 params.udfAcquirer.merchantType = orgTransfer.merchantType;
-                params.udfAcquirer.posEntryMode = params.posEntryMode || orgTransfer.posEntryMode;;
+                params.udfAcquirer.posEntryMode = params.posEntryMode || orgTransfer.posEntryMode;
                 params.udfAcquirer.posData = orgTransfer.posData;
                 params.udfAcquirer.identificationCode = orgTransfer.merchantId;
                 params.transferCurrency = orgTransfer.transferCurrency;
 
-                params.transferAmount = parseFloat(orgTransfer.transferAmount) + parseFloat(orgTransfer.incrementalAmountSum)
+                params.transferAmount = parseFloat(orgTransfer.transferAmount) + parseFloat(orgTransfer.incrementalAmountSum);
                 // params.networkData = orgTransfer.networkData;
                 params.reversedSum = parseFloat(orgTransfer.reversedSum);
                 if (params.reversedSum >= params.transferAmount) {
@@ -601,11 +608,11 @@ module.exports = {
                 }
                 params.amount = {
                     transfer: currency.amount(orgTransfer.transferCurrency, params.transferAmount)
-                }
+                };
                 params.isFullyReversed = true;
                 if (params.replacementAmount) {
                     params.replacementAmount = parseFloat(params.replacementAmount);
-                    if(params.replacementAmount >= (params.transferAmount - params.reversedSum)) {
+                    if (params.replacementAmount >= (params.transferAmount - params.reversedSum)) {
                         throw errors.invalidReplacementAmount();
                     }
                     if ((params.replacementAmount + params.reversedSum) < params.transferAmount) {
@@ -615,7 +622,7 @@ module.exports = {
                     params.replacementAmount = params.amount.replacement.amount;
                 }
                 params.transferAmount = params.amount.transfer.amount;
-                
+
                 // DE 48 (Additional Data)
                 params.udfAcquirer.privateData = orgTransfer.transactionCategoryCode + '2001S';
                 if (params.reverseReason === '06' || !orgTransfer.transferIdIssuer){
@@ -624,7 +631,7 @@ module.exports = {
                 } else {
                     params.udfAcquirer.privateData += '6315' + orgTransfer.networkData + orgTransfer.settlementDate.substring(5, 10).replace('-', '');
                 }
-                
+
                 // DE 90 (Original Params)
                 if (!orgTransfer.stan) {
                     // If DE 7 and DE 11 from the original authorization cannot be saved, DE 90, subelements 2 and 3 may be zero-filled within the Reversal Request/0400 message
@@ -633,13 +640,15 @@ module.exports = {
                 }
                 params.originalParams = '0100' + orgTransfer.localDateTime + orgTransfer.stan +
                 ('0000000000' + params.acquirerCode).slice(-11) + '00000000000';
-                
+
                 return this.bus.importMethod('db/transfer.push.reverseCreate')({
                     transferId: params.transferId,
                     reverseAmount: params.amount.replacement ? params.replacementAmount : params.transferAmount,
                     isPartial: params.amount.replacement ? 1 : 0,
                     issuerId: orgTransfer.issuerId,
-                    transferIdAcquirer: params.acquirerTransactionId
+                    transferIdAcquirer: params.acquirerTransactionId,
+                    issuerChannelId: params.issuerChannelId,
+                    requestSourceId: params.requestSourceId
                 });
             }).then((res) => {
                 params.reverseId = res[0][0].reverseId;
@@ -659,11 +668,16 @@ module.exports = {
                         return reverseResult;
                     });
                 }, (reversalError) => {
+                    let issuerTxState = reversalError.issuerResponseCode === '00' ? 2 : 3; // 2- Request was confirmed 3-Request was denied
+                    if (reversalError.type === 'port.timeout') {
+                        issuerTxState = 4; // Request timed out or ended with unknown error
+                    }
                     return this.bus.importMethod('db/transfer.push.reverseUpdate')({
                         reverseId: params.reverseId,
                         issuerResponseCode: reversalError.issuerResponseCode,
                         issuerResponseMessage: reversalError.issuerResponseMessage,
-                        originalResponse: reversalError.originalResponse
+                        originalResponse: reversalError.originalResponse,
+                        issuerTxState: issuerTxState
                     })
                     .then(() => {
                         throw reversalError;
@@ -702,10 +716,8 @@ module.exports = {
                     })
                     .then(() => {
                         throw statusError;
-                        
                     });
                 });
-            })
+            });
     }
 };
-// todo handle timeout from destination port

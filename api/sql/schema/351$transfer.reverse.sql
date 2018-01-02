@@ -16,6 +16,7 @@ CREATE TABLE [transfer].[reverse](
     originalRequest VARCHAR(MAX) NULL,
     originalResponse VARCHAR(MAX) NULL,
     stan char(6) NULL,
+    requestSourceId char(6),
     createdBy BIGINT NULL,
     createdOn DATETIMEOFFSET (7), 
     updatedBy BIGINT NULL,

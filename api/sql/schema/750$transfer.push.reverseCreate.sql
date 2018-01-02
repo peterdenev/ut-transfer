@@ -6,7 +6,8 @@ ALTER PROCEDURE [transfer].[push.reverseCreate]
     @issuerChannelId char(4),
     @transferIdAcquirer varchar(50) = NULL,
     @transferDateTime datetime2(0) = NULL,
-    @localDateTime varchar(14) = NULL
+    @localDateTime varchar(14) = NULL,
+    @requestSourceId char(6) = NULL
 AS
 DECLARE @reverseId BIGINT
 INSERT INTO
@@ -20,6 +21,7 @@ INSERT INTO
     transferDateTime,
     localDateTime,
     transferIdAcquirer,
+    requestSourceId,
     createdOn,
     updatedOn
 )
@@ -33,6 +35,7 @@ VALUES (
     ISNULL(@transferDateTime, GETDATE()),
     @localDateTime,
     @transferIdAcquirer,
+    @requestSourceId,
     SYSDATETIMEOFFSET(),
     SYSDATETIMEOFFSET()
 )
