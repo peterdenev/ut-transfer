@@ -31,7 +31,8 @@ module.exports = (gridStyle) => ({
     export: {
         method: 'db/transfer.report.transfer',
         resultsetName: 'transfers',
-        maxSize: 20000
+        maxSize: 500000,
+        huge: true // split export by chunks
     },
     toolbox: {
         showAdvanced: true,
