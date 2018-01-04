@@ -1,30 +1,32 @@
 ALTER PROCEDURE [transfer].[networkManagement.add]
-   @issuerTxState smallint,
-    @requestInformationCode char(3),
-    @responseInformationCode char(3),
-    @responseCode varchar(10), 
-    @responseMessage varchar(250),
-    @originalRequest VARCHAR(MAX) ,
-    @originalResponse VARCHAR(MAX)
+    @requestNetworkCode char(3),
+    @originalRequest VARCHAR(MAX),
+    @originalResponse VARCHAR(MAX),
+    @mti char(4),
+    @requestSourceId char(6),
+	@responseCode varchar(10),
+    @issuerChannelId char(4)
 AS
 DECLARE  @networkManagementId BIGINT
 INSERT INTO [transfer].[networkManagement]
            ([issuerTxState]
-           ,[requestInformationCode]
-           ,[responseInformationCode]
-           ,[responseCode]
-           ,[responseMessage]
+           ,[requestNetworkCode]
            ,[originalRequest]
-           ,[originalResponse]     
+           ,[originalResponse]
+		   ,[mti]
+           ,[issuerChannelId]
+		   ,[requestSourceId]
+		   ,[responseCode]  
            ,[createdOn])
 VALUES (
-    @issuerTxState ,
-    @requestInformationCode ,
-    @responseInformationCode ,
-    @responseCode , 
-    @responseMessage ,
-    @originalRequest  ,
-    @originalResponse ,
+    1 ,
+    @requestNetworkCode ,
+    @originalRequest,
+    @originalResponse,
+	@mti,
+    @issuerChannelId,
+	@requestSourceId,
+	@responseCode,
     SYSDATETIMEOFFSET()
 )
 SET @networkManagementId=SCOPE_IDENTITY()

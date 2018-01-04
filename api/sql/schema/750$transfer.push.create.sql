@@ -19,6 +19,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @transferCurrency varchar(3),
     @transferAmount money,
     @issuerId varchar(50),
+    @issuerChannelId char(4),
     @ledgerId varchar(50),
     @acquirerFee money,
     @issuerFee money,
@@ -37,7 +38,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @posData varchar(25),
     @transferType varchar(25),
     @transferPending transfer.pendingTT READONLY,
-    @clearingStatusId CHAR(5),
+    @clearingStatusId CHAR(6),
     @userAvailableAccounts [core].[arrayList] READONLY,
     @meta core.metaDataTT READONLY
 AS
@@ -145,7 +146,9 @@ BEGIN TRY
         sourceAccount,
         destinationAccount,
         expireTime,
+        issuerTxState,
         issuerId,
+        issuerChannelId,
         ledgerId,
         transferCurrency,
         transferAmount,
@@ -162,7 +165,7 @@ BEGIN TRY
         originalRequest,
         originalTransferId,
         isPreauthorization,
-	   clearingStatusId,
+	    clearingStatusId,
         createdOn,
         updatedOn
     )
@@ -198,7 +201,9 @@ BEGIN TRY
         @sourceAccount,
         @destinationAccount,
         ISNULL(@expireTime, DATEADD(SECOND, @expireSeconds, @transferDateTime)),
+        1,
         @issuerId,
+        @issuerChannelId,
         @ledgerId,
         @transferCurrency,
         @transferAmount,
@@ -215,7 +220,7 @@ BEGIN TRY
 		@originalRequest,
         @originalTransferId,
         @isPreauthorization,
-	   @clearingStatusId,
+	    @clearingStatusId,
         SYSDATETIMEOFFSET(),
         SYSDATETIMEOFFSET()
     DECLARE @transferId BIGINT = @@IDENTITY

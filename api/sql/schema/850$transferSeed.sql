@@ -10,9 +10,10 @@ DECLARE @parentItemNameId bigint
  IF NOT EXISTS(select top 1 1 from [transfer].[clearingStatus])
  BEGIN
  INSERT INTO [transfer].[clearingStatus]
- VALUES('pendi','pending' ),
- ('forcl','for clearing' ),
- ('clred','cleared' )
+ VALUES('pendng','Pending' ),
+ ('forclr','For Clearing' ),
+ ('sentcl','Sent For Clearing' ),
+ ('cleard','Cleared' )
  END
   
   
@@ -33,8 +34,31 @@ DECLARE @parentItemNameId bigint
     (12,'Forward was confirmed' ),
     (13,'Forward was denied' ),
     (14,'Forward timed out or returned unknown error' )
-
-
- 
  END
   
+/*requestSource*/
+ IF NOT EXISTS(select top 1 1 from [transfer].[requestSource])
+ BEGIN
+ INSERT INTO [transfer].[requestSource]
+ VALUES('aquire','Aquirer' ),
+ ('switch','SG Switch' ),
+ ('issuer','Issuer' )
+ END
+
+ /*issuerChannel*/
+ IF NOT EXISTS(select top 1 1 from [transfer].[issuerChannel])
+ BEGIN
+ INSERT INTO [transfer].[issuerChannel]
+ VALUES('mip1','MIP 1' ),
+ ('mip2','MIP 2' )
+ END
+
+ /*reverseQueueStatus*/
+ IF NOT EXISTS(select top 1 1 from [transfer].[reverseQueueStatus])
+ BEGIN
+ INSERT INTO [transfer].[reverseQueueStatus]
+ VALUES('fail','Failed' ),
+ ('pend','Pending' ),
+ ('sent','Sent' ),
+ ('sndg','Sending' )
+ END

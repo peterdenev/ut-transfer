@@ -1,21 +1,19 @@
 ALTER PROCEDURE [transfer].[networkManagement.update]
     @issuerTxState smallint,
-    @requestInformationCode char(3),
-    @responseInformationCode char(3),
+    @responseNetworkCode char(3),
     @responseCode varchar(10), 
     @responseMessage varchar(250),
-    @originalRequest VARCHAR(MAX) ,
     @originalResponse VARCHAR(MAX),
-    @networkManagementId BIGINT
+    @networkManagementId BIGINT,
+    @networkData varchar(20)
 AS
 
 UPDATE [transfer].[networkManagement]
    SET [issuerTxState] = @issuerTxState
-      ,[requestInformationCode] =@requestInformationCode
-      ,[responseInformationCode] = @responseInformationCode
+      ,[responseNetworkCode] = @responseNetworkCode
       ,[responseCode] = @responseCode
       ,[responseMessage] = @responseMessage
-      ,[originalRequest] = @originalRequest
-      ,[originalResponse] = @originalResponse      
+      ,[originalResponse] = @originalResponse
+      ,[networkData] = @networkData 
       ,[updatedOn] = SYSDATETIMEOFFSET()
  WHERE networkManagementId=@networkManagementId

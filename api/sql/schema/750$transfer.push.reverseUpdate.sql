@@ -3,7 +3,8 @@ ALTER PROCEDURE [transfer].[push.reverseUpdate]
     @originalRequest VARCHAR(MAX) = NULL,
     @originalResponse VARCHAR(MAX) = NULL,
     @issuerResponseCode varchar(10) = NULL, 
-    @issuerResponseMessage varchar(250) = NULL
+    @issuerResponseMessage varchar(250) = NULL,
+    @issuerTxState int = NULL
 AS
 SET NOCOUNT ON
 
@@ -14,10 +15,7 @@ BEGIN
     SET
         issuerResponseCode = @issuerResponseCode,
         issuerResponseMessage = @issuerResponseMessage,
-        issuerTxState = CASE WHEN @issuerResponseCode = '00'
-            THEN 2
-            ELSE 3
-            END,
+        issuerTxState = @issuerTxState,
         originalResponse = @originalResponse,
         updatedOn = SYSDATETIMEOFFSET()
     WHERE

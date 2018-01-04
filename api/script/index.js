@@ -279,8 +279,6 @@ module.exports = {
                 return transfer;
             }
         };
-        
-        
 
         return ruleValidate(this.bus, params)
 
@@ -498,10 +496,9 @@ module.exports = {
     },
 
     'push.executeMc': function(transfer, $meta) {
-
         var incrementalAuthorization = (transfr) => {
-            if (transfr.originalAcquirerTransferId) {
-                return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: transfr.originalAcquirerTransferId})
+            if (transfr.originalAcquirerTransactionId) {
+                return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: transfr.originalAcquirerTransactionId})
                 .then(result => {
                     if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
                         throw errors.acquirerTransferIdNotFound();
@@ -524,42 +521,48 @@ module.exports = {
         };
         return incrementalAuthorization(transfer)
         .then(() => {
-            return this.bus.importMethod('db/transfer.push.create')(transfer)
+            return this.bus.importMethod('db/transfer.push.create')(transfer);
         }).then(pushResult => {
-            
-            if (transfer.originalRequest) {
-                delete transfer.originalRequest;
-            }
+            // if (transfer.originalRequest) {
+            //     delete transfer.originalRequest;
+            // }
             if (transfer.originalTransferId) {
                 delete transfer.originalTransferId;
             }
-            
+
             pushResult = pushResult && pushResult[0] && pushResult[0][0];
             if (pushResult && pushResult.transferId) {
                 transfer.transferId = pushResult.transferId;
                 transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
                 transfer.localDateTime = pushResult.localDateTime;
                 transfer.issuerPort = pushResult.issuerPort;
-                let issuerResponseCode = '';
+
                 return this.bus.importMethod(transfer.issuerPort + '.push.execute')(transfer)
                 .then((res) => {
-                        res.transferId = transfer.transferId;
-                        issuerResponseCode = res.issuerResponseCode;
-                        return this.bus.importMethod('db/transfer.push.confirmIssuer')(res)
+                    res.transferId = transfer.transferId;
+                    return this.bus.importMethod('db/transfer.push.confirmIssuer')(res)
                         .then(() => res);
-                    }, (error) => {
-        
-                        return this.bus.importMethod('db/transfer.push.failIssuer')({
-                            transferId: transfer.transferId,                
-                            type: error.type || (where + '.error'),
-                            message: error.message,
-                            details: Object.assign({}, error, {transferDetails: transfer}),
-                            issuerResponseCode: error.issuerResponseCode,
-                            issuerResponseMessage: error.issuerResponseMessage
-                        }).then(() => {
-                            throw error;
-                        });
-                    }
+                }, (error) => {
+                    let queueReversal = error.type === 'port.timeout';
+                    let originalRequest = {
+                        cardDetails: transfer.cardDetails,
+                        transactionCaptureMode: transfer.transactionCaptureMode
+                    };
+                    return this.bus.importMethod('db/transfer.push.failIssuer')({
+                        transferId: transfer.transferId,
+                        type: error.type || ('unknown.error'),
+                        message: error.message,
+                        details: error.message,
+                        issuerResponseCode: error.issuerResponseCode,
+                        issuerResponseMessage: error.issuerResponseMessage,
+                        transferIdAcquirer: transfer.transferIdAcquirer,
+                        queueReversal: queueReversal,
+                        issuerChannelId: transfer.issuerChannelId,
+                        originalRequest: JSON.stringify(originalRequest)
+                    }).then(() => {
+                        throw error;
+                    });
+                }
                 );
             } else {
                 throw errors.systemDecline('transfer.push.create');
@@ -569,7 +572,7 @@ module.exports = {
         });
     },
     'push.reverseMc': function(params, $meta) {
-        return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: params.acquirerTransferId})
+        return this.bus.importMethod('db/transfer.transfer.get')({transferIdAcquirer: params.acquirerOriginalTransactionId})
             .then(result => {
                 if (!result || !result.transfer || !result.transfer[0] || !result.transfer[0].transferId) {
                     throw errors.acquirerTransferIdNotFound();
@@ -581,7 +584,7 @@ module.exports = {
                 if (orgTransfer.reversed) {
                     throw errors.transferAlreadyReversed();
                 }
-                if (orgTransfer.cleared || (orgTransfer.clearingStatusId && orgTransfer.clearingStatusId !== 'pendng')) {
+                if (orgTransfer.cleared || (orgTransfer.clearingStatusId && orgTransfer.clearingStatusId !== 'pendng' && orgTransfer.clearingStatusId !== 'forclr')) {
                     throw errors.clearedTransfer();
                 }
                 params.transferId = orgTransfer.transferId;
@@ -592,12 +595,12 @@ module.exports = {
                 params.udfAcquirer.mti = '400';
                 params.udfAcquirer.processingCode = orgTransfer.processingCode;
                 params.udfAcquirer.merchantType = orgTransfer.merchantType;
-                params.udfAcquirer.posEntryMode = params.posEntryMode || orgTransfer.posEntryMode;;
+                params.udfAcquirer.posEntryMode = params.posEntryMode || orgTransfer.posEntryMode;
                 params.udfAcquirer.posData = orgTransfer.posData;
                 params.udfAcquirer.identificationCode = orgTransfer.merchantId;
                 params.transferCurrency = orgTransfer.transferCurrency;
 
-                params.transferAmount = parseFloat(orgTransfer.transferAmount) + parseFloat(orgTransfer.incrementalAmountSum)
+                params.transferAmount = parseFloat(orgTransfer.transferAmount) + parseFloat(orgTransfer.incrementalAmountSum);
                 // params.networkData = orgTransfer.networkData;
                 params.reversedSum = parseFloat(orgTransfer.reversedSum);
                 if (params.reversedSum >= params.transferAmount) {
@@ -605,11 +608,11 @@ module.exports = {
                 }
                 params.amount = {
                     transfer: currency.amount(orgTransfer.transferCurrency, params.transferAmount)
-                }
+                };
                 params.isFullyReversed = true;
                 if (params.replacementAmount) {
                     params.replacementAmount = parseFloat(params.replacementAmount);
-                    if(params.replacementAmount >= (params.transferAmount - params.reversedSum)) {
+                    if (params.replacementAmount >= (params.transferAmount - params.reversedSum)) {
                         throw errors.invalidReplacementAmount();
                     }
                     if ((params.replacementAmount + params.reversedSum) < params.transferAmount) {
@@ -619,7 +622,7 @@ module.exports = {
                     params.replacementAmount = params.amount.replacement.amount;
                 }
                 params.transferAmount = params.amount.transfer.amount;
-                
+
                 // DE 48 (Additional Data)
                 params.udfAcquirer.privateData = orgTransfer.transactionCategoryCode + '2001S';
                 if (params.reverseReason === '06' || !orgTransfer.transferIdIssuer){
@@ -628,7 +631,7 @@ module.exports = {
                 } else {
                     params.udfAcquirer.privateData += '6315' + orgTransfer.networkData + orgTransfer.settlementDate.substring(5, 10).replace('-', '');
                 }
-                
+
                 // DE 90 (Original Params)
                 if (!orgTransfer.stan) {
                     // If DE 7 and DE 11 from the original authorization cannot be saved, DE 90, subelements 2 and 3 may be zero-filled within the Reversal Request/0400 message
@@ -637,12 +640,15 @@ module.exports = {
                 }
                 params.originalParams = '0100' + orgTransfer.localDateTime + orgTransfer.stan +
                 ('0000000000' + params.acquirerCode).slice(-11) + '00000000000';
-                
+
                 return this.bus.importMethod('db/transfer.push.reverseCreate')({
                     transferId: params.transferId,
                     reverseAmount: params.amount.replacement ? params.replacementAmount : params.transferAmount,
                     isPartial: params.amount.replacement ? 1 : 0,
-                    issuerId: orgTransfer.issuerId
+                    issuerId: orgTransfer.issuerId,
+                    transferIdAcquirer: params.acquirerTransactionId,
+                    issuerChannelId: params.issuerChannelId,
+                    requestSourceId: params.requestSourceId
                 });
             }).then((res) => {
                 params.reverseId = res[0][0].reverseId;
@@ -662,11 +668,16 @@ module.exports = {
                         return reverseResult;
                     });
                 }, (reversalError) => {
+                    let issuerTxState = reversalError.issuerResponseCode === '00' ? 2 : 3; // 2- Request was confirmed 3-Request was denied
+                    if (reversalError.type === 'port.timeout') {
+                        issuerTxState = 4; // Request timed out or ended with unknown error
+                    }
                     return this.bus.importMethod('db/transfer.push.reverseUpdate')({
                         reverseId: params.reverseId,
                         issuerResponseCode: reversalError.issuerResponseCode,
                         issuerResponseMessage: reversalError.issuerResponseMessage,
-                        originalResponse: reversalError.originalResponse
+                        originalResponse: reversalError.originalResponse,
+                        issuerTxState: issuerTxState
                     })
                     .then(() => {
                         throw reversalError;
@@ -705,10 +716,8 @@ module.exports = {
                     })
                     .then(() => {
                         throw statusError;
-                        
                     });
                 });
-            })
+            });
     }
 };
-// todo handle timeout from destination port

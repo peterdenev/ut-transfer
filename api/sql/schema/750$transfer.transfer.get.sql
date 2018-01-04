@@ -75,7 +75,6 @@ SELECT TOP 1
     t.clearingStatusId,
     @incrementalAmountSum as incrementalAmountSum
     , t.cleared
-    , t.clearingStatusId
     , @reversedSum as reversedSum
 FROM
     [transfer].[transfer] t
