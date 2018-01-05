@@ -223,7 +223,7 @@ BEGIN TRY
 	    @clearingStatusId,
         SYSDATETIMEOFFSET(),
         SYSDATETIMEOFFSET()
-    DECLARE @transferId BIGINT = @@IDENTITY
+    DECLARE @transferId BIGINT = SCOPE_IDENTITY()
 
     EXEC [transfer].[push.event]
         @transferId = @transferId,
