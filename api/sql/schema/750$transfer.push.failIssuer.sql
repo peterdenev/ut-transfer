@@ -39,11 +39,14 @@ BEGIN
     
 END
 
-EXEC [transfer].[push.event]
+EXEC [transfer].[push.eventFailed]
     @transferId = @transferId,
     @type = @type,
     @state = 'fail',
     @source = 'issuer',
     @message = @message,
+    @issuerResponseMessage=@issuerResponseMessage,
+    @issuerResponseCode=@issuerResponseCode,
+    @issuerChannelId=@issuerChannelId,
     @udfDetails = @details
 
