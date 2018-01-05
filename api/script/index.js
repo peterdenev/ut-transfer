@@ -505,6 +505,9 @@ module.exports = {
                     }
                     let orgTransfer = result.transfer[0];
                     transfer.originalTransferId = orgTransfer.transferId;
+                    if (orgTransfer.settlementDate instanceof Object) {
+                        orgTransfer.settlementDate = orgTransfer.settlementDate.toISOString();
+                    }
                     transfer.udfAcquirer.privateData = transfer.udfAcquirer.privateData +
                     '6315' + orgTransfer.networkData + orgTransfer.settlementDate.substring(5, 10).replace('-', '') + '  ';
                     /* Mastercard Authorization Manual p.289
@@ -622,10 +625,12 @@ module.exports = {
                     params.replacementAmount = params.amount.replacement.amount;
                 }
                 params.transferAmount = params.amount.transfer.amount;
-
+                if (orgTransfer.settlementDate instanceof Object) {
+                    orgTransfer.settlementDate = orgTransfer.settlementDate.toISOString();
+                }
                 // DE 48 (Additional Data)
                 params.udfAcquirer.privateData = orgTransfer.transactionCategoryCode + '2001S';
-                if (params.reverseReason === '06' || !orgTransfer.transferIdIssuer){
+                if (params.reverseReason === '06' || !orgTransfer.transferIdIssuer) {
                     // DE 15, DE 38, and DE 63 will only be available if an approved authorization response was received.
                     params.udfAcquirer.privateData += '6315000000000000000';
                 } else {
