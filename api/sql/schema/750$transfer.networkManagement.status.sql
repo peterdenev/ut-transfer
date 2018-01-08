@@ -1,7 +1,7 @@
 ALTER PROCEDURE [transfer].[networkManagement.status]    
 AS
-DECLARE @settingPeriod INT=(select [value] FROm [transfer].networkManagementSetting where networkManagementSettingId='T' )
-DECLARE @settingErrorNumber INT=(select [value] FROm [transfer].networkManagementSetting where networkManagementSettingId='E' )
+DECLARE @settingPeriod INT=(SELECT [value] FROM [transfer].networkManagementSetting WHERE networkManagementSettingId='T' )
+DECLARE @settingErrorNumber INT=(SELECT [value] FROM [transfer].networkManagementSetting WHERE networkManagementSettingId='E' )
 DECLARE @dateFrom datetime2(0)
 DECLARE @dateTo datetime2(0)=GETDATE()
 DECLARE @lastEchoTest datetime2(0)
