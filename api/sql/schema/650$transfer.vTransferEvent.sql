@@ -68,7 +68,7 @@ SELECT
     END) [issuerTxStateName],
     n.itemName [transferType],
     (CASE
-        WHEN t.[reversed] = 1 THEN N'transferReversed'
+        WHEN t.[reversed] = 1 AND t.[reversedLedger] = 1 THEN N'transferReversed'
         WHEN t.[issuerTxState] in (2, 8, 12) AND ISNULL(cardAlert.type, cashAlert.type) IS NOT NULL THEN N'transferAlert'
         WHEN t.channelType = N'iso' AND t.[issuerTxState] IN (2, 8, 12)  THEN N'transferNormal'
         WHEN t.[acquirerTxState] in (2, 8, 12) THEN N'transferNormal'

@@ -9,7 +9,8 @@ SET NOCOUNT ON
 UPDATE
     [transfer].[transfer]
 SET
-    acquirerTxState = 3
+    acquirerTxState = 3,
+    expireTime = DATEADD(S, -1, GETDATE())
 WHERE
     transferId = @transferId AND
     acquirerTxState = 1

@@ -150,7 +150,6 @@ BEGIN TRY
             er.type acquirerErrorType,
             t.transferId,
             t.transferIdAcquirer,
-            CASE WHEN t.issuerTxState = 1 THEN 1 ELSE 0 END [issuerTimeout],
             t.sourceAccount,
             t.destinationAccount,
             t.channelType,
@@ -161,7 +160,9 @@ BEGIN TRY
             u.reverseIssuer,
             u.reverseLedger,
             t.issuerId,
-            t.ledgerId
+            t.ledgerId,
+            issuerError.udfDetails issuerError,
+            issuerError.type issuerErrorType
         FROM
             @updated u
         JOIN
@@ -184,6 +185,16 @@ BEGIN TRY
             ORDER BY
                 eventDateTime DESC
         ) AS er
+        OUTER APPLY (
+            SELECT TOP 1
+                udfDetails, [type]
+            FROM
+                [transfer].[event]
+            WHERE
+                transferId = t.transferId AND source = 'issuer' AND state = 'unknown'
+            ORDER BY
+                eventDateTime DESC
+        ) issuerError
         ORDER BY
             e.eventDateTime, e.eventId
 

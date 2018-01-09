@@ -9,9 +9,10 @@ SET NOCOUNT ON
 UPDATE
     [transfer].[transfer]
 SET
-    issuerTxState = 4
+    issuerTxState = 4,
+    expireTime = DATEADD(S, -1, GETDATE())
 WHERE
-    transferId = @transferId AND
+    transferId = @transferId AND 
     issuerTxState = 1
 
 DECLARE @COUNT int = @@ROWCOUNT

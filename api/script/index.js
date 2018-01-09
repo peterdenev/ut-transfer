@@ -27,10 +27,10 @@ var currency = require('../../currency');
 
 const processReversal = (bus, log, $meta) => transfer => {
     if (!transfer || !transfer.transferId) {
-        throw errors.notFound();
+        return Promise.reject(errors.notFound());
     }
     if (transfer.reversed && (transfer.issuerId === transfer.ledgerId || transfer.reversedLedger)) {
-        throw errors.transferAlreadyReversed();
+        return Promise.reject(errors.transferAlreadyReversed());
     }
     const reverse = (port, target) => {
         let method = `${port}.${transfer.transferType}.${transfer.operation}`;
@@ -138,7 +138,7 @@ module.exports = {
             var method;
             if (where === 'Acquirer') {
                 method = this.bus.importMethod('db/transfer.push.abortAcquirer');
-            } else if (DECLINED[where.toLowerCase()].includes(error && error.type)) {
+            } else if (error.reverse === false || DECLINED[where.toLowerCase()].includes(error && error.type)) {
                 method = this.bus.importMethod('db/transfer.push.fail' + where);
             } else {
                 method = this.bus.importMethod('db/transfer.push.reverse' + where);
