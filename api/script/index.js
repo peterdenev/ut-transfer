@@ -426,7 +426,11 @@ module.exports = {
                 }
                 return false;
             })
-            .then(finish, finish)
+            .then(finish)
+            .catch(error => {
+                this.error(error);
+                finish();
+            })
             .catch(error => this.error(error));
             return true;
         }
