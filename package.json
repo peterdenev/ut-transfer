@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.23.0-rc-bahur.5",
+  "version": "6.23.0-rc-bahur.6",
   "main": "./index.js",
   "dependencies": {
     "immutable": "^3.8.1",
