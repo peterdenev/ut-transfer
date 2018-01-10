@@ -12,6 +12,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @merchantInvoice varchar(50),
     @merchantType varchar(50),
     @cardId bigint,
+    @cardBin int,
     @sourceAccount varchar(50),
     @destinationAccount varchar(50),
     @expireTime datetime,
@@ -84,7 +85,7 @@ BEGIN TRY
 
     BEGIN TRANSACTION
    
-    UPDATE
+    /*UPDATE
         [transfer].[partner]
     SET
         @merchantPort = port,
@@ -93,7 +94,7 @@ BEGIN TRY
         @merchantSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1,
         @merchantSettings = settings
     WHERE
-        partnerId = @merchantId
+        partnerId = @merchantId*/
 
     UPDATE
         [transfer].[partner]
@@ -119,14 +120,14 @@ BEGIN TRY
         SET @issuerSettlementDate = CAST(@settlementDate AS datetime)
     END
 
-    UPDATE
+    /*UPDATE
         [transfer].[partner]
     SET
         @ledgerPort = port,
         @ledgerMode = mode,
         @ledgerSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1
     WHERE
-        partnerId = @ledgerId
+        partnerId = @ledgerId*/
     
     INSERT INTO [transfer].[transfer](
         transferDateTime,
@@ -143,6 +144,7 @@ BEGIN TRY
         merchantPort,
         merchantType,
         cardId,
+        cardBin,
         sourceAccount,
         destinationAccount,
         expireTime,
@@ -179,10 +181,7 @@ BEGIN TRY
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @issuerSettlementDate, 120),'-',''),':',''),' ','') issuerSettlementDate,
         @issuerSerialNumber issuerSerialNumber,
         @issuerSettings issuerSettings,
-        @issuerPort issuerPort,
-        @ledgerPort ledgerPort,
-        @ledgerMode ledgerMode,
-        @ledgerSerialNumber ledgerSerialNumber
+        @issuerPort issuerPort
     SELECT
         @transferDateTime,
         @transferTypeId,
@@ -198,6 +197,7 @@ BEGIN TRY
         @merchantPort,
         @merchantType,
         @cardId,
+        @cardBin,
         @sourceAccount,
         @destinationAccount,
         ISNULL(@expireTime, DATEADD(SECOND, @expireSeconds, @transferDateTime)),
@@ -233,7 +233,7 @@ BEGIN TRY
         @udfDetails = @udfAcquirer,
         @message = 'Transfer created'
 
-    IF @isPending = 1
+    /*IF @isPending = 1
     BEGIN
         INSERT INTO
             [transfer].[pending](
@@ -315,7 +315,7 @@ BEGIN TRY
         [state],
         [transferIdPayment]
     FROM
-        @split
+        @split*/
 
     COMMIT TRANSACTION
 
