@@ -62,3 +62,12 @@ DECLARE @parentItemNameId bigint
  ('sent','Sent' ),
  ('sndg','Sending' )
  END
+
+  /*captureMode*/
+ IF NOT EXISTS(select top 1 1 from [transfer].[captureMode])
+ BEGIN
+ INSERT INTO [transfer].[captureMode]
+ VALUES('ecom','E-Commerce' ),
+ ('moto','MOTO' ),
+ ('recr','Recurring' )
+ END

@@ -50,6 +50,7 @@ CREATE TABLE [transfer].[transfer](
     isPreauthorization bit NULL,
     cleared bit NULL,
     clearingStatusId char(6) NULL,
+    captureModeId char(4)NULL,
     description varchar(250), 
     createdOn DATETIMEOFFSET (7), 
     updatedBy BIGINT,
