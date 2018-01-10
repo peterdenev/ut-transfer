@@ -42,9 +42,9 @@ SELECT @countTimeOutMip2= sum(CASE WHEN responseCode=68 THEN 1 ELSE 0 END)
 SET @dateFrom=DATEADD(MINUTE,-@settingPeriod,@dateTo)
  
  SELECT 'monitoring' resultSetName
- SELECT @lastEchoTestMip1 lastEchoTest,@lastSignOnMip1 lastSignOn,@lastSignOffMip1 lastSignOff,@countTimeOutMip1 countTimeOut,@lastSignOffMip1 LastSignOff, 'mip1' mip
+ SELECT @lastEchoTestMip1 lastEchoTest,@lastSignOnMip1 lastSignOn,@lastSignOffMip1 lastSignOff,@countTimeOutMip1 countTimeOut,@countFormatErrorMip1 countFormatError, 'mip1' mip
 UNION
- SELECT @lastEchoTestMip2 lastEchoTest,@lastSignOnMip2 lastSignOn,@lastSignOffMip2 lastSignOff,@countTimeOutMip2 countTimeOut,@lastSignOffMip2 LastSignOff, 'mip2' mip
+ SELECT @lastEchoTestMip2 lastEchoTest,@lastSignOnMip2 lastSignOn,@lastSignOffMip2 lastSignOff,@countTimeOutMip2 countTimeOut,@countFormatErrorMip2 countFormatError, 'mip2' mip
 
 SELECT 'color' resultSetName
  SELECT CASE WHEN @settingErrorNumber<@countTimeOutMip1 THEN 1 ELSE 0 END isAmberMip1, CASE WHEN @settingErrorNumber<@countTimeOutMip2 THEN 1 ELSE 0 END isAmberMip2 

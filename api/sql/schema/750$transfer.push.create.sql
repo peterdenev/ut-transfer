@@ -39,6 +39,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @transferType varchar(25),
     @transferPending transfer.pendingTT READONLY,
     @clearingStatusId CHAR(6),
+    @captureModeId char(4),
     @userAvailableAccounts [core].[arrayList] READONLY,
     @meta core.metaDataTT READONLY
 AS
@@ -157,7 +158,7 @@ BEGIN TRY
         transferFee,
         description,
         reversed,
-		networkData,
+	   networkData,
         transactionCategoryCode,
         processingCode,
         posEntryMode,
@@ -165,7 +166,8 @@ BEGIN TRY
         originalRequest,
         originalTransferId,
         isPreauthorization,
-	    clearingStatusId,
+	   clearingStatusId,
+	   captureModeId,
         createdOn,
         updatedOn
     )
@@ -212,15 +214,16 @@ BEGIN TRY
         @transferFee,
         @description,
         0,
-		@networkData,
+	   @networkData,
         @transactionCategoryCode,
         @processingCode,
         @posEntryMode,
         @posData,
-		@originalRequest,
+	   @originalRequest,
         @originalTransferId,
         @isPreauthorization,
-	    @clearingStatusId,
+	   @clearingStatusId,
+	   @captureModeId,
         SYSDATETIMEOFFSET(),
         SYSDATETIMEOFFSET()
     DECLARE @transferId BIGINT = SCOPE_IDENTITY()
