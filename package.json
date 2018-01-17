@@ -2,6 +2,9 @@
   "name": "ut-transfer",
   "version": "6.23.0-rc-bahur.6",
   "main": "./index.js",
+  "pkg": {
+    "assets": ["api/sql/schema/*.sql"]
+  },
   "dependencies": {
     "immutable": "^3.8.1",
     "joi": "10.0.6"
