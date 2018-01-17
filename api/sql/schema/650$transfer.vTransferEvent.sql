@@ -106,7 +106,7 @@ OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
         FROM [transfer].[event]
-        WHERE [state] in (N'abort', N'fail') AND t.transferId = transferId
+        WHERE [state] in (N'abort', N'fail', 'unknown') AND t.transferId = transferId
         ORDER BY eventId ASC
     ) error
 OUTER APPLY

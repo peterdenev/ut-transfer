@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.23.0-rc-bahur.6",
+  "version": "6.23.0-rc-bahur.8",
   "main": "./index.js",
   "pkg": {
     "assets": ["api/sql/schema/*.sql"]
