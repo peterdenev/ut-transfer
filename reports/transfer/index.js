@@ -1,6 +1,5 @@
 import { filterElementTypes } from 'ut-front-react/components/GridToolBox/types';
 import reportStyle from '../../assets/static/css/reportStyle.css';
-import style from './style.css';
 
 let startDate = new Date();
 startDate.setHours(0);
@@ -17,7 +16,7 @@ endDate.setMilliseconds(999);
 module.exports = (gridStyle) => ({
     title: 'Transfer report',
     export: {
-        method: 'db/transfer.report.transfer',
+        method: 'transfer.report.transfer',
         resultsetName: 'transfers',
         maxSize: 20000
     },
@@ -48,10 +47,10 @@ module.exports = (gridStyle) => ({
             { name: 'channelType', title: 'Channel Type' }
         ],
         allowColumnConfig: true,
-        method: 'db/transfer.report.transfer',
+        method: 'transfer.report.transfer',
         resultsetName: 'transfers',
         rowStyleField: 'style',
-        externalStyle: {...style, ...reportStyle, ...gridStyle}
+        externalStyle: {...reportStyle, ...gridStyle}
     },
     toolbox: {
         showAdvanced: true,

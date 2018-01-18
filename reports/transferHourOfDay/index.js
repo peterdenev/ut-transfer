@@ -16,7 +16,7 @@ endDate.setMilliseconds(999);
 module.exports = (gridStyle) => ({
     title: 'Transfer Hour of Day Statistics ',
     export: {
-        method: 'db/transfer.report.byHourOfDay',
+        method: 'transfer.report.byHourOfDay',
         resultsetName: 'transferHourOfDay'
     },
     grid: {
@@ -36,7 +36,7 @@ module.exports = (gridStyle) => ({
             { name: 'acquirerFeePercent', title: '%' },
             { name: 'transferCurrency', title: 'Currency' }
         ],
-        method: 'db/transfer.report.byHourOfDay',
+        method: 'transfer.report.byHourOfDay',
         resultsetName: 'transferHourOfDay',
         allowColumnConfig: true,
         externalStyle: {...reportStyle, ...gridStyle}

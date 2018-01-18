@@ -20,7 +20,7 @@ endDate.setMilliseconds(999);
 module.exports = (gridStyle) => ({
     title: 'Transfer Week of Year Statistics ',
     export: {
-        method: 'db/transfer.report.byWeekOfYear',
+        method: 'transfer.report.byWeekOfYear',
         resultsetName: 'transferWeekOfYear'
     },
     grid: {
@@ -40,7 +40,7 @@ module.exports = (gridStyle) => ({
             { name: 'acquirerFeePercent', title: '%' },
             { name: 'transferCurrency', title: 'Currency' }
         ],
-        method: 'db/transfer.report.byWeekOfYear',
+        method: 'transfer.report.byWeekOfYear',
         resultsetName: 'transferWeekOfYear',
         allowColumnConfig: true,
         externalStyle: {...reportStyle, ...gridStyle}

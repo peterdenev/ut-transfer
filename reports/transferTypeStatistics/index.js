@@ -16,7 +16,7 @@ endDate.setMilliseconds(999);
 module.exports = (gridStyle) => ({
     title: 'Transfer Type Statistics ',
     export: {
-        method: 'db/transfer.report.byTypeOfTransfer',
+        method: 'transfer.report.byTypeOfTransfer',
         resultsetName: 'transferTransactyonType'
     },
     grid: {
@@ -36,7 +36,7 @@ module.exports = (gridStyle) => ({
             { name: 'acquirerFeePercent', title: '%' },
             { name: 'transferCurrency', title: 'Currency' }
         ],
-        method: 'db/transfer.report.byTypeOfTransfer',
+        method: 'transfer.report.byTypeOfTransfer',
         resultsetName: 'transferTransactyonType',
         allowColumnConfig: true,
         externalStyle: {...reportStyle, ...gridStyle}
