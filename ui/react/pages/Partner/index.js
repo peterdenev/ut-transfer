@@ -32,7 +32,9 @@ class Partner extends Component {
                 <div className={mainStyle.actionBarWrap}>
                     <ToolboxFilters>
                         <div className={style.filterWrap}>
-                            <FilterByCustomSearch allowedFields={filterByCustomSearch.get('fields')} defaultField={filterByCustomSearch.get('defaultField')} />
+                            <div className={style.filterCustomSearchSeparated}>
+                                <FilterByCustomSearch allowedFields={filterByCustomSearch.get('fields')} defaultField={filterByCustomSearch.get('defaultField')} />
+                            </div>
                             <ClearFilter />
                         </div>
                     </ToolboxFilters>
