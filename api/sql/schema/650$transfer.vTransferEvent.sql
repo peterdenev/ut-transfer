@@ -68,7 +68,7 @@ SELECT
     END) [issuerTxStateName],
     n.itemName [transferType],
     (CASE
-        WHEN t.[reversed] = 1 AND t.[reversedLedger] = 1 THEN N'transferReversed'
+        WHEN t.[reversed] = 1 AND (t.issuerId = t.ledgerId OR t.[reversedLedger] = 1) THEN N'transferReversed'
         WHEN t.[issuerTxState] in (2, 8, 12) AND ISNULL(cardAlert.type, cashAlert.type) IS NOT NULL THEN N'transferAlert'
         WHEN t.channelType = N'iso' AND t.[issuerTxState] IN (2, 8, 12)  THEN N'transferNormal'
         WHEN t.[acquirerTxState] in (2, 8, 12) THEN N'transferNormal'
@@ -106,7 +106,15 @@ OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
         FROM [transfer].[event]
-        WHERE [state] in (N'abort', N'fail', 'unknown') AND t.transferId = transferId
+        WHERE
+            [state] IN (N'abort', N'fail', 'unknown') AND
+            transferId = t.transferId AND
+            source = CASE
+                WHEN merchantTxState IS NOT NULL AND merchantTxState NOT IN (2, 8, 12) THEN 'merchant'
+                WHEN issuerTxState IS NOT NULL AND issuerTxState NOT IN (2, 8, 12) THEN 'issuer'
+                WHEN ledgerTxState IS NOT NULL AND ledgerTxState NOT IN (2, 8, 12) THEN 'ledger'
+                ELSE 'acquirer'
+            END
         ORDER BY eventId ASC
     ) error
 OUTER APPLY
