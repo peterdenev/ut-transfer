@@ -38,5 +38,5 @@ module.exports = {
     invalidIssuer: create('invalidIssuer', Transfer, 'Invalid issuer'),
     issuerNotConnected: create('issuerNotConnected', Transfer, 'No connection to issuer'),
     issuerTimeout: create('issuerTimeout', Transfer, 'Issuer times out'),
-    issuerDisconnected: create('issuerDisconnected', Transfer, 'Issuer down')
+    issuerDisconnected: create('issuerDisconnected', Transfer, 'Destination not Available')
 };
