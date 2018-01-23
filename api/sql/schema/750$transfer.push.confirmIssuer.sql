@@ -2,6 +2,7 @@ ALTER PROCEDURE [transfer].[push.confirmIssuer]
     @transferId bigint,
     @transferIdIssuer varchar(50),
     @retrievalReferenceNumber varchar(12),
+    @acquirerFee money,
     @issuerFee money,
     @transferFee money,
     @settlementDate varchar(14),
@@ -35,6 +36,7 @@ SET
     transferIdIssuer = @transferIdIssuer,
     issuerFee = ISNULL(@issuerFee, issuerFee),
     transferFee = ISNULL(@transferFee, transferFee),
+    acquirerFee = ISNULL(@acquirerFee, acquirerFee),
     settlementDate = ISNULL(@issuerSettlementDate, settlementDate),
     retrievalReferenceNumber = ISNULL(@retrievalReferenceNumber, retrievalReferenceNumber),
     issuerTxState = 2

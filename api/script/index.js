@@ -220,15 +220,15 @@ module.exports = {
             .then(this.bus.importMethod(transfer.ledgerPort + '.push.execute'))
             .then(result => {
                 result.transferIdLedger = result.transferIdIssuer;
-                transfer.acquirerFee = transfer.acquirerFee || result.issuerFee;
                 return parseResult(transfer, result, 'Ledger');
             })
             .catch(handleError(transfer, 'Ledger'))
             .then(result => this.bus.importMethod('db/transfer.push.confirmLedger')({
                 transferId: transfer.transferId,
                 transferIdLedger: transfer.transferIdLedger,
-                acquirerFee: transfer.acquirerFee,
-                transferFee: transfer.transferFee,
+                acquirerFee: result.acquirerFee,
+                transferFee: result.transferFee,
+                issuerFee: result.issuerFee,
                 message: transfer.transferType,
                 details: result
             }))
@@ -261,8 +261,9 @@ module.exports = {
             .then(result => this.bus.importMethod('db/transfer.push.confirmIssuer')({
                 transferId: transfer.transferId,
                 transferIdIssuer: transfer.transferIdIssuer,
-                issuerFee: transfer.issuerFee,
-                transferFee: transfer.transferFee,
+                acquirerFee: result.acquirerFee,
+                transferFee: result.transferFee,
+                issuerFee: result.issuerFee,
                 retrievalReferenceNumber: transfer.retrievalReferenceNumber,
                 settlementDate: transfer.settlementDate,
                 message: transfer.transferType,
