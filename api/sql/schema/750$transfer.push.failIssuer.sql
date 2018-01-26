@@ -45,8 +45,8 @@ EXEC [transfer].[push.eventFailed]
     @state = 'fail',
     @source = 'issuer',
     @message = @message,
-    @issuerResponseMessage=@issuerResponseMessage,
-    @issuerResponseCode=@issuerResponseCode,
+    @responseMessage=@issuerResponseMessage,
+    @responseCode=@issuerResponseCode,
     @issuerChannelId=@issuerChannelId,
     @udfDetails = @details
 
