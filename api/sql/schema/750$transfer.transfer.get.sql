@@ -13,26 +13,28 @@ ALTER PROCEDURE [transfer].[transfer.get]
 AS
 
     -- checks if the user has a right to make the operation
-DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
-EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
+DECLARE @actionID varchar(100) = OBJECT_SCHEMA_NAME(@@PROCID) + '.' + OBJECT_NAME(@@PROCID), @return int = 0
+EXEC @return = [user].[permission.check] @actionId = @actionID, @objectId = NULL, @meta = @meta
 IF @return != 0
 BEGIN
     RETURN 55555
 END
 
-IF (isnull(@transferID, 0) = 0 AND isnull(@transferIdAcquirer, '') = '')
+IF (ISNULL(@transferID, 0) = 0 AND ISNULL(@transferIdAcquirer, '') = '')
 BEGIN
     RAISERROR('transfer.missingParameter', 16, 1);
     RETURN 55555
 END
 
-DECLARE @transfer AS TABLE (transferId bigint, transferTypeId bigint, acquirerCode varchar(50), transferIdAcquirer varchar(50), transferIdLedger varchar(50),
-                            transferIdIssuer varchar(50), transferIdMerchant varchar(50), transferDateTime datetime, localDateTime varchar(14), issuerSettlementDate date, channelId bigint,
-                            channelType varchar(50), ordererId bigint, merchantId varchar(50), merchantInvoice varchar(50), merchantPort varchar(50), merchantType varchar(50),
-                            cardId bigint, sourceAccount varchar(50), destinationAccount varchar(50), expireTime datetime, expireCount int, expireCountLedger int, reversed bit, reversedLedger bit, reverseIssuer bit, reverseLedger bit, retryTime datetime,
-                            retryCount int, ledgerTxState smallint, issuerTxState smallint, acquirerTxState smallint, merchantTxState smallint, issuerId varchar(50), ledgerId varchar(50),
-                            transferCurrency varchar(3), transferAmount money,  acquirerFee money, issuerFee money, transferFee money,[description] varchar(250), issuerPort varchar(50),
-                            ledgerPort varchar(50),udfAcquirer xml, acquirerError xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max))
+DECLARE @transfer AS TABLE (
+    transferId bigint, transferTypeId bigint, acquirerCode varchar(50), transferIdAcquirer varchar(50), transferIdLedger varchar(50),
+    transferIdIssuer varchar(50), transferIdMerchant varchar(50), transferDateTime datetime, localDateTime varchar(14), issuerSettlementDate date, channelId bigint,
+    channelType varchar(50), ordererId bigint, merchantId varchar(50), merchantInvoice varchar(50), merchantPort varchar(50), merchantType varchar(50),
+    cardId bigint, sourceAccount varchar(50), destinationAccount varchar(50), expireTime datetime, expireCount int, expireCountLedger int, reversed bit, reversedLedger bit, reverseIssuer bit, reverseLedger bit, retryTime datetime,
+    retryCount int, ledgerTxState smallint, issuerTxState smallint, acquirerTxState smallint, merchantTxState smallint, issuerId varchar(50), ledgerId varchar(50),
+    transferCurrency varchar(3), transferAmount money, acquirerFee money, issuerFee money, transferFee money, [description] varchar(250), issuerPort varchar(50),
+    ledgerPort varchar(50), udfAcquirer xml, acquirerError xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max)
+)
 
 -- get by pull transaction id
 INSERT INTO
@@ -64,7 +66,7 @@ SELECT TOP 1
     t.reversed,
     t.reversedLedger,
     t.reversed ^ 1 AS reverseIssuer,
-    CASE WHEN t.reversedLedger = 0 AND t.issuerId != t.ledgerId THEN 1 ELSE 0 END as reverseLedger,
+    CASE WHEN t.reversedLedger = 0 AND t.issuerId != t.ledgerId THEN 1 ELSE 0 END AS reverseLedger,
     t.retryTime,
     t.retryCount,
     t.ledgerTxState,
@@ -152,7 +154,7 @@ BEGIN
         t.reversed,
         t.reversedLedger,
         t.reversed ^ 1 AS reverseIssuer,
-        CASE WHEN t.reversedLedger = 0 AND t.issuerId != t.ledgerId THEN 1 ELSE 0 END as reverseLedger,
+        CASE WHEN t.reversedLedger = 0 AND t.issuerId != t.ledgerId THEN 1 ELSE 0 END AS reverseLedger,
         t.retryTime,
         t.retryCount,
         t.ledgerTxState,
@@ -179,9 +181,9 @@ BEGIN
     FROM
         [transfer].[transfer] t
     JOIN
-        [transfer].[partner] pi on pi.partnerId = t.issuerId
+        [transfer].[partner] pi ON pi.partnerId = t.issuerId
     LEFT JOIN
-        [transfer].[partner] pl on pl.partnerId = t.ledgerId
+        [transfer].[partner] pl ON pl.partnerId = t.ledgerId
     LEFT JOIN
         [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
     LEFT JOIN
@@ -238,7 +240,9 @@ SELECT
     expireCountLedger,
     reversed,
     reversedLedger,
+    reversedLedger adjustLedger,
     reverseIssuer,
+    reverseIssuer adjustIssuer,
     reverseLedger,
     retryTime,
     retryCount,

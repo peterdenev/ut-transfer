@@ -1,6 +1,6 @@
-ALTER PROCEDURE [transfer].[push.reverse]
+CREATE PROCEDURE [transfer].[push.adjust]
     @transferId bigint,
-    @message varchar(250) = 'Reversal started',
+    @message varchar(250) = 'Adjust started',
     @udfAcquirer XML,
     @meta core.metaDataTT READONLY
 AS
@@ -15,7 +15,7 @@ AS
 
 EXEC [transfer].[push.event]
     @transferId = @transferId,
-    @type = 'transfer.reverse',
+    @type = 'transfer.adjust',
     @state = 'request',
     @source = 'acquirer',
     @message = @message,

@@ -25,13 +25,7 @@ const DECLINED = {
 var errors = require('../../errors');
 var currency = require('../../currency');
 
-const processReversal = (bus, log, $meta) => transfer => {
-    if (!transfer || !transfer.transferId) {
-        return Promise.reject(errors.notFound());
-    }
-    if (transfer.reversed && (transfer.issuerId === transfer.ledgerId || transfer.reversedLedger)) {
-        return Promise.reject(errors.transferAlreadyReversed());
-    }
+const processReversal = (bus, log, $meta, transfer) => {
     const reverse = (port, target) => {
         let method = `${port}.${transfer.transferType}.${transfer.operation}`;
         return bus.importMethod(method, {timeout: 30000})(transfer, $meta)
@@ -70,12 +64,61 @@ const processReversal = (bus, log, $meta) => transfer => {
         if (transfer.udfAcquirer) {
             transfer.udfAcquirer.mti = transfer.mti;
         }
-        return Promise.all([
-            transfer.reverseIssuer && reverse(transfer.issuerPort, 'Issuer'),
-            transfer.reverseLedger && reverse(transfer.ledgerPort, 'Ledger') // eslint-disable-line
-        ])
-        .then(() => transfer);
+        let reverseIssuer = transfer.reverseIssuer && reverse(transfer.issuerPort, 'Issuer');
+        let reverseLedger = transfer.reverseLedger && reverse(transfer.ledgerPort, 'Ledger');
+        return Promise.all([reverseIssuer, reverseLedger])
+            .then(() => transfer);
     });
+};
+
+const processAdjustment = (bus, log, $meta, transfer) => {
+    const adjust = (port, target) => {
+        let method = `${port}.${transfer.transferType}.${transfer.operation}`;
+        return bus.importMethod(method, {timeout: 30000})(transfer, $meta)
+        .then(() => bus.importMethod('db/transfer.push.confirmAdjustment')({
+            transferId: transfer.transferId,
+            source: target,
+            amount: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.amount,
+            currency: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.currency
+        }))
+        .catch(adjustmentError => {
+            return Promise.resolve(bus.importMethod(`db/transfer.push.failAdjustment`)({
+                transferId: transfer.transferId,
+                type: adjustmentError.type || (`${target}.error`),
+                message: adjustmentError.message,
+                source: target,
+                details: adjustmentError
+            }))
+            .catch(error => {
+                log.error && log.error(error);
+                return Promise.reject(adjustmentError);
+            })
+            .then(() => Promise.reject(adjustmentError));
+        });
+    };
+    return bus.importMethod('db/transfer.push.adjust')(transfer, $meta).then(() => {
+        transfer.operation = transfer.operation || 'adjust';
+        transfer.transferType = transfer.transferType || 'push';
+        if (transfer.udfAcquirer) {
+            transfer.udfAcquirer.mti = transfer.mti;
+        }
+        let adjustIssuer = transfer.adjustIssuer && adjust(transfer.issuerPort, 'issuer');
+        let adjustLedger = transfer.adjustLedger && adjust(transfer.ledgerPort, 'ledger');
+        return Promise.all([adjustIssuer, adjustLedger])
+            .then(() => transfer);
+    });
+};
+
+const processAny = (bus, log, $meta) => transfer => {
+    if (!transfer || !transfer.transferId) {
+        return Promise.reject(errors.notFound());
+    }
+    if (transfer.reversed && (transfer.issuerId === transfer.ledgerId || transfer.reversedLedger)) {
+        return Promise.reject(errors.transferAlreadyReversed());
+    }
+    return transfer.operation === 'adjust'
+        ? processAdjustment(bus, log, $meta, transfer)
+        : processReversal(bus, log, $meta, transfer);
 };
 
 var ruleValidate = (bus, transfer) => {
@@ -419,7 +462,7 @@ module.exports = {
             }))
             .then(idleResult => {
                 if (idleResult && idleResult.transferInfo && Array.isArray(idleResult.transferInfo) && idleResult.transferInfo.length > 0) {
-                    let reverse = processReversal(this.bus, this.log, $meta);
+                    let reverse = processAny(this.bus, this.log, $meta);
                     return Promise.all(idleResult.transferInfo.map(transfer => {
                         transfer.split = (idleResult.split || []).filter(split => split.transferId === transfer.transferId);
                         return reverse(transfer);
@@ -455,15 +498,18 @@ module.exports = {
                 var transferInfo = Object.assign({
                     message: params.message,
                     mti: '430',
-                    operation: 'reverse',
-                    transferType: 'push'
+                    operation: (params.amount && params.amount.adjustment && params.amount.adjustment.cents)
+                        ? 'adjust'
+                        : 'reverse',
+                    transferType: 'push',
+                    amount: params.amount
                 }, result, {originatorInfo: params});
                 return transferInfo;
             }
         });
 
         return getTransfer(params)
-            .then(processReversal(this.bus, this.log, $meta));
+            .then(processAny(this.bus, this.log, $meta));
     },
     'card.execute': function(params, $meta) {
         if (params.abortAcquirer) {
