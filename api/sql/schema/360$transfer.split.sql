@@ -14,6 +14,7 @@ CREATE TABLE [transfer].[split]( -- table that stores all splits per transaction
     [creditItemId] [bigint] NULL, -- id of the item whose account will be credited
     [state] [smallint] NULL, -- status of the split (eg. rejected, paid etc.)
     [transferIdPayment] [bigint] NULL, -- id of the transaction that paid the the split amount
+    [commissionId] [bigint] NULL,
     CONSTRAINT [pkTransferSplit] PRIMARY KEY CLUSTERED ([splitId] ASC),
     CONSTRAINT [fkTransferSplit_TransferId] FOREIGN KEY ([transferId]) REFERENCES [transfer].[transfer] ([transferId]),
     CONSTRAINT [fkTransferSplit_transferIdPayment] FOREIGN KEY ([transferIdPayment]) REFERENCES [transfer].[transfer] ([transferId]),

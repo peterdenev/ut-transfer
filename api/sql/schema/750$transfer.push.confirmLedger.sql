@@ -1,8 +1,6 @@
 ALTER PROCEDURE [transfer].[push.confirmLedger]
     @transferId bigint,
     @transferIdLedger varchar(50),
-    @acquirerFee money,
-    @transferFee money,
     @type varchar(50),
     @message varchar(250),
     @details XML
@@ -13,8 +11,6 @@ UPDATE
     [transfer].[transfer]
 SET
     transferIdledger = @transferIdledger,
-    acquirerFee = CASE WHEN @acquirerFee IS NULL THEN acquirerFee ELSE @acquirerFee END,
-    transferFee = CASE WHEN @transferFee IS NULL THEN transferFee ELSE @transferFee END,
     ledgerTxState = 2
 WHERE
     transferId = @transferId AND

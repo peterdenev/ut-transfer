@@ -1,0 +1,4 @@
+/.project
+*sublime*
+/node_modules/**/*
+npm-debug.*

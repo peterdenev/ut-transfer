@@ -1,4 +1,9 @@
 ---transfer.split/columns
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'commissionId' AND Object_ID = Object_ID(N'transfer.split') )
+BEGIN
+    ALTER TABLE [transfer].[split] ADD commissionId BIGINT
+END
+
 IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'debitActorId' AND Object_ID = Object_ID(N'transfer.split') )
 BEGIN
     ALTER TABLE [transfer].[split] ADD debitActorId BIGINT
@@ -129,9 +134,4 @@ END
 IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'updatedOn' AND Object_ID = Object_ID(N'transfer.pending') )
 BEGIN
     ALTER TABLE [transfer].[pending] ADD updatedOn datetime2
-END
-
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'credentialId' AND Object_ID = Object_ID(N'transfer.transfer') )
-BEGIN
-    ALTER TABLE [transfer].[transfer] ADD credentialId varchar(50)
 END

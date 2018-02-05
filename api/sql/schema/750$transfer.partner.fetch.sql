@@ -85,10 +85,10 @@ AS
         (
             SELECT p.partnerId, p.name, p.port, p.mode, p.settlementAccount, p.settlementDate, p.feeAccount, p.commissionAccount, p.serialNumber
             FROM [transfer].partner p
-            WHERE (@partnerId IS NULL OR p.partnerId like '%' + @partnerId + '%')
+            WHERE (@partnerId IS NULL OR p.partnerId = @partnerId )
                 AND (@name IS NULL OR p.name like '%' + @name + '%')
-                AND (@port IS NULL OR p.port like '%' + @port + '%')
-                AND (@mode IS NULL OR p.mode like '%' + @mode + '%')
+                AND (@port IS NULL OR p.port = @port )
+                AND (@mode IS NULL or p.mode = @mode)
         )   p
      )
 

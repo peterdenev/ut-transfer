@@ -1,37 +1,109 @@
 {
-  "name": "ut-transfer",
-  "version": "6.22.0",
-  "main": "./index.js",
+  "_args": [
+    [
+      {
+        "raw": "ut-transfer@6.18.1",
+        "scope": null,
+        "escapedName": "ut-transfer",
+        "name": "ut-transfer",
+        "rawSpec": "6.18.1",
+        "spec": "6.18.1",
+        "type": "version"
+      },
+      "D:\\abt\\impl-accessbank-tanzania-mwallet"
+    ]
+  ],
+  "_from": "ut-transfer@6.18.1",
+  "_id": "ut-transfer@6.18.1",
+  "_inCache": true,
+  "_location": "/ut-transfer",
+  "_nodeVersion": "6.9.5",
+  "_npmOperationalInternal": {
+    "host": "s3://npm-registry-packages",
+    "tmp": "tmp/ut-transfer-6.18.1.tgz_1501826402640_0.6117806662805378"
+  },
+  "_npmUser": {
+    "name": "kalin.krustev",
+    "email": "kalin.krustev@gmail.com"
+  },
+  "_npmVersion": "3.10.9",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "ut-transfer@6.18.1",
+    "scope": null,
+    "escapedName": "ut-transfer",
+    "name": "ut-transfer",
+    "rawSpec": "6.18.1",
+    "spec": "6.18.1",
+    "type": "version"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://nexus.softwaregroup-bg.com/repository/npm-all/ut-transfer/-/ut-transfer-6.18.1.tgz",
+  "_shasum": "e8119f92fc6f35222a9df6dfbf31272b691d0bcc",
+  "_shrinkwrap": null,
+  "_spec": "ut-transfer@6.18.1",
+  "_where": "D:\\abt\\impl-accessbank-tanzania-mwallet",
+  "author": {
+    "name": "Kalin Krustev",
+    "email": "kalin.krustev@softwaregroup-bg.com"
+  },
+  "bugs": {
+    "url": "https://github.com/softwaregroup-bg/ut-transfer/issues"
+  },
   "dependencies": {
     "immutable": "^3.8.1",
     "joi": "10.0.6"
   },
-  "devDependencies": {
-    "tap": "^10.7.3",
-    "ut-tools": "^5.30.0",
-    "ut-run": "^9.1.0",
-    "ut-test": "^5.13.0"
-  },
-  "peerDependencies": {
-    "ut-bus": "^6.1.0",
-    "ut-error": "^5.4.9",
-    "ut-rule": "^9.14.0",
-    "ut-report": "^5.21.0",
-    "ut-front": "^8.0.0",
-    "ut-front-react": "^10.0.1",
-    "ut-user": "^7.31.0",
-    "react": "^15.6.1",
-    "react-router": "^3.0.0",
-    "react-redux": "^5.0.5",
-    "redux": "3.7.2"
-  },
   "description": "UT Transfer",
+  "devDependencies": {
+    "ut-run": "^8.1.15",
+    "ut-test": "^5.6.3",
+    "ut-tools": "^5.17.26"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "e8119f92fc6f35222a9df6dfbf31272b691d0bcc",
+    "tarball": "https://nexus.softwaregroup-bg.com/repository/npm-all/ut-transfer/-/ut-transfer-6.18.1.tgz"
+  },
+  "gitHead": "ff1b445f32e08669293d7cb5875b8b66b55a4681",
+  "homepage": "https://github.com/softwaregroup-bg/ut-transfer#readme",
+  "license": "Apache-2.0",
+  "main": "./index.js",
+  "maintainers": [
+    {
+      "name": "kalin.krustev",
+      "email": "kalin.krustev@gmail.com"
+    }
+  ],
+  "name": "ut-transfer",
+  "optionalDependencies": {},
+  "peerDependencies": {
+    "ut-bus": "^5.11.1",
+    "ut-error": "^5.4.3",
+    "ut-rule": "^9.3.0",
+    "ut-report": "^5.16.17",
+    "ut-front": "^7.0.0",
+    "ut-front-react": "^9.4.11",
+    "ut-user": "^7.8.1",
+    "react": "^15.4.1",
+    "react-router": "^3.0.0",
+    "react-redux": "^5.0.1",
+    "redux": "^3.6.0"
+  },
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/softwaregroup-bg/ut-transfer.git"
+  },
   "scripts": {
-    "lint": "ut-lint .",
-    "release": "ut-release",
     "changelog": "ut-changelog",
     "check": "ut-check",
     "cover": "ut-cover",
+    "gitlab": "ut-gitlab",
+    "jenkins": "ut-jenkins",
+    "lint": "ut-lint .",
     "lint-js": "ut-lint-js .",
     "postpublish": "ut-postpublish",
     "postversion": "ut-postversion",
@@ -40,15 +112,9 @@
     "prepush": "ut-prepush",
     "pretest": "ut-pretest",
     "preversion": "ut-preversion",
+    "release": "ut-release",
     "test": "ut-test",
-    "version": "ut-version",
-    "jenkins": "ut-jenkins",
-    "gitlab": "ut-gitlab"
+    "version": "ut-version"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:softwaregroup-bg/ut-transfer.git"
-  },
-  "author": "Kalin Krustev <kalin.krustev@softwaregroup-bg.com>",
-  "license": "Apache-2.0"
+  "version": "6.18.1"
 }

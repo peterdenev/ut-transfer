@@ -6,13 +6,6 @@ ALTER PROCEDURE [transfer].[push.failReversal]
 AS
 SET NOCOUNT ON
 
-UPDATE
-    [transfer].[transfer]
-SET
-    expireCount = ISNULL(expireCount, 0) + 1
-WHERE
-    transferId = @transferId
-
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,

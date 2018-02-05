@@ -12,7 +12,6 @@ ALTER PROCEDURE [transfer].[push.create]
     @merchantInvoice varchar(50),
     @merchantType varchar(50),
     @cardId bigint,
-    @credentialId varchar(50),
     @sourceAccount varchar(50),
     @destinationAccount varchar(50),
     @expireTime datetime,
@@ -121,7 +120,6 @@ BEGIN TRY
         merchantPort,
         merchantType,
         cardId,
-        credentialId,
         sourceAccount,
         destinationAccount,
         expireTime,
@@ -133,8 +131,7 @@ BEGIN TRY
         issuerFee,
         transferFee,
         description,
-        reversed,
-        issuerSerialNumber
+        reversed
     )
     OUTPUT
         INSERTED.*,
@@ -144,6 +141,7 @@ BEGIN TRY
         @merchantSettings merchantSettings,
         @issuerMode issuerMode,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @issuerSettlementDate, 120),'-',''),':',''),' ','') issuerSettlementDate,
+        @issuerSerialNumber issuerSerialNumber,
         @issuerSettings issuerSettings,
         @issuerPort issuerPort,
         @ledgerPort ledgerPort,
@@ -164,7 +162,6 @@ BEGIN TRY
         @merchantPort,
         @merchantType,
         @cardId,
-        @credentialId,
         @sourceAccount,
         @destinationAccount,
         ISNULL(@expireTime, DATEADD(SECOND, @expireSeconds, @transferDateTime)),
@@ -176,8 +173,7 @@ BEGIN TRY
         @issuerFee,
         @transferFee,
         @description,
-        0,
-        @issuerSerialNumber
+        0
 
     DECLARE @transferId BIGINT = @@IDENTITY
 

@@ -14,7 +14,7 @@ SET
     acquirerTxState = 2
 WHERE
     transferId = @transferId AND
-    acquirerTxState in (1, 2)
+    acquirerTxState = 1
 
 DECLARE @COUNT int = @@ROWCOUNT
 

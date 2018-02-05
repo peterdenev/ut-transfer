@@ -2,16 +2,16 @@ import { filterElementTypes } from 'ut-front-react/components/GridToolBox/types'
 import reportStyle from '../../assets/static/css/reportStyle.css';
 
 let startDate = new Date();
-startDate.setMonth(0);
 startDate.setDate(1);
+startDate.setMonth(0);
 startDate.setHours(0);
 startDate.setMinutes(0);
 startDate.setSeconds(0);
 startDate.setMilliseconds(0);
 
 let endDate = new Date();
-endDate.setMonth(11);
 endDate.setDate(31);
+endDate.setMonth(11);
 endDate.setHours(23);
 endDate.setMinutes(59);
 endDate.setSeconds(59);

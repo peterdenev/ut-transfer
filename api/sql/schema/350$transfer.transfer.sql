@@ -17,7 +17,6 @@ CREATE TABLE [transfer].[transfer](
     merchantPort varchar(50),
     merchantType varchar(50),
     cardId bigint,
-    credentialId varchar(50),
     sourceAccount varchar(50),
     destinationAccount varchar(50),
     expireTime datetime,
