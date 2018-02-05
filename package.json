@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.23.0-rc-bahur.16",
+  "version": "6.23.0-rc-bahur.17",
   "main": "./index.js",
   "pkg": {
     "assets": [
