@@ -240,7 +240,7 @@ SELECT
     expireCountLedger,
     reversed,
     reversedLedger,
-    reversedLedger adjustLedger,
+    reverseLedger adjustLedger,
     reverseIssuer,
     reverseIssuer adjustIssuer,
     reverseLedger,
