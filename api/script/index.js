@@ -75,11 +75,12 @@ const processAdjustment = (bus, log, $meta, transfer) => {
     const adjust = (port, target) => {
         let method = `${port}.${transfer.transferType}.${transfer.operation}`;
         return bus.importMethod(method, {timeout: 30000})(transfer, $meta)
-        .then(() => bus.importMethod('db/transfer.push.confirmAdjustment')({
+        .then(result => bus.importMethod('db/transfer.push.confirmAdjustment')({
             transferId: transfer.transferId,
             source: target,
             amount: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.amount,
-            currency: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.currency
+            currency: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.currency,
+            details: result
         }))
         .catch(adjustmentError => {
             return Promise.resolve(bus.importMethod(`db/transfer.push.failAdjustment`)({
