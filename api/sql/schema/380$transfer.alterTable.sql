@@ -180,3 +180,32 @@ BEGIN
   ALTER TABLE [transfer].[transfer] ADD expireCountLedger int
 END
 
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'replacementAmount' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD replacementAmount money
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'replacementAmountCurrency' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD replacementAmountCurrency varchar(3)
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'actualAmount' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD actualAmount money
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'actualAmountCurrency' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD actualAmountCurrency varchar(3)
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'settlementAmount' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD settlementAmount money
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'settlementAmountCurrency' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD settlementAmountCurrency varchar(3)
+END

@@ -41,6 +41,12 @@ CREATE TABLE [transfer].[transfer](
     retrievalReferenceNumber varchar(12),
     description varchar(250),
     issuerSerialNumber bigint,
+    replacementAmount money,
+    replacementAmountCurrency varchar(3),
+    actualAmount money,
+    actualAmountCurrency varchar(3),
+    settlementAmount money,
+    settlementAmountCurrency varchar(3),
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
     CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])
 )

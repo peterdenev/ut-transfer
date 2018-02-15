@@ -78,9 +78,11 @@ const processAdjustment = (bus, log, $meta, transfer) => {
         .then(result => bus.importMethod('db/transfer.push.confirmAdjustment')({
             transferId: transfer.transferId,
             source: target,
-            amount: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.amount,
-            currency: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.currency,
-            details: result
+            replacementAmount: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.amount,
+            replacementAmountCurrency: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.currency,
+            actualAmount: result.amount && result.amount.actual && result.amount.actual.amount,
+            actualAmountCurrency: result.amount && result.amount.actual && result.amount.actual.currency,
+            details: null
         }))
         .catch(adjustmentError => {
             return Promise.resolve(bus.importMethod(`db/transfer.push.failAdjustment`)({
@@ -299,6 +301,8 @@ module.exports = {
                 transfer.issuerEmv = result.issuerEmv;
                 transfer.retrievalReferenceNumber = result.retrievalReferenceNumber;
                 transfer.settlementDate = result.settlementDate;
+                transfer.actualAmount = result.amount && result.amount.actual && result.amount.actual.amount;
+                transfer.actualAmountCurrency = result.amount && result.amount.actual && result.amount.actual.currency;
                 return parseResult(transfer, result, 'Issuer');
             })
             .catch(handleError(transfer, 'Issuer'))
@@ -308,6 +312,8 @@ module.exports = {
                 acquirerFee: result.acquirerFee,
                 transferFee: result.transferFee,
                 issuerFee: result.issuerFee,
+                actualAmount: result.amount && result.amount.actual && result.amount.actual.amount,
+                actualAmountCurrency: result.amount && result.amount.actual && result.amount.actual.currency,
                 retrievalReferenceNumber: transfer.retrievalReferenceNumber,
                 settlementDate: transfer.settlementDate,
                 message: transfer.transferType,

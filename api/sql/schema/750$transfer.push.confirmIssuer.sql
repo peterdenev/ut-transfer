@@ -6,6 +6,8 @@ ALTER PROCEDURE [transfer].[push.confirmIssuer]
     @issuerFee money,
     @transferFee money,
     @settlementDate varchar(14),
+    @actualAmount money,
+    @actualAmountCurrency varchar(3),
     @type varchar(50),
     @message varchar(250),
     @details XML
@@ -39,6 +41,8 @@ SET
     acquirerFee = ISNULL(@acquirerFee, acquirerFee),
     settlementDate = ISNULL(@issuerSettlementDate, settlementDate),
     retrievalReferenceNumber = ISNULL(@retrievalReferenceNumber, retrievalReferenceNumber),
+    actualAmount = ISNULL(@actualAmount, transferAmount),
+    actualAmountCurrency = ISNULL(@actualAmountCurrency, transferCurrency),
     issuerTxState = 2
 WHERE
     transferId = @transferId AND

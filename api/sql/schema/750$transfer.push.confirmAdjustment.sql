@@ -1,8 +1,10 @@
 CREATE PROCEDURE [transfer].[push.confirmAdjustment]
     @transferId bigint,
     @source varchar(50),
-    @amount money,
-    @currency varchar(3),
+    @replacementAmount money,
+    @replacementAmountCurrency varchar(3),
+    @actualAmount money,
+    @actualAmountCurrency varchar(3),
     @details XML
 AS
 SET NOCOUNT ON
@@ -11,8 +13,10 @@ BEGIN TRY
         UPDATE
             [transfer].[transfer]
         SET
-            transferAmount = @amount,
-            transferCurrency = @currency
+            replacementAmount = @replacementAmount,
+            replacementAmountCurrency = @replacementAmountCurrency,
+            actualAmount = ISNULL(@actualAmount, @replacementAmount),
+            actualAmountCurrency = ISNULL(@actualAmountCurrency, @replacementAmountCurrency)
         WHERE
             transferId = @transferId
 
