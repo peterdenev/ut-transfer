@@ -13,15 +13,15 @@
   "devDependencies": {
     "tap": "^10.7.3",
     "ut-tools": "^5.30.0",
-    "ut-run": "^9.1.0",
-    "ut-test": "^5.13.0"
+    "ut-run": "^9.2.0-rc-bahur.9",
+    "ut-test": "^5.14.0-rc-bahur.6"
   },
   "peerDependencies": {
     "immutable": "^3.8.1",
     "ut-bus": "^6.1.0",
     "ut-error": "^5.4.9",
-    "ut-rule": "^9.14.0",
-    "ut-report": "^5.21.0",
+    "ut-rule": "^9.15.0-rc-bahur.6",
+    "ut-report": "^6.1.0-rc-bahur.1",
     "ut-front": "^8.0.1",
     "ut-front-react": "^10.0.4",
     "ut-user": "^7.31.0",
