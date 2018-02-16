@@ -14,7 +14,7 @@ endDate.setSeconds(59);
 endDate.setMilliseconds(999);
 
 module.exports = (gridStyle) => ({
-    title: 'Transfer report',
+    title: 'Transfer Report',
     export: {
         method: 'transfer.report.transfer',
         resultsetName: 'transfers',
