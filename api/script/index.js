@@ -204,32 +204,39 @@ module.exports = {
             }) // .this is intentionally after catch as we do not want to this.log the original error
             .then(x => Promise.reject(error));
         };
-        var dbPushExecute = transfer => this.bus.importMethod('db/transfer.push.create')(transfer, Object.assign($meta, {method: 'db/transfer.push.create'}))
-            .then(pushResult => {
-                pushResult = pushResult && pushResult[0] && pushResult[0][0];
-                if (pushResult && pushResult.transferId) {
-                    transfer.transferId = pushResult.transferId;
-                    transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
-                    transfer.localDateTime = pushResult.localDateTime;
-                    transfer.issuerSerialNumber = pushResult.issuerSerialNumber;
-                    // Set ports
-                    transfer.merchantPort = pushResult.merchantPort;
-                    transfer.issuerPort = pushResult.issuerPort;
-                    transfer.ledgerPort = pushResult.ledgerPort;
+        var dbPushExecute = transfer => {
+            switch (transfer.skipLedger) {
+                case 'ledgerAsIssuer':
+                    transfer.ledgerId = transfer.issuerId;
+                    break;
+            }
+            return this.bus.importMethod('db/transfer.push.create')(transfer, Object.assign($meta, {method: 'db/transfer.push.create'}))
+                .then(pushResult => {
+                    pushResult = pushResult && pushResult[0] && pushResult[0][0];
+                    if (pushResult && pushResult.transferId) {
+                        transfer.transferId = pushResult.transferId;
+                        transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
+                        transfer.localDateTime = pushResult.localDateTime;
+                        transfer.issuerSerialNumber = pushResult.issuerSerialNumber;
+                        // Set ports
+                        transfer.merchantPort = pushResult.merchantPort;
+                        transfer.issuerPort = pushResult.issuerPort;
+                        transfer.ledgerPort = pushResult.ledgerPort;
 
-                    if (transfer.abortAcquirer) {
-                        return handleError(transfer, 'Acquirer')(transfer.abortAcquirer);
-                    } else {
-                        // Add splits for pending transaction
-                        if (transfer.pullTransferId) {
-                            transfer.split = transfer.split.concat(transfer.pullTransfer.split);
+                        if (transfer.abortAcquirer) {
+                            return handleError(transfer, 'Acquirer')(transfer.abortAcquirer);
+                        } else {
+                            // Add splits for pending transaction
+                            if (transfer.pullTransferId) {
+                                transfer.split = transfer.split.concat(transfer.pullTransfer.split);
+                            }
+                            return transfer;
                         }
-                        return transfer;
+                    } else {
+                        throw errors.systemDecline('transfer.push.create');
                     }
-                } else {
-                    throw errors.systemDecline('transfer.push.create');
-                }
-            });
+                });
+        };
 
         const merchantTransferValidate = (transfer) => {
             if (transfer.merchantPort) {
@@ -258,7 +265,7 @@ module.exports = {
         };
 
         const ledgerPushExecute = (transfer) => {
-            if (!transfer.ledgerPort || transfer.issuerPort === transfer.ledgerPort) {
+            if (transfer.skipLedger === true || (!transfer.ledgerPort || transfer.issuerPort === transfer.ledgerPort)) {
                 return transfer;
             }
             return this.bus.importMethod('db/transfer.push.requestLedger')(transfer)
