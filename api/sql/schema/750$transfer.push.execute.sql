@@ -45,29 +45,44 @@ DECLARE @merchantPort varchar(50),
 
 BEGIN TRY
     -- todo check permission
-    BEGIN TRANSACTION
 
-    UPDATE
+    BEGIN TRANSACTION
+     UPDATE
         [transfer].[partner]
     SET
+       serialNumber = ISNULL(serialNumber, 0) + 1 
+    WHERE
+        partnerId in (@ledgerId,@issuerId,@merchantId)
+
+
+    SELECT
         @merchantPort = port,
         @merchantMode = mode,
         @merchantSettlementDate = settlementDate,
-        @merchantSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1,
+        @merchantSerialNumber = serialNumber ,
         @merchantSettings = settings
+    FROM [transfer].[partner]
     WHERE
         partnerId = @merchantId
 
-    UPDATE
-        [transfer].[partner]
-    SET
+
+    SELECT
         @issuerPort = port,
         @issuerMode = mode,
         @issuerSettlementDate = settlementDate,
-        @issuerSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1,
+        @issuerSerialNumber = serialNumber,
         @issuerSettings = settings
+    FROM [transfer].[partner]
     WHERE
         partnerId = @issuerId
+
+
+    SELECT
+        @ledgerPort = port,
+        @ledgerMode = mode,
+        @ledgerSerialNumber = serialNumber
+    FROM [transfer].[partner]
+    WHERE partnerId = @ledgerId
 
     IF LEN(@settlementDate) = 4
     BEGIN
@@ -81,15 +96,6 @@ BEGIN TRY
     BEGIN
         SET @issuerSettlementDate = CAST(@settlementDate AS datetime)
     END
-
-    UPDATE
-        [transfer].[partner]
-    SET
-        @ledgerPort = port,
-        @ledgerMode = mode,
-        @ledgerSerialNumber = serialNumber = ISNULL(serialNumber, 0) + 1
-    WHERE
-        partnerId = @ledgerId
 
     INSERT INTO [transfer].[transfer](
         transferDateTime,
