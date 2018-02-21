@@ -32,6 +32,8 @@ module.exports = (gridStyle) => ({
             { name: 'rrn', title: 'RRN' },
             { name: 'stan', title: 'STAN' },
             { name: 'transferAmount', title: 'Transfer Amount' },
+            { name: 'actualAmount', title: 'Actual Amount' },
+            { name: 'replacementAmount', title: 'Replacement Amount' },
             { name: 'issuerFee', title: 'Issuer Fee' },
             { name: 'acquirerFee', title: 'Acquirer Fee' },
             { name: 'transferCurrency', title: 'Currency' },

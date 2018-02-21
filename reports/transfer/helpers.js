@@ -24,6 +24,8 @@ module.exports = {
                 case 'acquirerFee':
                 case 'issuerFee':
                 case 'transferAmount':
+                case 'actualAmount':
+                case 'replacementAmount':
                     if (!isHeader) {
                         result = formatNumber(result);
                         classNames.push('textColorBlue');

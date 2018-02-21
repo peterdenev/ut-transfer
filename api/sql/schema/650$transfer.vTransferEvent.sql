@@ -7,6 +7,8 @@ SELECT
     t.[destinationAccount],
     t.[issuerTxState],
     t.[transferAmount],
+    t.[actualAmount],
+    t.[replacementAmount],
     t.[description],
     t.[transferCurrency],
     t.[transferIdAcquirer],
