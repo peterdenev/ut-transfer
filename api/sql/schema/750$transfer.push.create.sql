@@ -105,6 +105,9 @@ BEGIN TRY
     WHERE
         partnerId = @ledgerId
 
+	IF OBJECT_ID('tempdb..#outputTable') IS NOT NULL
+		DROP TABLE #outputTable;
+
     INSERT INTO [transfer].[transfer](
         transferDateTime,
         transferTypeId,
@@ -147,6 +150,7 @@ BEGIN TRY
         @ledgerPort ledgerPort,
         @ledgerMode ledgerMode,
         @ledgerSerialNumber ledgerSerialNumber
+		INTO #outputTable
     SELECT
         @transferDateTime,
         @transferTypeId,
@@ -270,6 +274,12 @@ BEGIN TRY
         @split
 
     COMMIT TRANSACTION
+
+	SELECT *
+	FROM #outputTable;
+
+	IF OBJECT_ID('tempdb..#outputTable') IS NOT NULL
+		DROP TABLE #outputTable;
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
