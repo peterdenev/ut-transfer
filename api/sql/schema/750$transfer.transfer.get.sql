@@ -32,7 +32,7 @@ DECLARE @transfer AS TABLE (
     channelType varchar(50), ordererId bigint, merchantId varchar(50), merchantInvoice varchar(50), merchantPort varchar(50), merchantType varchar(50),
     cardId bigint, sourceAccount varchar(50), destinationAccount varchar(50), expireTime datetime, expireCount int, expireCountLedger int, reversed bit, reversedLedger bit, reverseIssuer bit, reverseLedger bit, retryTime datetime,
     retryCount int, ledgerTxState smallint, issuerTxState smallint, acquirerTxState smallint, merchantTxState smallint, issuerId varchar(50), ledgerId varchar(50),
-    transferCurrency varchar(3), transferAmount money, acquirerFee money, issuerFee money, transferFee money, [description] varchar(250), issuerPort varchar(50),
+    transferCurrency varchar(3), transferAmount money, acquirerFee money, issuerFee money, transferFee money, processorFee money, [description] varchar(250), issuerPort varchar(50),
     ledgerPort varchar(50), udfAcquirer xml, acquirerError xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max)
 )
 
