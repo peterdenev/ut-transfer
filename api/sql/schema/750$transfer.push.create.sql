@@ -105,8 +105,57 @@ BEGIN TRY
     WHERE
         partnerId = @ledgerId
 
-	IF OBJECT_ID('tempdb..#outputTable') IS NOT NULL
-		DROP TABLE #outputTable;
+	DECLARE @outputTable TABLE (
+    transferId bigint NULL,
+    transferTypeId bigint NULL,
+    acquirerCode varchar(50) NULL,
+    transferIdAcquirer varchar(50) NULL,
+    transferIdLedger varchar(50) NULL,
+    transferIdIssuer varchar(50) NULL,
+    transferIdMerchant varchar(50) NULL,
+    transferDateTime datetime NULL,
+    localDateTime varchar(14) NULL,
+    settlementDate date NULL,
+    channelId bigint NULL,
+    channelType varchar(50) NULL,
+    ordererId bigint NULL,
+    merchantId varchar(50) NULL,
+    merchantInvoice varchar(50) NULL,
+    merchantPort varchar(50) NULL,
+    merchantType varchar(50) NULL,
+    cardId bigint NULL,
+    sourceAccount varchar(50) NULL,
+    destinationAccount varchar(50) NULL,
+    expireTime datetime NULL,
+    expireCount int NULL,
+    reversed bit NULL,
+    retryTime datetime NULL,
+    retryCount int NULL,
+    ledgerTxState smallint NULL,
+    issuerTxState smallint NULL,
+    acquirerTxState smallint NULL,
+    merchantTxState smallint NULL,
+    issuerId varchar(50) NULL,
+    ledgerId varchar(50) NULL,
+    transferCurrency varchar(3) NULL,
+    transferAmount money NULL,
+    acquirerFee money NULL,
+    issuerFee money NULL,
+    transferFee money NULL,
+    description varchar(250) NULL,
+    merchantMode varchar(20),
+    merchantSettlementDate datetime,
+    merchantSerialNumber bigint,
+    merchantSettings XML,
+    issuerMode varchar(20),
+    issuerSettlementDate datetime,
+    issuerSerialNumber bigint,
+    issuerSettings XML,
+    issuerPort varchar(50),
+    ledgerPort varchar(50),
+    ledgerMode varchar(20),
+    ledgerSerialNumber bigint
+	);
 
     INSERT INTO [transfer].[transfer](
         transferDateTime,
@@ -137,7 +186,43 @@ BEGIN TRY
         reversed
     )
     OUTPUT
-        INSERTED.*,
+        INSERTED.transferId,
+        INSERTED.transferTypeId,
+        INSERTED.acquirerCode,
+        INSERTED.transferIdAcquirer,
+        INSERTED.transferIdLedger,
+        INSERTED.transferIdIssuer,
+        INSERTED.transferIdMerchant,
+        INSERTED.transferDateTime,
+        INSERTED.localDateTime,
+        INSERTED.settlementDate,
+        INSERTED.channelId,
+        INSERTED.channelType,
+        INSERTED.ordererId,
+        INSERTED.merchantId,
+        INSERTED.merchantInvoice,
+        INSERTED.merchantPort,
+        INSERTED.merchantType,
+        INSERTED.cardId,
+        INSERTED.sourceAccount,
+        INSERTED.destinationAccount,
+        INSERTED.expireTime,
+        INSERTED.expireCount,
+        INSERTED.reversed,
+        INSERTED.retryTime,
+        INSERTED.retryCount,
+        INSERTED.ledgerTxState,
+        INSERTED.issuerTxState,
+        INSERTED.acquirerTxState,
+        INSERTED.merchantTxState,
+        INSERTED.issuerId,
+        INSERTED.ledgerId,
+        INSERTED.transferCurrency,
+        INSERTED.transferAmount,
+        INSERTED.acquirerFee,
+        INSERTED.issuerFee,
+        INSERTED.transferFee,
+        INSERTED.description,
         @merchantMode merchantMode,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @merchantSettlementDate, 120),'-',''),':',''),' ','') merchantSettlementDate,
         @merchantSerialNumber merchantSerialNumber,
@@ -150,7 +235,7 @@ BEGIN TRY
         @ledgerPort ledgerPort,
         @ledgerMode ledgerMode,
         @ledgerSerialNumber ledgerSerialNumber
-		INTO #outputTable
+		INTO @outputTable
     SELECT
         @transferDateTime,
         @transferTypeId,
@@ -179,7 +264,10 @@ BEGIN TRY
         @description,
         0
 
-    DECLARE @transferId BIGINT = @@IDENTITY
+    SELECT *
+    FROM @outputTable;
+
+    DECLARE @transferId BIGINT = (SELECT transferId FROM @outputTable);
 
     EXEC [transfer].[push.event]
         @transferId = @transferId,
@@ -274,12 +362,6 @@ BEGIN TRY
         @split
 
     COMMIT TRANSACTION
-
-	SELECT *
-	FROM #outputTable;
-
-	IF OBJECT_ID('tempdb..#outputTable') IS NOT NULL
-		DROP TABLE #outputTable;
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
