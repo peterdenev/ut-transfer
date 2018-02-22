@@ -24,6 +24,7 @@ SELECT
     t.[issuerFee],
     t.[retrievalReferenceNumber],
     t.[issuerSerialNumber],
+    t.issuerId,
     request.udfDetails [requestDetails],
     request.eventDateTime [requestDateTime],
     request.[type] [requestType],
@@ -83,7 +84,7 @@ SELECT
     CASE
         WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] in (2, 8, 12)) THEN 1
         ELSE 0
-    END success    
+    END success
 FROM
     [transfer].[transfer] t
 OUTER APPLY

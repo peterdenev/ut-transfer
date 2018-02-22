@@ -31,9 +31,10 @@ module.exports = (gridStyle) => ({
             { name: 'description', title: 'Description' },
             { name: 'rrn', title: 'RRN' },
             { name: 'stan', title: 'STAN' },
+            { name: 'traceNumber', title: 'Trace Number' },
             { name: 'transferAmount', title: 'Transfer Amount' },
-            { name: 'actualAmount', title: 'Actual Amount' },
             { name: 'replacementAmount', title: 'Replacement Amount' },
+            { name: 'actualAmount', title: 'Actual Amount' },
             { name: 'issuerFee', title: 'Issuer Fee' },
             { name: 'acquirerFee', title: 'Acquirer Fee' },
             { name: 'transferCurrency', title: 'Currency' },
@@ -62,6 +63,7 @@ module.exports = (gridStyle) => ({
     filters: [
         { name: 'transferId', label: 'Trans#', placeholder: 'Trans#', type: filterElementTypes.searchBox },
         { name: 'cardNumber', label: 'Card Number', placeholder: 'Card Number', type: filterElementTypes.searchBox },
+        { name: 'traceNumber', label: 'Trace Number', placeholder: 'Trace Number', type: filterElementTypes.searchBox },
         { name: 'accountNumber', label: 'Account Number', placeholder: 'Account Number', type: filterElementTypes.searchBox },
         { name: 'deviceId', label: 'Device ID', placeholder: 'Device ID', type: filterElementTypes.searchBox },
         {

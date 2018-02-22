@@ -1,6 +1,7 @@
 ALTER PROCEDURE [transfer].[report.transfer]
     @transferId bigint,
     @cardNumber varchar(32),
+    @traceNumber bigint,
     @accountNumber varchar(100),
     @deviceId varchar(100),
     @processingCode varchar(100),
@@ -71,6 +72,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@startDate IS NULL OR t.[transferDateTime] >= @startDate)
             AND (@endDate IS NULL OR t.[transferDateTime] <= @endDate)
             AND (@issuerTxState IS NULL OR t.[issuerTxState] = @issuerTxState)
+            AND (@traceNumber IS NULL OR t.[transferId] = @traceNumber OR t.[issuerSerialNumber] = @traceNumber)
             -- AND (@cardNumber IS NULL OR c.[cardNumber] LIKE '%' + @cardNumber + '%')
             AND (@cardNumber IS NULL OR t.cardId = @cardNumberId)
             -- AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') LIKE '%' + @deviceId + '%')
@@ -86,8 +88,6 @@ SELECT
     [RowNum],
     [recordsTotal],
     [transferAmount] AS transferAmountTotal,
-    [actualAmount] AS actualAmountTotal,
-    [replacementAmount] AS replacementAmountTotal,
     [acquirerFee] AS acquirerFeeTotal,
     [issuerFee] AS issuerFeeTotal,
     [transferCurrency],
@@ -105,8 +105,6 @@ UNION ALL SELECT
     MIN([recordsTotal]) + ROW_NUMBER() OVER(ORDER BY [transferCurrency]) AS [RowNum],
     MIN([recordsTotal]) + COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal],
     SUM(CASE WHEN success = 1 THEN ISNULL([transferAmount], 0) ELSE 0.0 END) AS transferAmountTotal,
-    SUM(CASE WHEN success = 1 THEN ISNULL([actualAmount], 0) ELSE 0.0 END) AS actualAmountTotal,
-    SUM(ISNULL([replacementAmount], 0)) AS replacementAmountTotal,
     SUM(CASE WHEN success = 1 THEN ISNULL([acquirerFee], 0) ELSE 0.0 END) AS acquirerFeeTotal,
     SUM(CASE WHEN success = 1 THEN ISNULL([issuerFee], 0) ELSE 0.0 END) AS issuerFeeTotal,
     [transferCurrency],
@@ -150,6 +148,9 @@ SELECT
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
     t.[merchantId] [merchantName],
     UPPER(t.[channelType]) [channelType],
+    CASE WHEN t.issuerId != 'cbs' THEN t.issuerSerialNumber
+        ELSE t.transferId
+    END [traceNumber],
     CASE t.channelType
         WHEN 'iso' THEN t.transferIdAcquirer
         WHEN 'atm' THEN t.issuerSerialNumber
@@ -179,8 +180,8 @@ UNION ALL SELECT
     CAST(r.recordsTotalSuccessfull AS NVARCHAR(50)) AS transferIdIssuer,
     NULL AS transferIdAcquirer,
     r.transferAmountTotal AS transferAmount,
-    r.actualAmountTotal AS actualAmount,
-    r.replacementAmountTotal AS replacementAmount,
+    NULL AS actualAmount,
+    NULL AS replacementAmount,
     r.acquirerFeeTotal,
     r.issuerFeeTotal,
     r.[transferCurrency],
@@ -193,6 +194,7 @@ UNION ALL SELECT
     NULL AS merchantName,
     NULL AS channelType,
     NULL AS rrn,
+    NULL AS traceNumber,
     NULL AS authCode,
     NULL AS [additionalInfo],
     'transferAverage' AS style,
