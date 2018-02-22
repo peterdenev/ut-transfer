@@ -38,6 +38,7 @@ CREATE TABLE [transfer].[transfer](
     acquirerFee money,
     issuerFee money,
     transferFee money,
+    processorFee money,
     retrievalReferenceNumber varchar(12),
     description varchar(250),
     issuerSerialNumber bigint,

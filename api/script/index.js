@@ -143,9 +143,13 @@ var ruleValidate = (bus, transfer) => {
             if (decision.amount) {
                 transfer.acquirerFee = (decision.amount.acquirerFee === null ? transfer.acquirerFee : decision.amount.acquirerFee) || 0;
                 transfer.issuerFee = (decision.amount.issuerFee === null ? transfer.issuerFee : decision.amount.issuerFee) || 0;
-                transfer.transferFee = transfer.acquirerFee + transfer.issuerFee;
+
+                transfer.processorFee = (decision.amount.processorFee === null ? transfer.processorFee : decision.amount.processorFee) || 0;
+                transfer.transferFee = transfer.acquirerFee + transfer.issuerFee + transfer.processorFee;
+
                 transfer.amount.acquirerFee = currency.amount(transfer.transferCurrency, transfer.acquirerFee);
                 transfer.amount.issuerFee = currency.amount(transfer.transferCurrency, transfer.issuerFee);
+                transfer.amount.processorFee = currency.amount(transfer.transferCurrency, transfer.processorFee);
             }
             transfer.transferDateTime = decision.amount && decision.amount.transferDateTime;
             transfer.transferTypeId = decision.amount && decision.amount.transferTypeId;
@@ -258,6 +262,7 @@ module.exports = {
             transfer.acquirerFee = result.acquirerFee || transfer.acquirerFee;
             transfer.issuerFee = result.issuerFee || transfer.issuerFee;
             transfer.transferFee = result.transferFee || transfer.transferFee;
+            transfer.processorFee = result.processorFee || transfer.processorFee;
             transfer[`udf${type}`] = result.udfIssuer || {};
             result.transferId = transfer.transferId;
 
@@ -281,6 +286,7 @@ module.exports = {
                 transferIdLedger: transfer.transferIdLedger,
                 acquirerFee: result.acquirerFee,
                 transferFee: result.transferFee,
+                processorFee: result.processorFee,
                 issuerFee: result.issuerFee,
                 message: transfer.transferType,
                 details: result
@@ -318,6 +324,7 @@ module.exports = {
                 transferIdIssuer: transfer.transferIdIssuer,
                 acquirerFee: result.acquirerFee,
                 transferFee: result.transferFee,
+                processorFee: result.processorFee,
                 issuerFee: result.issuerFee,
                 actualAmount: result.amount && result.amount.actual && result.amount.actual.amount,
                 actualAmountCurrency: result.amount && result.amount.actual && result.amount.actual.currency,

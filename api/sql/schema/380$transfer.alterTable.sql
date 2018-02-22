@@ -209,3 +209,8 @@ IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'settlementAmountCurrency'
 BEGIN
   ALTER TABLE [transfer].[transfer] ADD settlementAmountCurrency varchar(3)
 END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'processorFee' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD processorFee money
+END

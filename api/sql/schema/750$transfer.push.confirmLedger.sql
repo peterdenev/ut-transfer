@@ -3,6 +3,7 @@ ALTER PROCEDURE [transfer].[push.confirmLedger]
     @transferIdLedger varchar(50),
     @acquirerFee money,
     @transferFee money,
+    @processorFee money,
     @issuerFee money,
     @type varchar(50),
     @message varchar(250),
@@ -16,6 +17,7 @@ SET
     transferIdledger = @transferIdledger,
     transferFee = ISNULL(@transferFee, transferFee),
     acquirerFee = ISNULL(@acquirerFee, acquirerFee),
+    processorFee = ISNULL(@processorFee, processorFee),
     issuerFee = ISNULL(@issuerFee, issuerFee),
     ledgerTxState = 2
 WHERE
