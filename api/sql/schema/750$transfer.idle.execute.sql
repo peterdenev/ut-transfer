@@ -74,7 +74,7 @@ BEGIN TRY
                 expireTime <= GETDATE() AND
                 (reverseIssuer = 1 OR reverseLedger = 1)
             ORDER
-                BY expireTime, transferId 
+                BY expireTime, transferId
         ) r ON r.transferId = t.transferId
     END
 
@@ -141,6 +141,7 @@ BEGIN TRY
             t.transferFee,
             t.acquirerFee,
             t.issuerFee,
+            t.processorFee,
             t.transferCurrency,
             t.localDateTime,
             t.settlementDate issuerSettlementDate,

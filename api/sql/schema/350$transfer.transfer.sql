@@ -38,7 +38,6 @@ CREATE TABLE [transfer].[transfer](
     acquirerFee money,
     issuerFee money,
     transferFee money,
-    processorFee money,
     retrievalReferenceNumber varchar(12),
     description varchar(250),
     issuerSerialNumber bigint,
@@ -48,6 +47,7 @@ CREATE TABLE [transfer].[transfer](
     actualAmountCurrency varchar(3),
     settlementAmount money,
     settlementAmountCurrency varchar(3),
+    processorFee money,
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
     CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])
 )
