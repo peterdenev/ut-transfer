@@ -69,37 +69,37 @@ SELECT
     n.itemName [transferType],
     (CASE
         WHEN t.[reversed] = 1 AND (t.issuerId = t.ledgerId OR t.[reversedLedger] = 1) THEN N'transferReversed'
-        WHEN t.[issuerTxState] in (2, 8, 12) AND ISNULL(cardAlert.type, cashAlert.type) IS NOT NULL THEN N'transferAlert'
-        WHEN t.channelType = N'iso' AND t.[issuerTxState] IN (2, 8, 12)  THEN N'transferNormal'
-        WHEN t.[acquirerTxState] in (2, 8, 12) THEN N'transferNormal'
+        WHEN t.[issuerTxState] IN (2, 8, 12) AND ISNULL(cardAlert.type, cashAlert.type) IS NOT NULL THEN N'transferAlert'
+        WHEN t.channelType = N'iso' AND t.[issuerTxState] IN (2, 8, 12) THEN N'transferNormal'
+        WHEN t.[acquirerTxState] IN (2, 8, 12) THEN N'transferNormal'
         ELSE N'transferError'
     END) [style],
     CASE
         WHEN ISNULL(cashAlert.[message], N'') != '' AND ISNULL(cardAlert.[message], N'') != N'' THEN cashAlert.[message] + CHAR(10) + CHAR(13) + cardAlert.[message]
         ELSE ISNULL(cashAlert.[message], N'') + ISNULL(cardAlert.[message], N'')
-    END as alerts,
+    END AS alerts,
     CASE
-        WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] in (2, 8, 12)) THEN 1
+        WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] IN (2, 8, 12)) THEN 1
         ELSE 0
-    END success    
+    END success
 FROM
     [transfer].[transfer] t
 OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
         FROM [transfer].[event]
-        WHERE   [state] = N'request' 
-        AND     [source] = N'acquirer'
-        AND     t.transferId = transferId
+        WHERE [state] = N'request'
+        AND [source] = N'acquirer'
+        AND t.transferId = transferId
         ORDER BY eventId ASC
     ) request
 OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
         FROM [transfer].[event]
-        WHERE   [state] = N'confirm' 
-        AND     [source] = N'issuer'
-        AND     t.transferId = transferId
+        WHERE [state] = N'confirm'
+        AND [source] = N'issuer'
+        AND t.transferId = transferId
         ORDER BY eventId ASC
     ) confirmIssuer
 OUTER APPLY

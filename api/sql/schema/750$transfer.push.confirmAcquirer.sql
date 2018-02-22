@@ -1,8 +1,8 @@
 ALTER PROCEDURE [transfer].[push.confirmAcquirer]
-    @transferId bigint,
-    @transferIdAcquirer varchar(50),
-    @type varchar(50),
-    @message varchar(250),
+    @transferId BIGINT,
+    @transferIdAcquirer VARCHAR(50),
+    @type VARCHAR(50),
+    @message VARCHAR(250),
     @details XML
 AS
 SET NOCOUNT ON
@@ -14,9 +14,9 @@ SET
     acquirerTxState = 2
 WHERE
     transferId = @transferId AND
-    acquirerTxState in (1, 2)
+    acquirerTxState IN (1, 2)
 
-DECLARE @COUNT int = @@ROWCOUNT
+DECLARE @COUNT INT = @@ROWCOUNT
 
 SET @type = ISNULL (@type, 'transfer.push.confirmAcquirer')
 

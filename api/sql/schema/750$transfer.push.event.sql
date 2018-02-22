@@ -1,16 +1,17 @@
 ALTER PROCEDURE [transfer].[push.event]
-    @transferId bigint,
-    @type varchar(50),
-    @state varchar(50),
-    @source varchar(50),
-    @message nvarchar(250),
+    @transferId BIGINT,
+    @type VARCHAR(50),
+    @state VARCHAR(50),
+    @source VARCHAR(50),
+    @message NVARCHAR(250),
     @udfDetails XML
 AS
 SET NOCOUNT ON
 
-IF NOT EXISTS (SELECT *
-               FROM [transfer].[transfer]
-               WHERE transferId = @transferId)
+IF NOT EXISTS
+    (SELECT *
+    FROM [transfer].[transfer]
+    WHERE transferId = @transferId)
 BEGIN
     RAISERROR ('transfer.invalidTransferId', 16, 1)
     RETURN 5555

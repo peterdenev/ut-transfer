@@ -1,16 +1,16 @@
 ALTER PROCEDURE [transfer].[report.transfer]
-    @transferId bigint,
-    @cardNumber varchar(32),
-    @accountNumber varchar(100),
-    @deviceId varchar(100),
-    @processingCode varchar(100),
-    @startDate datetime,
-    @endDate datetime,
-    @issuerTxState int,
-    @merchantName varchar(100),
-    @channelType varchar(50),
-    @pageNumber int, -- page number for result
-    @pageSize int, -- page size of result
+    @transferId BIGINT,
+    @cardNumber VARCHAR(32),
+    @accountNumber VARCHAR(100),
+    @deviceId VARCHAR(100),
+    @processingCode VARCHAR(100),
+    @startDate DATETIME,
+    @endDate DATETIME,
+    @issuerTxState INT,
+    @merchantName VARCHAR(100),
+    @channelType VARCHAR(50),
+    @pageNumber INT, -- page number for result
+    @pageSize INT, -- page size of result
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
 SET NOCOUNT ON
@@ -19,15 +19,15 @@ DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
 DECLARE @cardNumberId BIGINT
 
 -- checks if the user has a right to make the operation
-DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
-EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
-IF @return != 0
+DECLARE @actionID VARCHAR(100) = OBJECT_SCHEMA_NAME(@@PROCID) + '.' + OBJECT_NAME(@@PROCID), @RETURN INT = 0
+EXEC @RETURN = [user].[permission.check] @actionId = @actionID, @objectId = NULL, @meta = @meta
+IF @RETURN != 0
 BEGIN
     RETURN 55555
 END
 
 IF @cardNumber IS NOT NULL
-    SET @cardNumberId = (select numberId from [card].[number] where pan = @cardNumber)
+    SET @cardNumberId = (SELECT numberId FROM [card].[number] WHERE pan = @cardNumber)
 
 IF @pageNumber IS NULL
     SET @pageNumber = 1
@@ -52,10 +52,10 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             t.[issuerFee],
             t.[transferCurrency],
             CASE
-                WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] in (2, 8, 12)) THEN 1
+                WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] IN (2, 8, 12)) THEN 1
                 ELSE 0
             END AS success,
-            ROW_NUMBER() OVER(ORDER BY t.[transferId] DESC) as [RowNum],
+            ROW_NUMBER() OVER(ORDER BY t.[transferId] DESC) AS [RowNum],
             COUNT(*) OVER(PARTITION BY 1) AS [recordsTotal]
         FROM
             [transfer].[transfer] t
@@ -71,7 +71,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@issuerTxState IS NULL OR t.[issuerTxState] = @issuerTxState)
             -- AND (@cardNumber IS NULL OR c.[cardNumber] LIKE '%' + @cardNumber + '%')
             AND (@cardNumber IS NULL OR t.cardId = @cardNumberId)
-            -- AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') LIKE '%' + @deviceId + '%')
+            -- AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'VARCHAR(8)') LIKE '%' + @deviceId + '%')
             AND (@deviceId IS NULL OR tl.terminalId LIKE '%' + @deviceId + '%')
             AND (@processingCode IS NULL OR t.[transferTypeId] = @processingCode)
             AND (@merchantName IS NULL OR t.[merchantId] LIKE '%' + @merchantName + '%')
@@ -110,14 +110,14 @@ FROM
 GROUP BY
     transferCurrency
 
-DECLARE @lastPageSize INT = @@ROWCOUNT      -- we need to know if the page become bigger than max size when add totals
+DECLARE @lastPageSize INT = @@ROWCOUNT -- we need to know if the page become bigger than max size when add totals
 
 SELECT 'transfers' AS resultSetName
 
 SELECT
     t.[transferId],
     r.[credentialId] [cardNumber],
-    convert(varchar(19), t.[transferDateTime], 120) transferDateTime,
+    CONVERT(VARCHAR(19), t.[transferDateTime], 120) transferDateTime,
     t.[sourceAccount],
     t.[destinationAccount],
     t.[transferType] [description],
@@ -127,15 +127,15 @@ SELECT
     t.[acquirerFee],
     t.[issuerFee],
     t.[transferCurrency],
-    t.[requestDetails].value('(/root/terminalId)[1]', 'varchar(8)') [terminalId],
-    t.[requestDetails].value('(/root/terminalName)[1]', 'varchar(40)') [terminalName],
+    t.[requestDetails].value('(/root/terminalId)[1]', 'VARCHAR(8)') [terminalId],
+    t.[requestDetails].value('(/root/terminalName)[1]', 'VARCHAR(40)') [terminalName],
     CASE
         WHEN t.success = 0 THEN t.errorMessage
         ELSE 'Success'
     END [responseDetails],
     ISNULL(ISNULL(
-        t.[errorDetails].value('(/root/responseCode)[1]', 'varchar(3)'),
-        t.[errorDetails].value('(/params/responseCode)[1]', 'varchar(3)')
+        t.[errorDetails].value('(/root/responseCode)[1]', 'VARCHAR(3)'),
+        t.[errorDetails].value('(/params/responseCode)[1]', 'VARCHAR(3)')
     ), CASE WHEN t.success = 1 THEN '00' ELSE '96' END
     ) [responseCode],
     t.[issuerTxStateName],
@@ -202,7 +202,7 @@ SELECT TOP 1
     @pageSize AS pageSize,
     recordsTotal AS recordsTotal,
     CASE
-        WHEN @pageNumber < (recordsTotal - 1) / @pageSize  + 1 THEN @pageNumber
+        WHEN @pageNumber < (recordsTotal - 1) / @pageSize + 1 THEN @pageNumber
         ELSE (recordsTotal - 1) / @pageSize + 1
     END AS pageNumber,
     (recordsTotal - 1) / @pageSize + 1 AS pagesTotal

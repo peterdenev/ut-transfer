@@ -1,6 +1,6 @@
-ALTER PROCEDURE [transfer].[partner.edit]  -- edits transfer partner information
+ALTER PROCEDURE [transfer].[partner.edit] -- edits transfer partner information
     @partner [transfer].partnerTT READONLY, -- the edited partner information
-    @meta core.metaDataTT READONLY -- information for the user that makes the operation
+    @meta core.metaDataTT READONLY -- information FOR the user that makes the operation
 AS
     DECLARE @callParams XML
     DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta) -- the id of the user that makes the operation
@@ -8,17 +8,20 @@ AS
 BEGIN TRY
 
     -- checks if the user has a right to make the operation
-    declare @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
-    exec @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
-    if @return != 0
+    DECLARE @actionID VARCHAR(100) = OBJECT_SCHEMA_NAME(@@PROCID) + '.' + OBJECT_NAME(@@PROCID), @RETURN INT = 0
+    EXEC @RETURN = [user].[permission.check] @actionId = @actionID, @objectId = NULL, @meta = @meta
+    IF @RETURN != 0
     BEGIN
         RETURN 55555
     END
 
-    DECLARE @languageId BIGINT = (SELECT languageId
-                        FROM [core].[language] cl
-                        JOIN [user].[session] us ON us.[language] = cl.[iso2Code]
-                        WHERE us.[actorId] = @userId)
+    DECLARE @languageId BIGINT =
+        (
+            SELECT languageId
+            FROM [core].[language] cl
+            JOIN [user].[session] us ON us.[language] = cl.[iso2Code]
+            WHERE us.[actorId] = @userId
+        )
 
     BEGIN TRANSACTION
         UPDATE p
@@ -37,8 +40,7 @@ BEGIN TRY
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
 BEGIN CATCH
-   IF @@trancount > 0 ROLLBACK TRANSACTION
-   BEGIN
-       EXEC [core].[error]
-   END
+    IF @@trancount > 0
+        ROLLBACK TRANSACTION
+    EXEC [core].[error]
 END CATCH

@@ -1,21 +1,21 @@
 ALTER PROCEDURE [transfer].[transfer.get]
     @transferIdAcquirer NVARCHAR (50) = NULL, -- the acquirer transfer id
     @transferId BIGINT = NULL, -- the transfer id
-    @acquirerCode varchar(50) = NULL, -- acquirer code
-    @cardId bigint = NULL, -- card Id
-    @localDateTime varchar(14) = NULL, -- local datetime of the transaction
-    @retrievalReferenceNumber varchar(12) = NULL,
-    @transferIdIssuer varchar(50) = NULL,
-    @issuerId varchar(50) = NULL,
-    @pan varchar(32) = NULL,
+    @acquirerCode VARCHAR(50) = NULL, -- acquirer code
+    @cardId BIGINT = NULL, -- card Id
+    @localDateTime VARCHAR(14) = NULL, -- local datetime of the transaction
+    @retrievalReferenceNumber VARCHAR(12) = NULL,
+    @transferIdIssuer VARCHAR(50) = NULL,
+    @issuerId VARCHAR(50) = NULL,
+    @pan VARCHAR(32) = NULL,
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 
 AS
 
     -- checks if the user has a right to make the operation
-DECLARE @actionID varchar(100) = OBJECT_SCHEMA_NAME(@@PROCID) + '.' + OBJECT_NAME(@@PROCID), @return int = 0
-EXEC @return = [user].[permission.check] @actionId = @actionID, @objectId = NULL, @meta = @meta
-IF @return != 0
+DECLARE @actionID VARCHAR(100) = OBJECT_SCHEMA_NAME(@@PROCID) + '.' + OBJECT_NAME(@@PROCID), @RETURN INT = 0
+EXEC @RETURN = [user].[permission.check] @actionId = @actionID, @objectId = NULL, @meta = @meta
+IF @RETURN != 0
 BEGIN
     RETURN 55555
 END
@@ -27,13 +27,13 @@ BEGIN
 END
 
 DECLARE @transfer AS TABLE (
-    transferId bigint, transferTypeId bigint, acquirerCode varchar(50), transferIdAcquirer varchar(50), transferIdLedger varchar(50),
-    transferIdIssuer varchar(50), transferIdMerchant varchar(50), transferDateTime datetime, localDateTime varchar(14), issuerSettlementDate date, channelId bigint,
-    channelType varchar(50), ordererId bigint, merchantId varchar(50), merchantInvoice varchar(50), merchantPort varchar(50), merchantType varchar(50),
-    cardId bigint, sourceAccount varchar(50), destinationAccount varchar(50), expireTime datetime, expireCount int, expireCountLedger int, reversed bit, reversedLedger bit, reverseIssuer bit, reverseLedger bit, retryTime datetime,
-    retryCount int, ledgerTxState smallint, issuerTxState smallint, acquirerTxState smallint, merchantTxState smallint, issuerId varchar(50), ledgerId varchar(50),
-    transferCurrency varchar(3), transferAmount money, acquirerFee money, issuerFee money, transferFee money, processorFee money, [description] varchar(250), issuerPort varchar(50),
-    ledgerPort varchar(50), udfAcquirer xml, acquirerError xml, pendingId int, pullTransactionId bigint, pushTransactionId bigint, pendingExpireTime datetime, params nvarchar(max)
+    transferId BIGINT, transferTypeId BIGINT, acquirerCode VARCHAR(50), transferIdAcquirer VARCHAR(50), transferIdLedger VARCHAR(50),
+    transferIdIssuer VARCHAR(50), transferIdMerchant VARCHAR(50), transferDateTime DATETIME, localDateTime VARCHAR(14), issuerSettlementDate DATE, channelId BIGINT,
+    channelType VARCHAR(50), ordererId BIGINT, merchantId VARCHAR(50), merchantInvoice VARCHAR(50), merchantPort VARCHAR(50), merchantType VARCHAR(50),
+    cardId BIGINT, sourceAccount VARCHAR(50), destinationAccount VARCHAR(50), expireTime datetime, expireCount INT, expireCountLedger INT, reversed BIT, reversedLedger BIT, reverseIssuer BIT, reverseLedger BIT, retryTime DATETIME,
+    retryCount INT, ledgerTxState SMALLINT, issuerTxState SMALLINT, acquirerTxState SMALLINT, merchantTxState SMALLINT, issuerId VARCHAR(50), ledgerId VARCHAR(50),
+    transferCurrency VARCHAR(3), transferAmount MONEY, acquirerFee MONEY, issuerFee MONEY, transferFee MONEY, processorFee MONey, [description] VARCHAR(250), issuerPort VARCHAR(50),
+    ledgerPort VARCHAR(50), udfAcquirer XML, acquirerError XML, pendingId INT, pullTransactionId BIGINT, pushTransactionId BIGINT, pendingExpireTime DATETIME, params NVARCHAR(max)
 )
 
 -- get by pull transaction id
@@ -120,7 +120,7 @@ WHERE
     (@localDateTime IS NULL OR t.localDateTime LIKE '%' + @localDateTime) AND
     (@acquirerCode IS NULL OR t.acquirerCode = @acquirerCode) AND
     (@retrievalReferenceNumber IS NULL OR t.retrievalReferenceNumber = @retrievalReferenceNumber) AND
-    (@pan IS NULL OR e.[udfDetails].value('(/root/pan)[1]', 'varchar(32)') = @pan) AND
+    (@pan IS NULL OR e.[udfDetails].value('(/root/pan)[1]', 'VARCHAR(32)') = @pan) AND
     pullTransactionId IS NOT NULL
 ORDER BY
     t.transferDateTime DESC
@@ -209,7 +209,7 @@ BEGIN
         (@localDateTime IS NULL OR t.localDateTime LIKE '%' + @localDateTime) AND
         (@acquirerCode IS NULL OR t.acquirerCode = @acquirerCode) AND
         (@retrievalReferenceNumber IS NULL OR t.retrievalReferenceNumber = @retrievalReferenceNumber) AND
-        (@pan IS NULL OR e.[udfDetails].value('(/root/pan)[1]', 'varchar(32)') = @pan)
+        (@pan IS NULL OR e.[udfDetails].value('(/root/pan)[1]', 'VARCHAR(32)') = @pan)
     ORDER BY
         t.transferDateTime DESC
 END
@@ -297,5 +297,4 @@ SELECT
     pendingId,
     pullTransactionId,
     pushTransactionId, expireTime, params
-FROM
-    @transfer
+FROM @transfer

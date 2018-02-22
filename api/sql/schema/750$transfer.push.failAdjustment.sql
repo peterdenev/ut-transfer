@@ -1,8 +1,8 @@
 ALTER PROCEDURE [transfer].[push.failAdjustment]
-    @transferId bigint,
-    @type varchar(50),
-    @message varchar(250),
-    @source varchar(50),
+    @transferId BIGINT,
+    @type VARCHAR(50),
+    @message VARCHAR(250),
+    @source VARCHAR(50),
     @details XML
 AS
 SET NOCOUNT ON
