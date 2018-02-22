@@ -141,9 +141,9 @@ var ruleValidate = (bus, transfer) => {
             transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
             transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
             if (decision.amount) {
-                transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
-                transfer.acquirerFee = decision.amount.acquirerFee;
-                transfer.issuerFee = decision.amount.issuerFee;
+                transfer.acquirerFee = (decision.amount.acquirerFee === null ? transfer.acquirerFee : decision.amount.acquirerFee) || 0;
+                transfer.issuerFee = (decision.amount.issuerFee === null ? transfer.issuerFee : decision.amount.issuerFee) || 0;
+                transfer.transferFee = transfer.acquirerFee + transfer.issuerFee;
                 transfer.amount.acquirerFee = currency.amount(transfer.transferCurrency, transfer.acquirerFee);
                 transfer.amount.issuerFee = currency.amount(transfer.transferCurrency, transfer.issuerFee);
             }
