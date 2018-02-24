@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[push.CREATE]
+ALTER PROCEDURE [transfer].[push.create]
     @transferTypeId BIGINT,
     @acquirerCode VARCHAR(50),
     @transferDateTime DATETIME,
