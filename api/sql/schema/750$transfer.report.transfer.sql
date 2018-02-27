@@ -1,16 +1,17 @@
 ALTER PROCEDURE [transfer].[report.transfer]
-    @transferId BIGINT,
-    @cardNumber VARCHAR(32),
-    @accountNumber VARCHAR(100),
-    @deviceId VARCHAR(100),
-    @processingCode VARCHAR(100),
-    @startDate DATETIME,
-    @endDate DATETIME,
-    @issuerTxState INT,
-    @merchantName VARCHAR(100),
-    @channelType VARCHAR(50),
-    @pageNumber INT, -- page number for result
-    @pageSize INT, -- page size of result
+    @transferId bigint,
+    @cardNumber varchar(32),
+    @traceNumber bigint,
+    @accountNumber varchar(100),
+    @deviceId varchar(100),
+    @processingCode varchar(100),
+    @startDate datetime,
+    @endDate datetime,
+    @issuerTxState int,
+    @merchantName varchar(100),
+    @channelType varchar(50),
+    @pageNumber int, -- page number for result
+    @pageSize int, -- page size of result
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
 SET NOCOUNT ON
@@ -48,6 +49,8 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             t.[credentialId],
             t.[issuerId],
             t.[transferAmount],
+            t.[actualAmount],
+            t.[replacementAmount],
             t.[acquirerFee],
             t.[issuerFee],
             t.[transferCurrency],
@@ -69,6 +72,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@startDate IS NULL OR t.[transferDateTime] >= @startDate)
             AND (@endDate IS NULL OR t.[transferDateTime] <= @endDate)
             AND (@issuerTxState IS NULL OR t.[issuerTxState] = @issuerTxState)
+            AND (@traceNumber IS NULL OR t.[transferId] = @traceNumber OR t.[issuerSerialNumber] = @traceNumber)
             -- AND (@cardNumber IS NULL OR c.[cardNumber] LIKE '%' + @cardNumber + '%')
             AND (@cardNumber IS NULL OR t.cardId = @cardNumberId)
             -- AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'VARCHAR(8)') LIKE '%' + @deviceId + '%')
@@ -124,6 +128,8 @@ SELECT
     t.[transferIdAcquirer],
     t.[transferIdIssuer],
     t.[transferAmount],
+    t.[actualAmount],
+    t.[replacementAmount],
     t.[acquirerFee],
     t.[issuerFee],
     t.[transferCurrency],
@@ -142,6 +148,9 @@ SELECT
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
     t.[merchantId] [merchantName],
     UPPER(t.[channelType]) [channelType],
+    CASE WHEN t.issuerId != 'cbs' THEN t.issuerSerialNumber
+        ELSE t.transferId
+    END [traceNumber],
     CASE t.channelType
         WHEN 'iso' THEN t.transferIdAcquirer
         WHEN 'atm' THEN t.issuerSerialNumber
@@ -171,6 +180,8 @@ UNION ALL SELECT
     CAST(r.recordsTotalSuccessfull AS NVARCHAR(50)) AS transferIdIssuer,
     NULL AS transferIdAcquirer,
     r.transferAmountTotal AS transferAmount,
+    NULL AS actualAmount,
+    NULL AS replacementAmount,
     r.acquirerFeeTotal,
     r.issuerFeeTotal,
     r.[transferCurrency],
@@ -183,6 +194,7 @@ UNION ALL SELECT
     NULL AS merchantName,
     NULL AS channelType,
     NULL AS rrn,
+    NULL AS traceNumber,
     NULL AS authCode,
     NULL AS [additionalInfo],
     'transferAverage' AS style,

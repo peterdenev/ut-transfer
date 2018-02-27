@@ -15,6 +15,7 @@ module.exports = {
         startDate: joi.string(),
         endDate: joi.string(),
         issuerTxState: joi.number(),
+        traceNumber: joi.number(),
         merchantName: joi.string().max(100),
         pageNumber: joi.number().min(1),
         pageSize: joi.number().min(1)
