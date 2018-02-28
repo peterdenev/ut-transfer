@@ -1,5 +1,5 @@
 ALTER PROCEDURE [transfer].[push.requestMerchant]
-    @transferId bigint
+    @transferId BIGINT
 AS
 SET NOCOUNT ON
 
@@ -9,6 +9,6 @@ SET
     merchantTxState = 1
 WHERE
     transferId = @transferId AND
-    merchantTxState is NULL
+    merchantTxState IS NULL
 
 IF @@ROWCOUNT <> 1 RAISERROR('transfer.requestMerchant', 16, 1);

@@ -1,7 +1,7 @@
 ALTER PROCEDURE [transfer].[push.reverseLedger]
-    @transferId bigint,
-    @type varchar(50),
-    @message varchar(250),
+    @transferId BIGINT,
+    @type VARCHAR(50),
+    @message VARCHAR(250),
     @details XML
 AS
 SET NOCOUNT ON
@@ -15,7 +15,7 @@ WHERE
     transferId = @transferId AND
     ledgerTxState = 1
 
-DECLARE @COUNT int = @@ROWCOUNT
+DECLARE @COUNT INT = @@ROWCOUNT
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,

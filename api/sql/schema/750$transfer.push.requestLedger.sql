@@ -1,5 +1,5 @@
 ALTER PROCEDURE [transfer].[push.requestLedger]
-    @transferId bigint
+    @transferId BIGINT
 AS
 SET NOCOUNT ON
 
@@ -9,6 +9,6 @@ SET
     ledgerTxState = 1
 WHERE
     transferId = @transferId AND
-    ledgerTxState is NULL
+    ledgerTxState IS NULL
 
 IF @@ROWCOUNT <> 1 RAISERROR('transfer.requestLedger', 16, 1);

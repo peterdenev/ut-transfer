@@ -1,10 +1,10 @@
 CREATE PROCEDURE [transfer].[push.confirmAdjustment]
-    @transferId bigint,
-    @source varchar(50),
-    @replacementAmount money,
-    @replacementAmountCurrency varchar(3),
-    @actualAmount money,
-    @actualAmountCurrency varchar(3),
+    @transferId BIGINT,
+    @source VARCHAR(50),
+    @replacementAmounT MONEY,
+    @replacementAmountCurrency VARCHAR(3),
+    @actualAmount MONEY,
+    @actualAmountCurrency VARCHAR(3),
     @details XML
 AS
 SET NOCOUNT ON
@@ -27,7 +27,7 @@ BEGIN TRY
             @type = 'transfer.adjust',
             @state = 'adjust',
             @source = @source,
-            @message = 'Transaction was succesfully adjusted',
+            @message = 'TRANSACTION was succesfully adjusted',
             @udfDetails = @details
     COMMIT TRANSACTION
 END TRY

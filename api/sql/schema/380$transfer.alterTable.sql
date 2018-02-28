@@ -1,30 +1,30 @@
 ---transfer.split/columns
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'debitActorId' AND Object_ID = Object_ID(N'transfer.split') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'debitActorId' AND OBJECT_ID = OBJECT_ID(N'transfer.split') )
 BEGIN
     ALTER TABLE [transfer].[split] ADD debitActorId BIGINT
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'creditActorId' AND Object_ID = Object_ID(N'transfer.split') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'creditActorId' AND OBJECT_ID = OBJECT_ID(N'transfer.split') )
 BEGIN
     ALTER TABLE [transfer].[split] ADD creditActorId BIGINT
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'debitItemId' AND Object_ID = Object_ID(N'transfer.split') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'debitItemId' AND OBJECT_ID = OBJECT_ID(N'transfer.split') )
 BEGIN
     ALTER TABLE [transfer].[split] ADD debitItemId BIGINT
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'creditItemId' AND Object_ID = Object_ID(N'transfer.split') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'creditItemId' AND OBJECT_ID = OBJECT_ID(N'transfer.split') )
 BEGIN
     ALTER TABLE [transfer].[split] ADD creditItemId BIGINT
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'state' AND Object_ID = Object_ID(N'transfer.split') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'state' AND OBJECT_ID = OBJECT_ID(N'transfer.split') )
 BEGIN
     ALTER TABLE [transfer].[split] ADD [state] SMALLINT
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'transferIdPayment' AND Object_ID = Object_ID(N'transfer.split') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'transferIdPayment' AND OBJECT_ID = OBJECT_ID(N'transfer.split') )
 BEGIN
     ALTER TABLE [transfer].[split] ADD transferIdPayment BIGINT
 END
@@ -66,12 +66,12 @@ BEGIN
     ALTER TABLE [transfer].[pending] DROP CONSTRAINT fkTransferPending_SecondTransferId
 END
 
-IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'firstTransferId' AND Object_ID = Object_ID(N'transfer.pending') )
+IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'firstTransferId' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
     EXEC sp_rename 'transfer.pending.firstTransferId', 'pullTransactionId', 'Column'
 END
 
-IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'secondTransferId' AND Object_ID = Object_ID(N'transfer.pending') )
+IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'secondTransferId' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
     EXEC sp_rename 'transfer.pending.secondTransferId', 'pushTransactionId', 'Column'
 END
@@ -86,17 +86,17 @@ BEGIN
     ALTER TABLE [transfer].[pending] ADD CONSTRAINT fkTransferPending_PushTransactionId FOREIGN KEY([pushTransactionId]) REFERENCES [transfer].[transfer] ([transferId])
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'approvalAccountNumber' AND Object_ID = Object_ID(N'transfer.pending') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'approvalAccountNumber' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
     ALTER TABLE [transfer].[pending] ADD approvalAccountNumber VARCHAR (50)
 END
 
-IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'securityCode' AND Object_ID = Object_ID(N'transfer.pending') )
+IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'securityCode' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
     ALTER TABLE [transfer].[pending] ALTER COLUMN securityCode VARCHAR (max)
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'reasonId' AND Object_ID = Object_ID(N'transfer.pending') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'reasonId' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
     ALTER TABLE [transfer].[pending] ADD reasonId BIGINT
 END
@@ -106,106 +106,111 @@ BEGIN
     ALTER TABLE [transfer].[pending] ADD CONSTRAINT fkTransferPending_ReasonId FOREIGN KEY([reasonId]) REFERENCES [core].[itemName] ([itemNameId])
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'description' AND Object_ID = Object_ID(N'transfer.pending') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'description' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
     ALTER TABLE [transfer].[pending] ADD [description] NVARCHAR (255)
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'params' AND Object_ID = Object_ID(N'transfer.pending') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'params' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
     ALTER TABLE [transfer].[pending] ADD params NVARCHAR (max)
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'createdBy' AND Object_ID = Object_ID(N'transfer.pending') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'createdBy' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
     ALTER TABLE [transfer].[pending] ADD createdBy BIGINT
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'updatedBy' AND Object_ID = Object_ID(N'transfer.pending') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'updatedBy' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
     ALTER TABLE [transfer].[pending] ADD updatedBy BIGINT
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'updatedOn' AND Object_ID = Object_ID(N'transfer.pending') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'updatedOn' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
-    ALTER TABLE [transfer].[pending] ADD updatedOn datetime2
+    ALTER TABLE [transfer].[pending] ADD updatedOn DATETIME2
 END
 
-IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'credentialId' AND Object_ID = Object_ID(N'transfer.transfer') )
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'credentialId' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer') )
 BEGIN
-    ALTER TABLE [transfer].[transfer] ADD credentialId varchar(50)
+    ALTER TABLE [transfer].[transfer] ADD credentialId VARCHAR(50)
 END
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'issuerId' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'issuerId' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD issuerId varchar(50)
-END
-
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'ledgerId' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
-BEGIN
-  ALTER TABLE [transfer].[transfer] ADD ledgerId varchar(50)
+    ALTER TABLE [transfer].[transfer] ADD issuerId VARCHAR(50)
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'transferIdLedger' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'ledgerId' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD transferIdLedger varchar(50)
+    ALTER TABLE [transfer].[transfer] ADD ledgerId VARCHAR(50)
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'ledgerTxState' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'transferIdLedger' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD ledgerTxState smallint
+    ALTER TABLE [transfer].[transfer] ADD transferIdLedger VARCHAR(50)
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'state' AND Object_ID = OBJECT_ID(N'transfer.event'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'ledgerTxState' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[event] ADD [state] varchar(50)
+    ALTER TABLE [transfer].[transfer] ADD ledgerTxState SMALLINT
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'issuerSerialNumber' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'state' AND OBJECT_ID = OBJECT_ID(N'transfer.event'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD issuerSerialNumber bigint
+    ALTER TABLE [transfer].[event] ADD [state] VARCHAR(50)
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'retrievalReferenceNumber' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'issuerSerialNumber' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD retrievalReferenceNumber varchar(12)
+    ALTER TABLE [transfer].[transfer] ADD issuerSerialNumber BIGINT
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'reversedLedger' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'retrievalReferenceNumber' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD reversedLedger bit
+    ALTER TABLE [transfer].[transfer] ADD retrievalReferenceNumber VARCHAR(12)
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'expireCountLedger' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'reversedLedger' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD expireCountLedger int
+    ALTER TABLE [transfer].[transfer] ADD reversedLedger BIT
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'replacementAmount' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'expireCountLedger' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD replacementAmount money
+    ALTER TABLE [transfer].[transfer] ADD expireCountLedger INT
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'replacementAmountCurrency' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'replacementAmount' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD replacementAmountCurrency varchar(3)
+    ALTER TABLE [transfer].[transfer] ADD replacementAmount money
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'actualAmount' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'replacementAmountCurrency' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD actualAmount money
+    ALTER TABLE [transfer].[transfer] ADD replacementAmountCurrency VARCHAR(3)
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'actualAmountCurrency' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'actualAmount' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD actualAmountCurrency varchar(3)
+    ALTER TABLE [transfer].[transfer] ADD actualAmount money
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'settlementAmount' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'actualAmountCurrency' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD settlementAmount money
+    ALTER TABLE [transfer].[transfer] ADD actualAmountCurrency VARCHAR(3)
 END
 
-IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'settlementAmountCurrency' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'settlementAmount' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD settlementAmountCurrency varchar(3)
+    ALTER TABLE [transfer].[transfer] ADD settlementAmount money
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'settlementAmountCurrency' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD settlementAmountCurrency VARCHAR(3)
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'processorFee' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD processorFee money
 END

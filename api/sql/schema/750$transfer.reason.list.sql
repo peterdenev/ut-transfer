@@ -1,4 +1,4 @@
-CREATE PROCEDURE [transfer].[reason.list] -- add new transfer reason in DB
+CREATE PROCEDURE [transfer].[reason.list] -- add new transfer reason in db
     @action NVARCHAR (50), --the action ids for which this reason is valid
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 
@@ -7,9 +7,9 @@ AS
     DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
 
     -- checks if the user has a right to make the operation
-    --declare @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
-    --exec @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
-    --if @return != 0
+    --DECLARE @actionID VARCHAR(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @RETURN INT = 0
+    --EXEC @RETURN = [user].[permission.check] @actionId =  @actionID, @objectId = NULL, @meta = @meta
+    --IF @RETURN != 0
     --BEGIN
     --    RETURN 55555
     --END

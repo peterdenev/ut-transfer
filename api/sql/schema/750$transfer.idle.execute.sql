@@ -1,14 +1,14 @@
 ALTER PROCEDURE [transfer].[idle.execute]
     @ports core.arrayList READONLY,
-    @count int
+    @count INT
 AS
 DECLARE @callParams XML
 DECLARE @updated TABLE(
-    txid bigint,
-    mtid varchar(4),
-    opcode varchar(20),
-    reverseIssuer bit,
-    reverseLedger bit
+    txid BIGINT,
+    mtid VARCHAR(4),
+    opcode VARCHAR(20),
+    reverseIssuer BIT,
+    reverseLedger BIT
 )
 BEGIN TRY
     -- forward stored
@@ -16,10 +16,10 @@ BEGIN TRY
         [transfer].[transfer]
     SET
         expireTime = CASE
-            WHEN 5>isnull(retryCount,0) THEN DATEADD(SECOND, 30, GETDATE())
-            WHEN 10>retryCount THEN DATEADD(SECOND, 60, GETDATE())
-            WHEN 15>retryCount THEN DATEADD(MINUTE, 30, GETDATE())
-            WHEN 20>retryCount THEN DATEADD(HOUR, 1, GETDATE())
+            WHEN 5 > ISNULL(retryCount, 0) THEN DATEADD(SECOND, 30, GETDATE())
+            WHEN 10 > retryCount THEN DATEADD(SECOND, 60, GETDATE())
+            WHEN 15 > retryCount THEN DATEADD(MINUTE, 30, GETDATE())
+            WHEN 20 > retryCount THEN DATEADD(HOUR, 1, GETDATE())
         END,
         retryCount = ISNULL(retryCount, 0) + 1,
         retryTime = GETDATE()
@@ -34,15 +34,15 @@ BEGIN TRY
             FROM
                 [transfer].[transfer] t
             JOIN
-                [transfer].[partner] p ON p.partnerId = t.issuerId AND p.mode in ('online') AND p.port IN (SELECT value FROM @ports)
+                [transfer].[partner] p ON p.partnerId = t.issuerId AND p.mode IN ('online') AND p.port IN (SELECT value FROM @ports)
             WHERE
                 t.issuerTxState IN (8, 11, 13, 14) AND
-                ISNULL(t.acquirerTxState, CASE t.channelType WHEN 'POS' THEN 2 else 0 END) IN (2) AND
+                ISNULL(t.acquirerTxState, CASE t.channelType WHEN 'POS' THEN 2 ELSE 0 END) IN (2) AND
                 t.reversed = 0 AND
-                20 > ISNULL(t.retryCount,0) AND
-                GETDATE() >= t.expireTime AND
+                20 > ISNULL(t.retryCount, 0) AND
+                GETDATE() > = t.expireTime AND
                 t.transferDateTime > DATEADD(DAY, -1, GETDATE()) AND
-                t.channelType IN ('ATM','POS')
+                t.channelType IN ('ATM', 'POS')
             ORDER
                 BY t.expireTime, t.transferId
         )
@@ -74,7 +74,7 @@ BEGIN TRY
                 expireTime <= GETDATE() AND
                 (reverseIssuer = 1 OR reverseLedger = 1)
             ORDER
-                BY expireTime, transferId 
+                BY expireTime, transferId
         ) r ON r.transferId = t.transferId
     END
 
@@ -85,7 +85,7 @@ BEGIN TRY
             [transfer].[transfer]
         SET
             expireTime = CASE
-                WHEN 5 > ISNULL(expireCount,0) THEN DATEADD(SECOND, 30, GETDATE())
+                WHEN 5 > ISNULL(expireCount, 0) THEN DATEADD(SECOND, 30, GETDATE())
                 WHEN 10 > expireCount THEN DATEADD(SECOND, 60, GETDATE())
                 WHEN 15 > expireCount THEN DATEADD(MINUTE, 30, GETDATE())
                 WHEN 20 > expireCount THEN DATEADD(HOUR, 1, GETDATE())
@@ -97,8 +97,8 @@ BEGIN TRY
         WHERE
             issuerTxState IN (2, 12) AND
             reversed = 0 AND
-            20 > isnull(expireCount, 0) AND
-            GETDATE() >= expireTime AND
+            20 > ISNULL(expireCount, 0) AND
+            GETDATE() > = expireTime AND
             transferId IN (
                 SELECT TOP (@count)
                     d.transferId
@@ -111,10 +111,10 @@ BEGIN TRY
                 WHERE
                     cc.status IS NULL
                     AND cc.expireTime < GETDATE()
-                    AND d.issuerTxState IN (2,12)
+                    AND d.issuerTxState IN (2, 12)
                     AND d.reversed = 0
                     AND 20 > ISNULL(d.expireCount, 0)
-                    AND GETDATE() >= d.expireTime
+                    AND GETDATE() > = d.expireTime
                     AND d.channelType IN ('ATM')
                 ORDER BY
                     d.expireTime, d.transferId
@@ -141,6 +141,7 @@ BEGIN TRY
             t.transferFee,
             t.acquirerFee,
             t.issuerFee,
+            t.processorFee,
             t.transferCurrency,
             t.localDateTime,
             t.settlementDate issuerSettlementDate,
