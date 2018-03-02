@@ -1,3 +1,8 @@
+<a name="6.23.0"></a>
+# [6.23.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.23.0-rc-bahur.31...v6.23.0) (2018-03-02)
+
+
+
 <a name="6.22.0"></a>
 # [6.22.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.21.0-rc-acapulco.35...v6.22.0) (2017-12-15)
 
