@@ -1,7 +1,7 @@
-ALTER PROCEDURE [transfer].[push.failReversal]
-    @transferId bigint,
-    @type varchar(50),
-    @message varchar(250),
+ALTER PROCEDURE [transfer].[push.failReversalIssuer]
+    @transferId BIGINT,
+    @type VARCHAR(50),
+    @message VARCHAR(250),
     @details XML
 AS
 SET NOCOUNT ON

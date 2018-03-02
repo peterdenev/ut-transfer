@@ -1,6 +1,5 @@
 import { filterElementTypes } from 'ut-front-react/components/GridToolBox/types';
 import reportStyle from '../../assets/static/css/reportStyle.css';
-import style from './style.css';
 
 let startDate = new Date();
 startDate.setHours(0);
@@ -15,16 +14,16 @@ endDate.setSeconds(59);
 endDate.setMilliseconds(999);
 
 module.exports = (gridStyle) => ({
-    title: 'Transfer report',
+    title: 'Transfer Report',
     export: {
-        method: 'db/transfer.report.transfer',
+        method: 'transfer.report.transfer',
         resultsetName: 'transfers',
         maxSize: 20000
     },
     grid: {
         fields: [
             { name: 'transferId', title: 'Trans#' },
-            { name: 'transferIdIssuer', title: 'Issuer Trans#' },
+            { name: 'transferIdIssuer', title: 'Auth code' },
             { name: 'cardNumber', title: 'Card Number' },
             { name: 'transferDateTime', title: 'Transfer Date' },
             { name: 'sourceAccount', title: 'Debit Account' },
@@ -32,10 +31,13 @@ module.exports = (gridStyle) => ({
             { name: 'description', title: 'Description' },
             { name: 'rrn', title: 'RRN' },
             { name: 'stan', title: 'STAN' },
-            { name: 'authCode', title: 'Auth Code' },
+            { name: 'traceNumber', title: 'Trace Number' },
             { name: 'transferAmount', title: 'Transfer Amount' },
+            { name: 'replacementAmount', title: 'Replacement Amount' },
+            { name: 'actualAmount', title: 'Actual Amount' },
             { name: 'issuerFee', title: 'Issuer Fee' },
             { name: 'acquirerFee', title: 'Acquirer Fee' },
+            { name: 'conveinienceFee', title: 'Convenience Fee' },
             { name: 'transferCurrency', title: 'Currency' },
             { name: 'terminalId', title: 'Device Id' },
             { name: 'terminalName', title: 'Device Location' },
@@ -49,10 +51,10 @@ module.exports = (gridStyle) => ({
             { name: 'channelType', title: 'Channel Type' }
         ],
         allowColumnConfig: true,
-        method: 'db/transfer.report.transfer',
+        method: 'transfer.report.transfer',
         resultsetName: 'transfers',
         rowStyleField: 'style',
-        externalStyle: {...style, ...reportStyle, ...gridStyle}
+        externalStyle: {...reportStyle, ...gridStyle}
     },
     toolbox: {
         showAdvanced: true,
@@ -60,7 +62,9 @@ module.exports = (gridStyle) => ({
         filterAutoFetch: false
     },
     filters: [
+        { name: 'transferId', label: 'Trans#', placeholder: 'Trans#', type: filterElementTypes.searchBox },
         { name: 'cardNumber', label: 'Card Number', placeholder: 'Card Number', type: filterElementTypes.searchBox },
+        { name: 'traceNumber', label: 'Trace Number', placeholder: 'Trace Number', type: filterElementTypes.searchBox },
         { name: 'accountNumber', label: 'Account Number', placeholder: 'Account Number', type: filterElementTypes.searchBox },
         { name: 'deviceId', label: 'Device ID', placeholder: 'Device ID', type: filterElementTypes.searchBox },
         {

@@ -2,13 +2,13 @@ MERGE INTO
     core.itemName AS target
 USING
     (VALUES
-        ('deposit','Deposit / cash in'),
-        ('withdraw','Withdraw / cash out'),
-        ('withdrawOtp','Withdraw with OTP'),
-        ('transfer','Funds transfer to account'),
-        ('transferOtp','Funds transfer with OTP'),
-        ('balance','Balance enquiry'),
-        ('ministatement','Mini statement enquiry'),
+        ('deposit', 'Deposit / cash in'),
+        ('withdraw', 'Withdraw / cash out'),
+        ('withdrawOtp', 'Withdraw with OTP'),
+        ('transfer', 'Funds transfer to account'),
+        ('transferOtp', 'Funds transfer with OTP'),
+        ('balance', 'Balance enquiry'),
+        ('ministatement', 'Mini statement enquiry'),
         ('topup', 'Top up'),
         ('checkbook', 'Checkbook reorder'),
         ('bill', 'Bill payment'),
@@ -21,7 +21,7 @@ USING
         ('tia', 'Teller initiated audit')
     ) AS source (itemCode, itemName)
 JOIN
-	core.itemType t on t.alias='operation'
+    core.itemType t ON t.alias = 'operation'
 ON
     target.itemCode = source.itemCode
 WHEN
@@ -32,13 +32,13 @@ VALUES
     (t.itemTypeId, source.itemCode, source.itemName);
 
 MERGE INTO
-    [user].[actionCategory] as target
+    [user].[actionCategory] AS target
 USING
     (VALUES
         ('transfer')
     ) AS source (name)
 ON
-    target.name=source.name
+    target.name = source.name
 WHEN NOT MATCHED BY TARGET THEN
 INSERT
     ([name])
@@ -46,7 +46,7 @@ VALUES
     (source.[name]);
 
 MERGE INTO
-    [user].[action] as target
+    [user].[action] AS target
 USING
     (VALUES
         ('transfer.partner.fetch', 'transfer.partner.fetch', '{}'),
@@ -54,7 +54,7 @@ USING
         ('transfer.partner.get', 'transfer.partner.get', '{}'),
         ('transfer.partner.add', 'transfer.partner.add', '{}'),
         ('transfer.partner.edit', 'transfer.partner.edit', '{}'),
-       
+
         ('transfer.pending.cancel', 'transfer.pending.cancel', '{}'),
         ('transfer.pending.reject', 'transfer.pending.reject', '{}'),
         ('transfer.pendingUserTransfers.fetch', 'transfer.pendingUserTransfers.fetch', '{}'),
@@ -82,9 +82,9 @@ USING
         ('transfer.view.foreignAccounts', 'transfer.view.foreignAccounts', '{}')
     ) AS source (actionId, description, valueMap)
 JOIN
-	[user].[actionCategory] c ON c.name = 'transfer'
+    [user].[actionCategory] c ON c.name = 'transfer'
 ON
-    target.actionId=source.actionId
+    target.actionId = source.actionId
 WHEN NOT MATCHED BY TARGET THEN
 INSERT
     ([actionId], [actionCategoryId], [description], [valueMap])

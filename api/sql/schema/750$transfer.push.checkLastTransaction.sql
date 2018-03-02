@@ -1,12 +1,12 @@
 ALTER PROCEDURE [transfer].[push.checkLastTransaction]
-    @channelId bigint,
-    @sernum char(4),
-    @status char(1),
-    @notes1 int,
-    @notes2 int,
-    @notes3 int,
-    @notes4 int,
-    @confirm bit,
+    @channelId BIGINT,
+    @sernum CHAR(4),
+    @status CHAR(1),
+    @notes1 INT,
+    @notes2 INT,
+    @notes3 INT,
+    @notes4 INT,
+    @confirm BIT,
     @errorMap core.indexedMapTT READONLY
 AS
 SET NOCOUNT ON
@@ -15,29 +15,29 @@ DECLARE @callParams XML
 BEGIN TRY
 
     DECLARE
-        @lastTx int,
-        @lastSernum varchar(4),
-        @lastNotes1 int,
-        @lastNotes2 int,
-        @lastNotes3 int,
-        @lastNotes4 int,
-        @lastAcquirerState int,
-        @lastIssuerState int,
+        @lastTx INT,
+        @lastSernum VARCHAR(4),
+        @lastNotes1 INT,
+        @lastNotes2 INT,
+        @lastNotes3 INT,
+        @lastNotes4 INT,
+        @lastAcquirerState INT,
+        @lastIssuerState INT,
 
         @details XML = @callParams,
-        @responseCode varchar(3)
+        @responseCode VARCHAR(3)
 
     SET @details.modify('delete (/params/errorMap)[1]')
 
     SELECT TOP 1
         @lastTx = t.transferId,
-        @lastSernum = e.udfDetails.value('(/root/sernum)[1]', 'varchar(4)'),
+        @lastSernum = e.udfDetails.value('(/root/sernum)[1]', 'VARCHAR(4)'),
         @lastAcquirerState = t.acquirerTxState,
         @lastIssuerState = t.issuerTxState,
-        @lastNotes1 = e.udfDetails.value('(/root/type1Notes)[1]', 'int'),
-        @lastNotes2 = e.udfDetails.value('(/root/type2Notes)[1]', 'int'),
-        @lastNotes3 = e.udfDetails.value('(/root/type3Notes)[1]', 'int'),
-        @lastNotes4 = e.udfDetails.value('(/root/type4Notes)[1]', 'int')
+        @lastNotes1 = e.udfDetails.value('(/root/type1Notes)[1]', 'INT'),
+        @lastNotes2 = e.udfDetails.value('(/root/type2Notes)[1]', 'INT'),
+        @lastNotes3 = e.udfDetails.value('(/root/type3Notes)[1]', 'INT'),
+        @lastNotes4 = e.udfDetails.value('(/root/type4Notes)[1]', 'INT')
     FROM
         [transfer].[transfer] t
     LEFT JOIN
@@ -49,7 +49,7 @@ BEGIN TRY
 
     IF @lastAcquirerState IS NULL AND @lastTx IS NOT NULL
     BEGIN
-        SET @responseCode = (SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionTimeout')
+        SET @responseCode = (SELECT [value] FROM @errorMap WHERE [key] = 'atm.lastTransactionTimeout')
         SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
 
         EXEC [transfer].[push.abortAcquirer]
@@ -58,11 +58,11 @@ BEGIN TRY
             @message = 'ATM timed out waiting for response',
             @details = @details
     END ELSE
-    IF @lastAcquirerState=1 AND @lastIssuerState=2
+    IF @lastAcquirerState = 1 AND @lastIssuerState = 2
     BEGIN
         IF @lastSernum IS NULL
         BEGIN
-            SET @responseCode = (SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionMissingSernum')
+            SET @responseCode = (SELECT [value] FROM @errorMap WHERE [key] = 'atm.lastTransactionMissingSernum')
             SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
 
             EXEC [transfer].[push.errorAcquirer]
@@ -75,7 +75,7 @@ BEGIN TRY
         BEGIN
             IF @confirm = 1
             BEGIN
-                SET @responseCode = (SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionUnexpectedSernum')
+                SET @responseCode = (SELECT [value] FROM @errorMap WHERE [key] = 'atm.lastTransactionUnexpectedSernum')
                 SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
 
                 EXEC [transfer].[push.errorAcquirer]
@@ -85,7 +85,7 @@ BEGIN TRY
                     @details = @details
             END ELSE
             BEGIN
-                SET @responseCode = (SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionNoReply')
+                SET @responseCode = (SELECT [value] FROM @errorMap WHERE [key] = 'atm.lastTransactionNoReply')
                 SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
 
                 EXEC [transfer].[push.failAcquirer]
@@ -99,7 +99,7 @@ BEGIN TRY
         BEGIN
             IF @confirm = 1
             BEGIN
-                SET @responseCode = (SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionUnexpectedDispense')
+                SET @responseCode = (SELECT [value] FROM @errorMap WHERE [key] = 'atm.lastTransactionUnexpectedDispense')
                 SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
 
                 EXEC [transfer].[push.errorAcquirer]
@@ -110,7 +110,7 @@ BEGIN TRY
             END ELSE
             IF @notes1 = 0 AND @notes2 = 0 AND @notes3 = 0 AND @notes4 = 0
             BEGIN
-                SET @responseCode = (SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionZeroDispense')
+                SET @responseCode = (SELECT [value] FROM @errorMap WHERE [key] = 'atm.lastTransactionZeroDispense')
                 SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
 
                 EXEC [transfer].[push.failAcquirer]
@@ -120,7 +120,7 @@ BEGIN TRY
                     @details = @details
             END ELSE
             BEGIN
-                SET @responseCode = (SELECT [value] from @errorMap WHERE [key] = 'atm.lastTransactionDifferentDispense')
+                SET @responseCode = (SELECT [value] FROM @errorMap WHERE [key] = 'atm.lastTransactionDifferentDispense')
                 SET @details.modify('insert <responseCode>{sql:variable("@responseCode")}</responseCode> into (/params)[1]')
 
                 EXEC [transfer].[push.errorAcquirer]
@@ -138,12 +138,12 @@ BEGIN TRY
                 @message = NULL,
                 @details = @details
         END
-    end
+    END
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY
 BEGIN CATCH
-    if @@TRANCOUNT > 0 ROLLBACK TRANSACTION
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
     EXEC core.error
     RETURN 55555
 END CATCH

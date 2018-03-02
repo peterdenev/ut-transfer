@@ -137,7 +137,7 @@ function mapStateToProps(state, ownProps) {
     let filterValues = {};
 
     if (state.transferPartnerFilterByCustomSearch.get('field')) {
-        filterValues[state.transferPartnerFilterByCustomSearch.get('field')] = state.transferPartnerFilterByCustomSearch.get('value') || null;
+        filterValues[state.transferPartnerFilterByCustomSearch.get('field')] = ((state.transferPartnerFilterByCustomSearch.get('value') || '').trim()) || null;
     }
     return {
         config: state.transferConfig.get('partners'),

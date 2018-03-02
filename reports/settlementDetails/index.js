@@ -10,7 +10,7 @@ date.setMilliseconds(0);
 module.exports = (gridStyle) => ({
     title: 'Settlement Details',
     export: {
-        method: 'db/transfer.report.settlementDetails',
+        method: 'transfer.report.settlementDetails',
         resultsetName: 'settlementDetails',
         maxSize: 20000
     },
@@ -33,7 +33,7 @@ module.exports = (gridStyle) => ({
             { name: 'deviceName', title: 'Device Name' },
             { name: 'dueTo', title: 'Due To' }
         ],
-        method: 'db/transfer.report.settlementDetails',
+        method: 'transfer.report.settlementDetails',
         resultsetName: 'settlementDetails',
         allowColumnConfig: true,
         externalStyle: {...reportStyle, ...gridStyle},

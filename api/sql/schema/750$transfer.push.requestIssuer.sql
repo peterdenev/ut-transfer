@@ -1,5 +1,5 @@
 ALTER PROCEDURE [transfer].[push.requestIssuer]
-    @transferId bigint
+    @transferId BIGINT
 AS
 SET NOCOUNT ON
 
@@ -8,6 +8,6 @@ UPDATE
 SET
     issuerTxState = 1
 WHERE
-    transferId = @transferId AND issuerTxState is NULL
+    transferId = @transferId AND issuerTxState IS NULL
 
 IF @@ROWCOUNT <> 1 RAISERROR('transfer.requestIssuer', 16, 1);

@@ -17,13 +17,17 @@ module.exports = {
                     }
                     break;
                 case 'stan':
+                case 'traceNumber':
                     if (!isHeader && result) {
                         result = (`000000${result}`).slice(-6);
                     }
                     break;
                 case 'acquirerFee':
                 case 'issuerFee':
+                case 'conveinienceFee':
                 case 'transferAmount':
+                case 'actualAmount':
+                case 'replacementAmount':
                     if (!isHeader) {
                         result = formatNumber(result);
                         classNames.push('textColorBlue');

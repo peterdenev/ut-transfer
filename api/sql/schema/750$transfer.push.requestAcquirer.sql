@@ -1,7 +1,7 @@
 ALTER PROCEDURE [transfer].[push.requestAcquirer]
-    @transferId bigint,
-    @type varchar(50),
-    @message varchar(250),
+    @transferId BIGINT,
+    @type VARCHAR(50),
+    @message VARCHAR(250),
     @details XML
 AS
 SET NOCOUNT ON
@@ -12,9 +12,9 @@ SET
     acquirerTxState = 1
 WHERE
     transferId = @transferId AND
-    acquirerTxState is NULL
+    acquirerTxState IS NULL
 
-DECLARE @COUNT int = @@ROWCOUNT
+DECLARE @COUNT INT = @@ROWCOUNT
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,

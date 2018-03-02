@@ -1,8 +1,8 @@
 ALTER PROCEDURE [transfer].[push.confirmMerchant]
-    @transferId bigint,
-    @transferIdMerchant varchar(50),
-    @type varchar(50),
-    @message varchar(250),
+    @transferId BIGINT,
+    @transferIdMerchant VARCHAR(50),
+    @type VARCHAR(50),
+    @message VARCHAR(250),
     @details XML
 AS
 SET NOCOUNT ON
@@ -16,7 +16,7 @@ WHERE
     transferId = @transferId AND
     merchantTxState = 1
 
-DECLARE @COUNT int = @@ROWCOUNT
+DECLARE @COUNT INT = @@ROWCOUNT
 
 SET @type = ISNULL (@type, 'transfer.push.confirmMerchant')
 

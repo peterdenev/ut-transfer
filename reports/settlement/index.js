@@ -10,7 +10,7 @@ date.setMilliseconds(0);
 module.exports = (gridStyle) => ({
     title: 'Settlement Report',
     export: {
-        method: 'db/transfer.report.settlement',
+        method: 'transfer.report.settlement',
         resultsetName: 'settlement'
     },
     grid: {
@@ -24,7 +24,7 @@ module.exports = (gridStyle) => ({
             {name: 'dueTo', title: 'Due to'}
         ],
         allowColumnConfig: true,
-        method: 'db/transfer.report.settlement',
+        method: 'transfer.report.settlement',
         resultsetName: 'settlement',
         externalStyle: {...reportStyle, ...gridStyle}
     },

@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[push.failIssuer]
+ALTER PROCEDURE [transfer].[push.failReversalLedger]
     @transferId BIGINT,
     @type VARCHAR(50),
     @message VARCHAR(250),
@@ -9,18 +9,14 @@ SET NOCOUNT ON
 UPDATE
     [transfer].[transfer]
 SET
-    issuerTxState = 3
+    expireCountLedger = ISNULL(expireCountLedger, 0) + 1
 WHERE
-    transferId = @transferId AND
-    issuerTxState = 1
+    transferId = @transferId
 
-DECLARE @COUNT INT = @@ROWCOUNT
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
-    @state = 'fail',
-    @source = 'issuer',
+    @state = 'failReversal',
+    @source = 'ledger',
     @message = @message,
     @udfDetails = @details
-
-IF @COUNT <> 1 RAISERROR('transfer.failIssuer', 16, 1);

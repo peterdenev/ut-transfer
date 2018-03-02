@@ -16,7 +16,7 @@ endDate.setMilliseconds(999);
 module.exports = (gridStyle) => ({
     title: 'Transfer Details',
     export: {
-        method: 'db/transfer.transferDetails.get',
+        method: 'transfer.transferDetails.get',
         resultsetName: 'transferDetails'
     },
     grid: {
@@ -31,7 +31,7 @@ module.exports = (gridStyle) => ({
             { name: 'amountSettlement', title: 'Settlement Amount' },
             { name: 'transferCurrency', title: 'Currency' }
         ],
-        method: 'db/transfer.transferDetails.get',
+        method: 'transfer.transferDetails.get',
         resultsetName: 'transferDetails',
         allowColumnConfig: true,
         externalStyle: {...reportStyle, ...gridStyle}

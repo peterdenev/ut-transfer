@@ -1,29 +1,34 @@
 {
   "name": "ut-transfer",
-  "version": "6.22.0",
+  "version": "6.23.0-rc-bahur.31",
   "main": "./index.js",
+  "pkg": {
+    "assets": [
+      "api/sql/schema/*.sql"
+    ]
+  },
   "dependencies": {
-    "immutable": "^3.8.1",
     "joi": "10.0.6"
   },
   "devDependencies": {
     "tap": "^10.7.3",
     "ut-tools": "^5.30.0",
-    "ut-run": "^9.1.0",
-    "ut-test": "^5.13.0"
+    "ut-run": "^9.2.0-rc-bahur.9",
+    "ut-test": "^5.14.0-rc-bahur.6"
   },
   "peerDependencies": {
+    "immutable": "^3.8.1",
     "ut-bus": "^6.1.0",
     "ut-error": "^5.4.9",
-    "ut-rule": "^9.14.0",
-    "ut-report": "^5.21.0",
-    "ut-front": "^8.0.0",
-    "ut-front-react": "^10.0.1",
+    "ut-rule": "^9.15.0-rc-bahur.6",
+    "ut-report": "^6.1.0-rc-bahur.1",
+    "ut-front": "^8.0.1",
+    "ut-front-react": "^10.0.4",
     "ut-user": "^7.31.0",
     "react": "^15.6.1",
     "react-router": "^3.0.0",
     "react-redux": "^5.0.5",
-    "redux": "3.7.2"
+    "redux": "^3.7.2"
   },
   "description": "UT Transfer",
   "scripts": {
@@ -33,9 +38,11 @@
     "check": "ut-check",
     "cover": "ut-cover",
     "lint-js": "ut-lint-js .",
+    "lint-sql": "ut-lint-sql",
     "postpublish": "ut-postpublish",
     "postversion": "ut-postversion",
     "precommit": "ut-precommit",
+    "precover": "ut-precover",
     "prepublish": "ut-prepublish",
     "prepush": "ut-prepush",
     "pretest": "ut-pretest",

@@ -1,13 +1,13 @@
-ALTER PROCEDURE [transfer].[push.reject] --this SP will trigger event for pending transaction reject request
-    @transferId bigint, -- the id of the transfer to be rejected
-    @message varchar(250) = 'Reject created', -- message type
+ALTER PROCEDURE [transfer].[push.reject] --this sp will trigger event for pending transaction reject request
+    @transferId BIGINT, -- the id of the transfer to be rejected
+    @message VARCHAR(250) = 'Reject created', -- message type
     @meta core.metaDataTT READONLY -- the id of the user performing the operation
 AS
 
 -- checks if the user has a right to make the operation
-DECLARE @actionID varchar(100) =  OBJECT_SCHEMA_NAME(@@PROCID) + '.' +  OBJECT_NAME(@@PROCID), @return int = 0
-EXEC @return = [user].[permission.check] @actionId =  @actionID, @objectId = null, @meta = @meta
-IF @return != 0
+DECLARE @actionID VARCHAR(100) = OBJECT_SCHEMA_NAME(@@PROCID) + '.' + OBJECT_NAME(@@PROCID), @RETURN INT = 0
+EXEC @RETURN = [user].[permission.check] @actionId = @actionID, @objectId = NULL, @meta = @meta
+IF @RETURN != 0
 BEGIN
     RETURN 55555
 END

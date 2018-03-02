@@ -1,7 +1,7 @@
 ALTER PROCEDURE [transfer].[push.failAcquirer]
-    @transferId bigint,
-    @type varchar(50),
-    @message varchar(250),
+    @transferId BIGINT,
+    @type VARCHAR(50),
+    @message VARCHAR(250),
     @details XML
 AS
 SET NOCOUNT ON
@@ -9,12 +9,13 @@ SET NOCOUNT ON
 UPDATE
     [transfer].[transfer]
 SET
-    acquirerTxState = 3
+    acquirerTxState = 3,
+    expireTime = DATEADD(S, -1, GETDATE())
 WHERE
     transferId = @transferId AND
     acquirerTxState = 1
 
-DECLARE @COUNT int = @@ROWCOUNT
+DECLARE @COUNT INT = @@ROWCOUNT
 EXEC [transfer].[push.event]
     @transferId = @transferId,
     @type = @type,
