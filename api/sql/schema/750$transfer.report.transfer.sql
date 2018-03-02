@@ -51,8 +51,15 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             t.[transferAmount],
             t.[actualAmount],
             t.[replacementAmount],
-            t.[acquirerFee],
+            CASE
+                WHEN t.channelType = 'iso' THEN t.processorFee
+                ELSE t.acquirerFee
+            END [acquirerFee],
             t.[issuerFee],
+            CASE t.channelType
+                WHEN 'iso' THEN t.acquirerFee
+                WHEN 'atm' THEN t.transferFee
+            END [conveinienceFee],
             t.[transferCurrency],
             CASE
                 WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] IN (2, 8, 12)) THEN 1
@@ -90,6 +97,7 @@ SELECT
     [transferAmount] AS transferAmountTotal,
     [acquirerFee] AS acquirerFeeTotal,
     [issuerFee] AS issuerFeeTotal,
+    [conveinienceFee] AS conveinienceFeeTotal,
     [transferCurrency],
     NULL AS recordsTotalSuccessfull
 INTO
@@ -107,6 +115,7 @@ UNION ALL SELECT
     SUM(CASE WHEN success = 1 THEN ISNULL([transferAmount], 0) ELSE 0.0 END) AS transferAmountTotal,
     SUM(CASE WHEN success = 1 THEN ISNULL([acquirerFee], 0) ELSE 0.0 END) AS acquirerFeeTotal,
     SUM(CASE WHEN success = 1 THEN ISNULL([issuerFee], 0) ELSE 0.0 END) AS issuerFeeTotal,
+    SUM(CASE WHEN success = 1 THEN ISNULL([conveinienceFee], 0) ELSE 0.0 END) AS conveinienceFeeTotal,
     [transferCurrency],
     COUNT(CASE WHEN success = 1 THEN 1 END) AS [recordsTotalSuccessfull]
 FROM
@@ -130,8 +139,15 @@ SELECT
     t.[transferAmount],
     t.[actualAmount],
     t.[replacementAmount],
-    t.[acquirerFee],
+    CASE
+        WHEN t.channelType = 'iso' THEN t.processorFee
+        ELSE t.acquirerFee
+    END [acquirerFee],
     t.[issuerFee],
+    CASE t.channelType
+        WHEN 'iso' THEN t.acquirerFee
+        WHEN 'atm' THEN t.transferFee
+    END [conveinienceFee],
     t.[transferCurrency],
     t.[requestDetails].value('(/root/terminalId)[1]', 'VARCHAR(8)') [terminalId],
     t.[requestDetails].value('(/root/terminalName)[1]', 'VARCHAR(40)') [terminalName],
@@ -184,6 +200,7 @@ UNION ALL SELECT
     NULL AS replacementAmount,
     r.acquirerFeeTotal,
     r.issuerFeeTotal,
+    r.conveinienceFeeTotal,
     r.[transferCurrency],
     NULL AS terminalId,
     NULL AS terminalName,

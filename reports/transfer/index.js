@@ -37,6 +37,7 @@ module.exports = (gridStyle) => ({
             { name: 'actualAmount', title: 'Actual Amount' },
             { name: 'issuerFee', title: 'Issuer Fee' },
             { name: 'acquirerFee', title: 'Acquirer Fee' },
+            { name: 'conveinienceFee', title: 'Convenience Fee' },
             { name: 'transferCurrency', title: 'Currency' },
             { name: 'terminalId', title: 'Device Id' },
             { name: 'terminalName', title: 'Device Location' },

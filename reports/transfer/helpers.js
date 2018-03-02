@@ -24,6 +24,7 @@ module.exports = {
                     break;
                 case 'acquirerFee':
                 case 'issuerFee':
+                case 'conveinienceFee':
                 case 'transferAmount':
                 case 'actualAmount':
                 case 'replacementAmount':
