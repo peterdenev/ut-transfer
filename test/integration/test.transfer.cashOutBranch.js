@@ -1,4 +1,3 @@
-var test = require('ut-run/test');
 var commonFunc = require('ut-test/lib/methods/commonFunc');
 var accountMethods = require('ut-test/lib/methods/account');
 var customerMethods = require('ut-test/lib/methods/customer');
@@ -50,14 +49,10 @@ var accountId1, accountId2, accountNumber1, accountNumber2;
 var stdPolicy;
 
 // Wallet customer withdraws money from his/her wallet by visiting a branch
-module.exports = function(opt, cache) {
-    test({
+module.exports = function() {
+    return {
         type: 'integration',
         name: 'cash out at branch transaction',
-        server: opt.server,
-        serverConfig: opt.serverConfig,
-        client: opt.client,
-        clientConfig: opt.clientConfig,
         steps: function(test, bus, run) {
             return run(test, bus, [userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                 commonFunc.createStep('user.user.get', 'get admin details', (context) => {
@@ -2265,5 +2260,5 @@ module.exports = function(opt, cache) {
                 ])
             );
         }
-    }, cache);
+    };
 };
