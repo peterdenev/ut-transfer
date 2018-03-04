@@ -54,7 +54,7 @@ var phonePrefix;
 var stdPolicy;
 // TODO for successful transactions - change the precision when the logic is implemented in the backend/db
 
-module.exports = function() {
+module.exports = function(opt) {
     return {
         type: 'integration',
         name: 'balance check transaction',
