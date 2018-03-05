@@ -49,7 +49,7 @@ var customerTypeIndividual, customerActorId, customerActorId2, currencyId, categ
 var accountId1, accountNumber1;
 var stdPolicy;
 
-module.exports = function() {
+module.exports = function(opt) {
     return {
         type: 'integration',
         name: 'transfer from wallet to bank account',

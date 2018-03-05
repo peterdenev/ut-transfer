@@ -53,7 +53,7 @@ var accountId1, accountNumber1, accountId2, accountNumber2;
 var stdPolicy;
 
 // Customer can deposit money to their bank account by using a 3rd party Agent wallet.
-module.exports = function() {
+module.exports = function(opt) {
     return {
         type: 'integration',
         name: 'cash-in to bank account from 3rd party agent wallet',

@@ -54,7 +54,7 @@ var accountCustomer1Id, accountMerchantId1, accountMerchantId2, accountMerchantI
 var stdPolicy;
 var rejectReasonId, cancelReasonId;
 
-module.exports = function() {
+module.exports = function(opt) {
     return {
         type: 'integration',
         name: 'merchant pull request/ merchant payment',

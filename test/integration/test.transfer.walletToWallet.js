@@ -58,7 +58,7 @@ var accountSenderId1, accountReceiverId1, accountSenderNumber1, accountReceiverN
 var phonePrefix;
 var stdPolicy;
 
-module.exports = function() {
+module.exports = function(opt) {
     return {
         type: 'integration',
         name: 'wallet to wallet transaction',

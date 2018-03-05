@@ -50,7 +50,7 @@ var customerTypeIndividual, customerActorId, customerActorId2, currencyId, categ
 var accountId1, accountNumber1;
 var stdPolicy;
 
-module.exports = function() {
+module.exports = function(opt) {
     return {
         type: 'integration',
         name: 'pull funds from linked bank account',

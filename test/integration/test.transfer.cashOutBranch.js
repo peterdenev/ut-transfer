@@ -49,7 +49,7 @@ var accountId1, accountId2, accountNumber1, accountNumber2;
 var stdPolicy;
 
 // Wallet customer withdraws money from his/her wallet by visiting a branch
-module.exports = function() {
+module.exports = function(opt) {
     return {
         type: 'integration',
         name: 'cash out at branch transaction',

@@ -50,7 +50,7 @@ var stdPolicy;
 var phonePrefix;
 
 // Wallet customer deposits money into his/her wallet by visiting a branch
-module.exports = function() {
+module.exports = function(opt) {
     return {
         type: 'integration',
         name: 'cash in at branch transaction',
