@@ -151,6 +151,7 @@ BEGIN TRY
             er.type acquirerErrorType,
             t.transferId,
             t.transferIdAcquirer,
+            t.transferIdIssuer,
             t.sourceAccount,
             t.destinationAccount,
             t.channelType,
