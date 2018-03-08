@@ -14,6 +14,7 @@ module.exports = {
     invalidSavingsAccount: create('invalidSavingsAccount', Transfer, 'Invalid savings account'),
     invalidAccountType: create('invalidAccountType', Transfer, 'Invalid account type'),
     invalidAccount: create('invalidAccount', Transfer, 'Invalid account'),
+    inactiveAccount: create('inactiveAccount', Transfer, 'Inactive account'),
     genericDecline: create('genericDecline', Transfer, 'Transfer declined'),
     incorrectPin: create('incorrectPin', Transfer, 'Incorrect PIN'),
     notFound: create('notFound', Transfer, 'Transfer not found'),
