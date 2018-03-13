@@ -25,6 +25,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @transferFee money,
     @description varchar(250),
     @udfAcquirer XML,
+    @offlineDateTime datetime,
     @split transfer.splitTT READONLY,
     @isPending BIT,
     @transferPending transfer.pendingTT READONLY,
@@ -131,7 +132,8 @@ BEGIN TRY
         issuerFee,
         transferFee,
         description,
-        reversed
+        reversed,
+	   offlineDateTime
     )
     OUTPUT
         INSERTED.*,
@@ -173,7 +175,8 @@ BEGIN TRY
         @issuerFee,
         @transferFee,
         @description,
-        0
+        0,
+	   @offlineDateTime
 
     DECLARE @transferId BIGINT = @@IDENTITY
 
