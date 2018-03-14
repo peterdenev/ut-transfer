@@ -135,3 +135,42 @@ IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'updatedOn' AND Object_ID
 BEGIN
     ALTER TABLE [transfer].[pending] ADD updatedOn datetime2
 END
+
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns sc LEFT JOIN sys.syscomments sm ON sm.id = sc.default_object_id 
+	WHERE sc.Name = N'acquirerFee' AND sc.object_id = Object_ID(N'transfer.transfer') AND sm.text IS NOT NULL)
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD DEFAULT(0) FOR acquirerFee
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns sc LEFT JOIN sys.syscomments sm ON sm.id = sc.default_object_id 
+	WHERE sc.Name = N'issuerFee' AND sc.object_id = Object_ID(N'transfer.transfer') AND sm.text IS NOT NULL)
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD DEFAULT(0) FOR issuerFee
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns sc LEFT JOIN sys.syscomments sm ON sm.id = sc.default_object_id 
+	WHERE sc.Name = N'transferFee' AND sc.object_id = Object_ID(N'transfer.transfer') AND sm.text IS NOT NULL)
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD DEFAULT(0) FOR transferFee
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE name = N'taxVAT' AND object_id = Object_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD taxVAT money DEFAULT(0)
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE name = N'taxWTH' AND object_id = Object_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD taxWTH money DEFAULT(0)
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE name = N'taxOther' AND object_id = Object_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD taxOther money DEFAULT(0)
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE name = N'comission' AND object_id = Object_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD comission money DEFAULT(0)
+END
