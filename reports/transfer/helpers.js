@@ -16,7 +16,16 @@ module.exports = {
                         result = 'N/A';
                     }
                     break;
+                case 'transferDateTime':
+                    if (!isHeader && result) {
+                        result = {
+                            'Transaction Date': result.split(' ')[0],
+                            'Transaction Time': result.split(' ')[1]
+                        }[field.title];
+                    }
+                    break;
                 case 'stan':
+                case 'transferId':
                 case 'traceNumber':
                     if (!isHeader && result) {
                         result = (`000000${result}`).slice(-6);
