@@ -152,15 +152,20 @@ SELECT
     t.[requestDetails].value('(/root/terminalId)[1]', 'VARCHAR(8)') [terminalId],
     t.[requestDetails].value('(/root/terminalName)[1]', 'VARCHAR(40)') [terminalName],
     CASE
+        WHEN t.responseCode = '13' THEN 'Invalid Amount'
+        WHEN t.responseCode = '25' THEN 'Destination Invalid'
+        WHEN t.responseCode = '96' THEN 'Dispenser Fault'
         WHEN t.success = 0 THEN t.errorMessage
-        ELSE 'Success'
+        ELSE 'Successful'
     END [responseDetails],
     ISNULL(ISNULL(
         t.[errorDetails].value('(/root/responseCode)[1]', 'VARCHAR(3)'),
         t.[errorDetails].value('(/params/responseCode)[1]', 'VARCHAR(3)')
     ), CASE WHEN t.success = 1 THEN '00' ELSE '96' END
     ) [responseCode],
-    t.[issuerTxStateName],
+    CASE WHEN t.[issuerTxStateName] = '' THEN 'rejected'
+        ELSE t.[issuerTxStateName]
+    END [issuerTxStateName],
     ISNULL(t.reverseMessage, t.reverseErrorMessage) [reversalCode],
     t.[merchantId] [merchantName],
     UPPER(t.[channelType]) [channelType],

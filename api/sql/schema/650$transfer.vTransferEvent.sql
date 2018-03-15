@@ -58,7 +58,7 @@ SELECT
     (CASE t.[issuerTxState]
         WHEN 1 THEN N'requested'
         WHEN 2 THEN N'confirmed'
-        WHEN 3 THEN N'denied'
+        WHEN 3 THEN N'rejected'
         WHEN 4 THEN N'unknown'
         WHEN 5 THEN N'aborted'
         WHEN 6 THEN N'error'
@@ -86,7 +86,11 @@ SELECT
     CASE
         WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] IN (2, 8, 12)) THEN 1
         ELSE 0
-    END success
+    END success,
+    ISNULL(
+        error.udfDetails.value('(/root/responseCode)[1]', 'VARCHAR(3)'),
+        error.udfDetails.value('(/params/responseCode)[1]', 'VARCHAR(3)')
+    ) responseCode
 FROM
     [transfer].[transfer] t
 OUTER APPLY
