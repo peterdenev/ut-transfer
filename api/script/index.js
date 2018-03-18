@@ -12,6 +12,7 @@ const DECLINED = {
     issuer: [
         'transfer.insufficientFunds',
         'transfer.invalidAccount',
+        'transfer.inactiveAccount',
         'transfer.creditAccountNotAllowed',
         'transfer.invalidCurrentAccount',
         'transfer.invalidSavingsAccount',
