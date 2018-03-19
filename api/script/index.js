@@ -103,8 +103,16 @@ var ruleValidate = (bus, transfer) => {
             transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
             transfer.acquirerFee = decision.amount.acquirerFee;
             transfer.issuerFee = decision.amount.issuerFee;
+            transfer.taxVAT = decision.amount.vat;
+            transfer.taxWTH = decision.amount.wth;
+            transfer.taxOther = decision.amount.otherTax;
+            transfer.commission = decision.amount.commission;
             transfer.amount.acquirerFee = currency.amount(transfer.transferCurrency, transfer.acquirerFee);
             transfer.amount.issuerFee = currency.amount(transfer.transferCurrency, transfer.issuerFee);
+            transfer.amount.taxVAT = currency.amount(transfer.transferCurrency, transfer.taxVAT);
+            transfer.amount.taxWTH = currency.amount(transfer.transferCurrency, transfer.taxWTH);
+            transfer.amount.taxOther = currency.amount(transfer.transferCurrency, transfer.taxOther);
+            transfer.amount.commission = currency.amount(transfer.transferCurrency, transfer.commission);
             transfer.transferDateTime = decision.amount.transferDateTime;
             transfer.transferTypeId = decision.amount.transferTypeId;
         } else {
