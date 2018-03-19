@@ -136,6 +136,7 @@ BEGIN TRY
             lp.port ledgerPort,
             t.cardId,
             'push' transferType,
+            t.acquirerCode,
             t.issuerSerialNumber,
             t.transferAmount,
             t.transferFee,
