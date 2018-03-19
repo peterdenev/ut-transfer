@@ -1,37 +1,34 @@
-var {evalResult, formatNumber} = require('ut-report/assets/script/common');
+const {formatNumber} = require('../common');
 
 module.exports = {
     staticResources: [
         {rel: 'stylesheet', type: 'text/css', href: '/s/ut-transfer/repository/css/reportStyle.css'}
     ],
-    transformCellValue: function({allowHtml, nodeContext, dateFormat, locale}) {
-        return (value, field, data, isHeader) => {
-            var classNames = [];
-            var result = value;
+    transformCellValue: (value, field, data, isHeader) => {
+        let classnames = [];
 
-            switch (field.name) {
-                case 'transferCount':
-                case 'deniedCount':
-                    result = formatNumber(result);
-                    classNames.push('rightAlign');
-                    break;
-                case 'transferAmount':
-                case 'transferFee':
-                case 'dueTo':
-                    classNames.push('rightAlign');
-                    if (!isHeader) {
-                        result = formatNumber(result);
-                        classNames.push('textColorBlue');
-                    }
-                    break;
-                default:
-                    break;
-            }
-            if (allowHtml) {
-                return evalResult(result, 'div', classNames, nodeContext);
-            }
+        switch (field.name) {
+            case 'transferCount':
+            case 'deniedCount':
+                value = formatNumber(value);
+                classnames.push('rightAlign');
+                break;
+            case 'transferAmount':
+            case 'transferFee':
+            case 'dueTo':
+                classnames.push('rightAlign');
+                if (!isHeader) {
+                    value = formatNumber(value);
+                    classnames.push('textColorBlue');
+                }
+                break;
+            default:
+                break;
+        }
 
-            return result;
+        return {
+            value,
+            classnames
         };
     }
 };

@@ -1,40 +1,37 @@
-var {evalResult, formatNumber, formatDate} = require('ut-report/assets/script/common');
+const {formatNumber, formatDate} = require('../common');
 
 module.exports = {
     staticResources: [
         {rel: 'stylesheet', type: 'text/css', href: '/s/ut-transfer/repository/css/reportStyle.css'}
     ],
-    transformCellValue: function({allowHtml, nodeContext, dateFormat, locale}) {
-        return (value, field, data, isHeader) => {
-            var classNames = [];
-            var result = value;
+    transformCellValue: (value, field, data, isHeader) => {
+        let classnames = [];
 
-            switch (field.name) {
-                case 'transferDateTime':
-                    if (!isHeader) {
-                        if (result) {
-                            result = formatDate(result, 'DD-MM-YYYY hh:mm:ss');
-                        }
+        switch (field.name) {
+            case 'transferDateTime':
+                if (!isHeader) {
+                    if (value) {
+                        value = formatDate(value, 'DD-MM-YYYY hh:mm:ss');
                     }
-                    break;
-                case 'amountSettlement':
-                case 'amountTransaction':
-                case 'amountBilling':
-                case 'transferAmount':
-                    if (!isHeader) {
-                        result = formatNumber(result);
-                        classNames.push('textColorBlue');
-                    }
-                    classNames.push('rightAlign');
-                    break;
-                default:
-                    break;
-            }
-            if (allowHtml) {
-                return evalResult(result, 'div', classNames, nodeContext);
-            }
+                }
+                break;
+            case 'amountSettlement':
+            case 'amountTransaction':
+            case 'amountBilling':
+            case 'transferAmount':
+                if (!isHeader) {
+                    value = formatNumber(value);
+                    classnames.push('textColorBlue');
+                }
+                classnames.push('rightAlign');
+                break;
+            default:
+                break;
+        }
 
-            return result;
+        return {
+            value,
+            classnames
         };
     }
 };

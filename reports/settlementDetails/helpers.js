@@ -1,33 +1,30 @@
-var {evalResult, formatNumber} = require('ut-report/assets/script/common');
+const {formatNumber} = require('../common');
 
 module.exports = {
     staticResources: [
         {rel: 'stylesheet', type: 'text/css', href: '/s/ut-transfer/repository/css/reportStyle.css'}
     ],
     rowStyleField: 'style',
-    transformCellValue: function({allowHtml, nodeContext, dateFormat, locale}) {
-        return (value, field, data, isHeader) => {
-            var classNames = [];
-            var result = value;
-            switch (field.name) {
-                case 'dueTo':
-                case 'transferAmount':
-                case 'transferFee':
-                    if (!isHeader) {
-                        result = formatNumber(result);
-                        classNames.push('textColorBlue');
-                    }
-                    classNames.push('rightAlign');
-                    break;
-                default:
-                    break;
-            }
+    transformCellValue: (value, field, data, isHeader) => {
+        let classnames = [];
 
-            if (allowHtml) {
-                return evalResult(result, 'div', classNames, nodeContext);
-            }
+        switch (field.name) {
+            case 'dueTo':
+            case 'transferAmount':
+            case 'transferFee':
+                if (!isHeader) {
+                    value = formatNumber(value);
+                    classnames.push('textColorBlue');
+                }
+                classnames.push('rightAlign');
+                break;
+            default:
+                break;
+        }
 
-            return result;
+        return {
+            value,
+            classnames
         };
     }
 };
