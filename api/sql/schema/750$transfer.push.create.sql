@@ -26,7 +26,7 @@ ALTER PROCEDURE [transfer].[push.create]
 	@taxVAT money = 0,
     @taxWTH money = 0,
 	@taxOther money = 0,
-	@comission money = 0,
+	@commission money = 0,
     @description varchar(250),
     @udfAcquirer XML,
     @split transfer.splitTT READONLY,
@@ -149,7 +149,7 @@ BEGIN TRY
 	taxVAT money NULL,
     taxWTH money NULL,
 	taxOther money NULL,
-	comission money NULL,
+	commission money NULL,
     description varchar(250) NULL,
     merchantMode varchar(20),
     merchantSettlementDate datetime,
@@ -193,7 +193,7 @@ BEGIN TRY
 		taxVAT,
 		taxWTH,
 		taxOther,
-		comission,
+		commission,
         description,
         reversed
     )
@@ -237,7 +237,7 @@ BEGIN TRY
 		INSERTED.taxVAT,
 		INSERTED.taxWTH,
 		INSERTED.taxOther,
-		INSERTED.comission,
+		INSERTED.commission,
         INSERTED.description,
         @merchantMode merchantMode,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @merchantSettlementDate, 120),'-',''),':',''),' ','') merchantSettlementDate,
@@ -280,7 +280,7 @@ BEGIN TRY
 		@taxVAT,
 		@taxWTH,
 		@taxOther,
-		@comission,
+		@commission,
         @description,
         0
 

@@ -170,7 +170,12 @@ BEGIN
     ALTER TABLE [transfer].[transfer] ADD taxOther money DEFAULT(0)
 END
 
-IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE name = N'comission' AND object_id = Object_ID(N'transfer.transfer'))
+IF EXISTS (SELECT 1 FROM sys.columns WHERE name = N'comission' AND object_id = Object_ID(N'transfer.transfer'))
 BEGIN
-    ALTER TABLE [transfer].[transfer] ADD comission money DEFAULT(0)
+    EXEC sp_rename 'transfer.transfer.comission', 'commission', 'COLUMN';
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE name = N'commission' AND object_id = Object_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD commission money DEFAULT(0)
 END
