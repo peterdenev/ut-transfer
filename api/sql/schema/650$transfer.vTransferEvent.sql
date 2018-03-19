@@ -16,6 +16,7 @@ SELECT
     t.[transferTypeId],
     t.[cardId],
     t.[reversed],
+    t.[reversedLedger],
     t.[settlementDate],
     t.[channelType],
     t.[localDateTime],
