@@ -51,7 +51,7 @@ BEGIN TRY
             NULL AS branchCode, -- ISNULL(b.NomItemText,'???') branch_code,
             t.transferId AS transferId, -- m.msgid,
             t.channelType AS channelType, -- d.DeviceType,
-            t.transferDateTime AS transferDateTime, -- m.msgtime,
+            CONVERT(VARCHAR(19), t.transferDateTime, 120) [transferDateTime],
             NULL AS retrievalReferenceNumber, -- m.retrieval_reference_number,
             NULL AS datetimeTransmission, -- m.datetime_transmission,
             t.channelId AS channelId, -- m.acceptor_terminal,

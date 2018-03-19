@@ -21,7 +21,6 @@
     "ut-bus": "^6.1.0",
     "ut-error": "^5.4.9",
     "ut-rule": "^9.15.0-rc-bahur.6",
-    "ut-report": "^6.1.0-rc-bahur.1",
     "ut-front": "^8.0.1",
     "ut-front-react": "^10.0.4",
     "ut-user": "^7.31.0",
