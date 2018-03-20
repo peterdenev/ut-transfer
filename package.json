@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.24.0-rc-cubalibre.5",
+  "version": "6.24.0-rc-cubalibre.6",
   "main": "./index.js",
   "pkg": {
     "assets": [
