@@ -6,7 +6,10 @@ SET NOCOUNT ON
 UPDATE
     [transfer].[transfer]
 SET
-    issuerTxState = 1
+    issuerTxState = 1,
+    issuerRequestedDateTime = GETUTCDATE()
+OUTPUT
+    INSERTED.issuerRequestedDateTime
 WHERE
     transferId = @transferId AND issuerTxState IS NULL
 
