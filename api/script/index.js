@@ -2,6 +2,7 @@ const DECLINED = {
     ledger: [
         'transfer.insufficientFunds',
         'transfer.invalidAccount',
+        'transfer.inactiveAccount',
         'transfer.creditAccountNotAllowed',
         'transfer.invalidCurrentAccount',
         'transfer.invalidSavingsAccount',
@@ -305,7 +306,10 @@ module.exports = {
             return this.bus.importMethod('db/transfer.push.requestIssuer')({
                 transferId: transfer.transferId
             })
-            .then(() => transfer)
+            .then(result => {
+                transfer.issuerRequestedDateTime = result[0][0].issuerRequestedDateTime;
+                return transfer;
+            })
             .then(this.bus.importMethod(transfer.issuerPort + '.push.execute'))
             .then(result => {
                 if (transfer.transferType === 'ministatement') {

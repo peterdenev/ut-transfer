@@ -145,6 +145,7 @@ BEGIN TRY
             t.processorFee,
             t.transferCurrency,
             t.localDateTime,
+            t.issuerRequestedDateTime,
             t.settlementDate issuerSettlementDate,
             t.merchantType,
             e.udfDetails udfAcquirer,
