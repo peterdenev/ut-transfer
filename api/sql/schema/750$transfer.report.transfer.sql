@@ -181,6 +181,7 @@ SELECT
     NULL [additionalInfo],
     t.style,
     t.alerts,
+	ib.bankCode,
     r.rowNum
 FROM
     #transfersReport r
@@ -188,6 +189,8 @@ JOIN
     transfer.vTransferEvent t ON t.transferId = r.transferId
 JOIN
     [card].[card] c ON c.cardId = t.cardId
+LEFT JOIN
+	integration.banks ib on (LEFT(credentialId, CHARINDEX('*', credentialId) - 1) BETWEEN ib.binStart AND ib.binEnd)	
 WHERE
 -- if last page transactions + totals is bigger than pageSize we don't want to show transacions
     (RowNum BETWEEN @startRow AND @endRow) OR ((@startRow >= recordsTotal AND RowNum > recordsTotal - (recordsTotal % @pageSize) AND @lastPageSize <= @pageSize))
@@ -221,6 +224,7 @@ UNION ALL SELECT
     NULL AS [additionalInfo],
     'transferAverage' AS style,
     NULL AS alerts,
+	NULL AS bankCode,
     r.rowNum
 FROM
     #transfersReport r
