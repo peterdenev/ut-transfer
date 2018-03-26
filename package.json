@@ -7,9 +7,6 @@
       "api/sql/schema/*.sql"
     ]
   },
-  "dependencies": {
-    "joi": "10.0.6"
-  },
   "devDependencies": {
     "tap": "^10.7.3",
     "ut-tools": "^5.30.0",
@@ -18,6 +15,7 @@
   },
   "peerDependencies": {
     "immutable": "^3.8.1",
+    "joi": "^13.1.2",
     "ut-bus": "^6.1.0",
     "ut-error": "^5.4.9",
     "ut-rule": "^9.15.0-rc-bahur.6",
