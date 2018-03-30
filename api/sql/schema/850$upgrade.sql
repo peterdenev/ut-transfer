@@ -22,3 +22,8 @@ IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'state' AND Object_ID = OB
 BEGIN
   ALTER TABLE [transfer].[event] ADD [state] varchar(50)
 END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'reversalDate' AND Object_ID = OBJECT_ID(N'[transfer].[transfer]'))
+BEGIN
+  ALTER TABLE [transfer].[transfer] ADD reversalDate datetimeoffset
+END

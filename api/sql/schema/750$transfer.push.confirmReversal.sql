@@ -9,7 +9,8 @@ BEGIN TRY
     UPDATE
         [transfer].[transfer]
     SET
-        reversed = 1
+        reversed = 1,
+	   reversalDate=GETUTCDATE()
     WHERE
         transferId = @transferId
 
