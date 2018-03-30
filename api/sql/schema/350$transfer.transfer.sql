@@ -37,7 +37,7 @@ CREATE TABLE [transfer].[transfer](
     transferFee money,
     offlineDateTime datetime,
     description varchar(250),
-    reversalDate datetimeoffset,
+    reversalDate datetime,
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
     CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])
 )

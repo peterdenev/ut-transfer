@@ -25,5 +25,5 @@ END
 
 IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'reversalDate' AND Object_ID = OBJECT_ID(N'[transfer].[transfer]'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD reversalDate datetimeoffset
+  ALTER TABLE [transfer].[transfer] ADD reversalDate datetime
 END
