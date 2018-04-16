@@ -10,15 +10,15 @@
   "devDependencies": {
     "tap": "^10.7.3",
     "ut-tools": "^5.30.0",
-    "ut-run": "^9.2.0-rc-bahur.9",
-    "ut-test": "^5.14.0-rc-bahur.6"
+    "ut-run": "^9.3.0-rc-cubalibre.0",
+    "ut-test": "^5.16.0-rc-cubalibre.8"
   },
   "peerDependencies": {
     "immutable": "^3.8.1",
     "joi": "^13.1.2",
     "ut-bus": "^6.1.0",
     "ut-error": "^5.4.9",
-    "ut-rule": "^9.15.0-rc-bahur.6",
+    "ut-rule": "^9.17.0-rc-cubalibre.11",
     "ut-front": "^8.0.1",
     "ut-front-react": "^10.0.4",
     "ut-user": "^7.31.0",
