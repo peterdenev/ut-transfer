@@ -1,5 +1,5 @@
 CREATE TABLE [transfer].[transfer](
-    transferId BIGINT IDENTITY(1000,1) NOT NULL,
+    transferId BIGINT IDENTITY(1000, 1) NOT NULL,
     transferTypeId BIGINT NOT NULL,
     acquirerCode VARCHAR(50),
     transferIdAcquirer VARCHAR(50),

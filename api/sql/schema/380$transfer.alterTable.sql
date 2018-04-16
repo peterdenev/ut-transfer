@@ -212,10 +212,10 @@ END
 
 IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'processorFee' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD processorFee money
+    ALTER TABLE [transfer].[transfer] ADD processorFee money
 END
 
 IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'issuerRequestedDateTime' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
 BEGIN
-  ALTER TABLE [transfer].[transfer] ADD issuerRequestedDateTime DATETIME2
+    ALTER TABLE [transfer].[transfer] ADD issuerRequestedDateTime DATETIME2
 END

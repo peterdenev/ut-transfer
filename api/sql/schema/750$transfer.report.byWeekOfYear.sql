@@ -1,6 +1,6 @@
 ALTER PROCEDURE [transfer].[report.byWeekOfYear]
-    @startDate DATETIME = NULL,
-    @endDate DATETIME = NULL,
+    @startDate DATETIME2 = NULL,
+    @endDate DATETIME2 = NULL,
     @transferCurrency NVARCHAR(3) = NULL,
     @orderBy core.orderByTT READONLY, -- what kind of sort to be used ascending or descending & ON which column results to be sorted
     @meta core.metaDataTT READONLY -- information FOR the user that makes the operation
