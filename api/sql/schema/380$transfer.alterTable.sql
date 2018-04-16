@@ -179,3 +179,13 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE name = N'commission' AND object_i
 BEGIN
     ALTER TABLE [transfer].[transfer] ADD commission money DEFAULT(0)
 END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'noteToSelf' and Object_ID = Object_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE  [transfer].[transfer] ADD noteToSelf NVARCHAR(250) NULL
+END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'comment' and Object_ID = Object_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE  [transfer].[transfer] ADD [comment] NVARCHAR(250) NULL
+END

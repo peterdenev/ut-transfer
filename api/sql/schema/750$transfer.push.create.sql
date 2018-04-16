@@ -28,6 +28,8 @@ ALTER PROCEDURE [transfer].[push.create]
 	@taxOther money = 0,
 	@commission money = 0,
     @description varchar(250),
+	@comment NVARCHAR(250) = NULL,
+	@noteToSelf NVARCHAR(250) = NULL,
     @udfAcquirer XML,
     @split transfer.splitTT READONLY,
     @isPending BIT,
@@ -151,6 +153,8 @@ BEGIN TRY
 	taxOther money NULL,
 	commission money NULL,
     description varchar(250) NULL,
+	comment NVARCHAR(250) NULL,
+	noteToSelf NVARCHAR(250) NULL,
     merchantMode varchar(20),
     merchantSettlementDate datetime,
     merchantSerialNumber bigint,
@@ -195,6 +199,8 @@ BEGIN TRY
 		taxOther,
 		commission,
         description,
+		comment,
+		noteToSelf,
         reversed
     )
     OUTPUT
@@ -239,6 +245,8 @@ BEGIN TRY
 		INSERTED.taxOther,
 		INSERTED.commission,
         INSERTED.description,
+		INSERTED.comment,
+		INSERTED.noteToSelf,
         @merchantMode merchantMode,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @merchantSettlementDate, 120),'-',''),':',''),' ','') merchantSettlementDate,
         @merchantSerialNumber merchantSerialNumber,
@@ -282,6 +290,8 @@ BEGIN TRY
 		@taxOther,
 		@commission,
         @description,
+		@comment,
+		@noteToSelf,
         0
 
     SELECT *
