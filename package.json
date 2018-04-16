@@ -10,6 +10,7 @@
   "devDependencies": {
     "tap": "^10.7.3",
     "ut-tools": "^5.30.0",
+    "ut-test": "^5.16.0-rc-cubalibre.8",
     "ut-run": "^9.3.0-rc-cubalibre.0"
   },
   "peerDependencies": {
