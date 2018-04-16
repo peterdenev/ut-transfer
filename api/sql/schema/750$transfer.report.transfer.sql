@@ -1,17 +1,17 @@
 ALTER PROCEDURE [transfer].[report.transfer]
-    @transferId bigint,
-    @cardNumber varchar(32),
-    @traceNumber bigint,
-    @accountNumber varchar(100),
-    @deviceId varchar(100),
-    @processingCode varchar(100),
-    @startDate datetime,
-    @endDate datetime,
-    @issuerTxState int,
-    @merchantName varchar(100),
-    @channelType varchar(50),
-    @pageNumber int, -- page number for result
-    @pageSize int, -- page size of result
+    @transferId BIGINT,
+    @cardNumber VARCHAR(32),
+    @traceNumber BIGINT,
+    @accountNumber VARCHAR(100),
+    @deviceId VARCHAR(100),
+    @processingCode VARCHAR(100),
+    @startDate DATETIME2,
+    @endDate DATETIME2,
+    @issuerTxState INT,
+    @merchantName VARCHAR(100),
+    @channelType VARCHAR(50),
+    @pageNumber INT, -- page number for result
+    @pageSize INT, -- page size of result
     @meta core.metaDataTT READONLY -- information for the user that makes the operation
 AS
 SET NOCOUNT ON
