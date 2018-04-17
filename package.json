@@ -10,8 +10,8 @@
   "devDependencies": {
     "tap": "^10.7.3",
     "ut-tools": "^5.30.0",
-    "ut-run": "^9.2.0-rc-bahur.9",
-    "ut-test": "^5.14.0-rc-bahur.6"
+    "ut-run": "^9.3.0-rc-cubalibre.0",
+    "ut-test": "^5.15.8"
   },
   "peerDependencies": {
     "immutable": "^3.8.1",
