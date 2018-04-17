@@ -181,6 +181,15 @@ module.exports = {
             .then(pushResult => {
                 pushResult = pushResult && pushResult[0] && pushResult[0][0];
                 if (pushResult && pushResult.transferId) {
+                    this.bus.importMethod('history.transferTransferDetails.insert')({
+                        transferId: pushResult.transferId
+                    })
+                    .catch(e => {
+                        if (this.log && this.log.error) {
+                            this.log.error(e);
+                        }
+                    });
+
                     transfer.transferId = pushResult.transferId;
                     transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
                     transfer.localDateTime = pushResult.localDateTime;
