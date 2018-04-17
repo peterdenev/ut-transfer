@@ -5,6 +5,8 @@ CREATE PROCEDURE [transfer].[push.confirmAdjustment]
     @replacementAmountCurrency VARCHAR(3),
     @actualAmount MONEY,
     @actualAmountCurrency VARCHAR(3),
+    @transferIdIssuer varchar(50),
+    @transferIdLedger varchar(50),
     @details XML
 AS
 SET NOCOUNT ON
@@ -16,7 +18,9 @@ BEGIN TRY
             replacementAmount = @replacementAmount,
             replacementAmountCurrency = @replacementAmountCurrency,
             actualAmount = ISNULL(@actualAmount, @replacementAmount),
-            actualAmountCurrency = ISNULL(@actualAmountCurrency, @replacementAmountCurrency)
+            actualAmountCurrency = ISNULL(@actualAmountCurrency, @replacementAmountCurrency),
+            transferIdIssuer = ISNULL(@transferIdIssuer, transferIdIssuer),
+            transferIdLedger = ISNULL(@transferIdLedger, transferIdLedger)
         WHERE
             transferId = @transferId
 

@@ -84,6 +84,8 @@ const processAdjustment = (bus, log, $meta, transfer) => {
             replacementAmountCurrency: transfer.amount && transfer.amount.adjustment && transfer.amount.adjustment.currency,
             actualAmount: result.amount && result.amount.actual && result.amount.actual.amount,
             actualAmountCurrency: result.amount && result.amount.actual && result.amount.actual.currency,
+            transferIdIssuer: target === 'issuer' ? result.transferIdIssuer : undefined,
+            transferIdLedger: target === 'ledger' ? result.transferIdIssuer : undefined,
             details: null
         }))
         .catch(adjustmentError => {
