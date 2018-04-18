@@ -1,3 +1,23 @@
+<a name="6.24.0"></a>
+# [6.24.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.23.1...v6.24.0) (2018-04-18)
+
+
+### Bug Fixes
+
+* ACCU-2651 add inactive account error ([462c583](https://github.com/softwaregroup-bg/ut-transfer/commit/462c583))
+* added issuer requested utc date time ([#164](https://github.com/softwaregroup-bg/ut-transfer/issues/164)) ([7e72ec4](https://github.com/softwaregroup-bg/ut-transfer/commit/7e72ec4))
+* added reversedLedger to vTransferEvent ([#161](https://github.com/softwaregroup-bg/ut-transfer/issues/161)) ([9fe6c59](https://github.com/softwaregroup-bg/ut-transfer/commit/9fe6c59))
+* build ([bc40a3a](https://github.com/softwaregroup-bg/ut-transfer/commit/bc40a3a))
+* fix joi to be peer dependency ([#166](https://github.com/softwaregroup-bg/ut-transfer/issues/166)) ([261e0f0](https://github.com/softwaregroup-bg/ut-transfer/commit/261e0f0))
+* handle inactive account error ([e6c7b40](https://github.com/softwaregroup-bg/ut-transfer/commit/e6c7b40))
+* remove ut-report dependency ([0558796](https://github.com/softwaregroup-bg/ut-transfer/commit/0558796))
+* report filtering ([41f38a4](https://github.com/softwaregroup-bg/ut-transfer/commit/41f38a4))
+* select auth code in idle.execute ([#156](https://github.com/softwaregroup-bg/ut-transfer/issues/156)) ([3b8dcf0](https://github.com/softwaregroup-bg/ut-transfer/commit/3b8dcf0))
+* transfer report modification ([#160](https://github.com/softwaregroup-bg/ut-transfer/issues/160)) ([38a9332](https://github.com/softwaregroup-bg/ut-transfer/commit/38a9332))
+* update auth code, money precision ([#168](https://github.com/softwaregroup-bg/ut-transfer/issues/168)) ([bfa751c](https://github.com/softwaregroup-bg/ut-transfer/commit/bfa751c))
+
+
+
 <a name="6.23.1"></a>
 ## [6.23.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.23.0...v6.23.1) (2018-03-05)
 
