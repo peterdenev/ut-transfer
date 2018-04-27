@@ -1,3 +1,13 @@
+<a name="6.24.1"></a>
+## [6.24.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.24.0...v6.24.1) (2018-04-27)
+
+
+### Bug Fixes
+
+* check fallback ([f8efe69](https://github.com/softwaregroup-bg/ut-transfer/commit/f8efe69))
+
+
+
 <a name="6.24.0"></a>
 # [6.24.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.23.1...v6.24.0) (2018-04-18)
 
