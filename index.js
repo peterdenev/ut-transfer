@@ -8,7 +8,6 @@ module.exports = () => ({
         transferHTTP: require('./http')
     },
     validations: {
-        transfer: require('./validations/transfer'),
-        'db/transfer': require('./validations/db/transfer')
+        transfer: require('./validations/transfer')
     }
 });
