@@ -141,7 +141,7 @@ BEGIN TRY
         END
     END
 
-    SELECT 'isFallBack' AS 'resultset'
+    SELECT 'lastTransactionData' AS resultSetName
     SELECT TOP 1
         ISNULL(e.udfDetails.value('(/root/isFallBack)[1]', 'BIT'), 0) AS isFallBack
     FROM
