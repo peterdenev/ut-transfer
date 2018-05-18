@@ -4,26 +4,43 @@
 }
 
 .textColorBlue {
-    color: blue;
+    color: #4096fd;
 }
 
 .transferAlert {
-    background-color: #F3F781!important;
+    background-color: #FFF4A3 !important;
+}
+
+.transferAlert:hover {
+    background-color: #F7EC9B!important
 }
 
 .transferReversed {
-    background-color: lightgray!important;
+    background-color: #EEEEEE !important;
+}
+
+.transferReversed:hover {
+    background-color: #E6E6E6 !important;
 }
 
 .transferError {
-    background-color: pink!important;
+    background-color: #fee5e5 !important
+}
+.transferError:hover {
+    background-color:#F6DDDD!important
 }
 
 .transferNormal {
-    background-color: #ffffff!important;
+    background-color: #ffffff !important;
 }
 
 .transferAverage, .transferTotal {
-    background-color: #ffffff!important;
+    background-color: #ffffff !important;
     font-weight: bold;    
+}
+
+.transferNormal:hover,
+.transferAverage:hover,
+.transferTotal:hover {
+    background-color: #f7f7f7 !important;
 }
