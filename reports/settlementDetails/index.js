@@ -31,7 +31,7 @@ module.exports = (gridStyle) => ({
             { name: 'transferIdAcquirer', title: 'Acquirer Id' },
             { name: 'deviceId', title: 'Device Id' },
             { name: 'deviceName', title: 'Device Name' },
-            { name: 'dueTo', title: 'Due To' }
+            { name: 'dueTo', title: 'Due' }
         ],
         method: 'transfer.report.settlementDetails',
         resultsetName: 'settlementDetails',
