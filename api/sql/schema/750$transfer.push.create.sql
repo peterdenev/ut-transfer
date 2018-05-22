@@ -28,6 +28,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @offlineDateTime datetime,
     @split transfer.splitTT READONLY,
     @isPending BIT,
+    @bioValidatedBy NVARCHAR(100)=NULL,
     @transferPending transfer.pendingTT READONLY,
     @userAvailableAccounts [core].[arrayList] READONLY,
     @meta core.metaDataTT READONLY
@@ -133,7 +134,8 @@ BEGIN TRY
         transferFee,
         description,
         reversed,
-	   offlineDateTime
+	   offlineDateTime,
+	   bioValidatedBy
     )
     OUTPUT
         INSERTED.*,
@@ -176,7 +178,8 @@ BEGIN TRY
         @transferFee,
         @description,
         0,
-	   @offlineDateTime
+	   @offlineDateTime,
+	   @bioValidatedBy
 
     DECLARE @transferId BIGINT = @@IDENTITY
 
