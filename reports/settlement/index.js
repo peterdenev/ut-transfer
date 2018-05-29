@@ -58,54 +58,10 @@ module.exports = (gridStyle) => ({
     },
     filters: [
         {
-            name: 'cooperationId',
-            label: 'Cooperative',
-            placeholder: 'Cooperative',
-            type: filterElementTypes.dropDown,
-            showAllOption: false,
-            canSelectPlaceholder: true
-            // dataFetch: {
-            //     method: 'customer.organization.list',
-            //     resultsetName: 'allBranches',
-            //     params: {},
-            //     map: {display: 'organizationName', value: 'actorId'}
-            // }
-        },
-        {
-            name: 'branchId',
-            label: 'Business Unit',
-            placeholder: 'Business Unit',
-            type: filterElementTypes.dropDown,
-            showAllOption: false,
-            canSelectPlaceholder: true,
-            dataFetch: {
-                method: 'customer.organization.list',
-                resultsetName: 'allBranches',
-                params: {},
-                map: {display: 'organizationName', value: 'actorId'}
-            }
-        },
-        /*
-        {
-            name: '',
-            label: '',
-            placeholder: '',
-            type: filterElementTypes.dropDown,
-            showAllOption: false,
-            canSelectPlaceholder: true
-            // dataFetch: {
-            //     method: 'customer.organization.list',
-            //     resultsetName: 'allBranches',
-            //     params: {},
-            //     map: {display: 'organizationName', value: 'actorId'}
-            // }
-        },
-        */
-        {
-            labelFrom: 'Transaction From',
-            labelTo: 'Transaction To',
-            nameMap: {from: 'transactionFromDate', to: 'transactionToDate'},
-            type: filterElementTypes.datePickerBetween
+            label: 'Settlement Date',
+            name: 'settlementDate',
+            type: filterElementTypes.datePicker,
+            defaultValue: date
         }
     ],
     order: {
