@@ -87,6 +87,7 @@ var processReversal = (bus, log, $meta) => params => {
 
 var ruleValidate = (bus, transfer) => {
     return bus.importMethod('db/rule.decision.lookup')({
+        channelType: transfer.channelType,
         channelId: transfer.channelId,
         operation: transfer.transferType,
         sourceAccount: transfer.sourceAccount,
