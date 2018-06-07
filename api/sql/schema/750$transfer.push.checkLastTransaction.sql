@@ -38,8 +38,7 @@ BEGIN TRY
         @lastNotes1 = e.udfDetails.value('(/root/type1Notes)[1]', 'INT'),
         @lastNotes2 = e.udfDetails.value('(/root/type2Notes)[1]', 'INT'),
         @lastNotes3 = e.udfDetails.value('(/root/type3Notes)[1]', 'INT'),
-        @lastNotes4 = e.udfDetails.value('(/root/type4Notes)[1]', 'INT'),
-        @isFallBack = e.udfDetails.value('(/root/isFallBack)[1]', 'BIT')
+        @lastNotes4 = e.udfDetails.value('(/root/type4Notes)[1]', 'INT')
     FROM
         [transfer].[transfer] t
     LEFT JOIN
@@ -141,8 +140,18 @@ BEGIN TRY
                 @details = @details
         END
     END
-    SELECT 'isFallBack' AS 'resultset'
-    SELECT ISNULL (@isFallBack, 0) AS isFallBack
+
+    SELECT 'lastTransactionData' AS resultSetName
+    SELECT TOP 1
+        ISNULL(e.udfDetails.value('(/root/isFallBack)[1]', 'BIT'), 0) AS isFallBack
+    FROM
+        [transfer].[transfer] t
+    LEFT JOIN
+        [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.push'
+    WHERE
+        t.channelId = @channelId
+    ORDER BY
+        t.transferId DESC
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams
 END TRY

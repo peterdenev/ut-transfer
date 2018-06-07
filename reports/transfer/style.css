@@ -1,0 +1,4 @@
+.dataGridTable tbody td > * {
+    max-width: 135px;
+    min-width: 50px;
+}

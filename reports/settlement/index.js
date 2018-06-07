@@ -21,7 +21,7 @@ module.exports = (gridStyle) => ({
             {name: 'transferAmount', title: 'Transfer Amount'},
             {name: 'transferFee', title: 'Transfer Fee'},
             {name: 'deniedCount', title: 'Denied Count'},
-            {name: 'dueTo', title: 'Due to'}
+            {name: 'dueTo', title: 'Due'}
         ],
         allowColumnConfig: true,
         method: 'transfer.report.settlement',

@@ -49,7 +49,7 @@ BEGIN TRY
                 ELSE N''
             END AS localDate,
             RIGHT(v.localDateTime, 6) AS localTime,
-            CASE WHEN v.channelType = N'iso' THEN v.transferIdAcquirer ELSE v.transferId END AS transferIdAcquirer, --[Serial],
+            CASE WHEN v.channelType = N'iso' THEN v.transferIdAcquirer ELSE CAST(v.transferId AS VARCHAR(50)) END AS transferIdAcquirer, --[Serial],
             processing.x.value(N'(processingCode)[1]', N'NVARCHAR(150)') AS processingCode,
             c.issuerId AS issuerId,
             c.cardProductName AS productName,
@@ -59,7 +59,7 @@ BEGIN TRY
             ISNULL((CASE WHEN v.success = 1 AND n.itemCode IN (N'sale', N'withdraw') THEN v.transferAmount END), 0) +
             ISNULL((CASE WHEN v.success = 1 THEN v.acquirerFee END), 0) [dueTo],
             v.transferCurrency AS transferCurrency,
-            CASE WHEN v.channelType = N'iso' THEN v.transferIdIssuer ELSE v.transferId END AS transferIdIssuer, -- authorisationCode
+            CASE WHEN v.channelType = N'iso' THEN v.transferIdIssuer ELSE CAST(v.transferId AS VARCHAR(50)) END AS transferIdIssuer, -- authorisationCode
             processing.x.value(N'(terminalId)[1]', N'NVARCHAR(150)') AS deviceId,
             processing.x.value(N'(terminalName)[1]', N'NVARCHAR(150)') AS deviceName,
             v.style,

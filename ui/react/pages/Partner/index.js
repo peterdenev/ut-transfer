@@ -68,8 +68,8 @@ class Partner extends Component {
         let buttons = this.getButtons();
         return (
             <div>
-                <AddTab pathname={getLink('ut-transfer:partners')} title='Partners' />
-                <Header text={<Text>Partners</Text>} buttons={buttons} />
+                <AddTab pathname={getLink('ut-transfer:partners')} title='Transfer Partners and Card Issuers' />
+                <Header text={<Text>Transfer Partners and Card Issuers</Text>} buttons={buttons} />
                 <div>
                     <ResizibleContainer cols={resizibleContainerCols} localStorageType={localStorageTypes.TWO_COLS} />
                 </div>
