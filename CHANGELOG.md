@@ -1,3 +1,8 @@
+<a name="6.25.0"></a>
+# [6.25.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.25.0-rc-diesel.5...v6.25.0) (2018-06-07)
+
+
+
 <a name="6.24.1"></a>
 ## [6.24.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.24.0...v6.24.1) (2018-04-27)
 
