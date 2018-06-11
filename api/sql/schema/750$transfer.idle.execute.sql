@@ -11,12 +11,7 @@ BEGIN TRY
     UPDATE
         [transfer].[transfer]
     SET
-        expireTime = CASE
-            WHEN 5>isnull(retryCount,0) THEN DATEADD(SECOND, 30, GETDATE())
-            WHEN 10>retryCount THEN DATEADD(SECOND, 60, GETDATE())
-            WHEN 15>retryCount THEN DATEADD(MINUTE, 30, GETDATE())
-            WHEN 20>retryCount THEN DATEADD(HOUR, 1, GETDATE())
-        END,
+        expireTime = [transfer].[reversal.getExpireTime](retryCount, 'forward'),
         @txid = transferId,
         retryCount = ISNULL(retryCount, 0) + 1,
         retryTime = GETDATE(),
@@ -47,12 +42,7 @@ BEGIN TRY
         UPDATE
             [transfer].[transfer]
         SET
-            expireTime = CASE
-                WHEN 5 > ISNULL(expireCount, 0) THEN DATEADD(SECOND, 30, GETDATE())
-                WHEN 10 > expireCount THEN DATEADD(SECOND, 60, GETDATE())
-                WHEN 15 > expireCount THEN DATEADD(MINUTE, 30, GETDATE())
-                WHEN 20 > expireCount THEN DATEADD(HOUR, 1, GETDATE())
-            END,
+            expireTime = [transfer].[reversal.getExpireTime](retryCount, 'reverse'),
             @txid = transferId,
             expireCount = ISNULL(expireCount, 0) + 1,
             @mtid = '420',
@@ -91,12 +81,7 @@ BEGIN TRY
         UPDATE
             [transfer].[transfer]
         SET
-            expireTime = CASE
-                WHEN 5 > ISNULL(expireCount,0) THEN DATEADD(SECOND, 30, GETDATE())
-                WHEN 10 > expireCount THEN DATEADD(SECOND, 60, GETDATE())
-                WHEN 15 > expireCount THEN DATEADD(MINUTE, 30, GETDATE())
-                WHEN 20 > expireCount THEN DATEADD(HOUR, 1, GETDATE())
-            END,
+            expireTime = [transfer].[reversal.getExpireTime](retryCount, 'reverse'),
             @txid = transferId,
             expireCount = ISNULL(expireCount, 0) + 1,
             @mtid = '200',
