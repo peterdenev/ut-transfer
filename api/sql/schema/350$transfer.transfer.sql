@@ -37,11 +37,12 @@ CREATE TABLE [transfer].[transfer](
     transferFee money DEFAULT(0),
     taxVAT money DEFAULT(0),
     taxWTH money DEFAULT(0),
-	taxOther money DEFAULT(0),
-	commission money DEFAULT(0),
+    taxOther money DEFAULT(0),
+    commission money DEFAULT(0),
     description varchar(250),
-	[comment] NVARCHAR(250),
-	noteToSelf NVARCHAR(250),
+    [comment] NVARCHAR(250),
+    noteToSelf NVARCHAR(250),
+    utilityRef NVARCHAR(250),
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
     CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])
 )

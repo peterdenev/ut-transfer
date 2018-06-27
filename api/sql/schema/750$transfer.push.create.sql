@@ -30,6 +30,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @description varchar(250),
 	@comment NVARCHAR(250) = NULL,
 	@noteToSelf NVARCHAR(250) = NULL,
+    @utilityRef NVARCHAR(250) = NULL,
     @udfAcquirer XML,
     @split transfer.splitTT READONLY,
     @isPending BIT,
@@ -155,6 +156,7 @@ BEGIN TRY
     description varchar(250) NULL,
 	comment NVARCHAR(250) NULL,
 	noteToSelf NVARCHAR(250) NULL,
+    utilityRef NVARCHAR(250) NULL,
     merchantMode varchar(20),
     merchantSettlementDate datetime,
     merchantSerialNumber bigint,
@@ -201,6 +203,7 @@ BEGIN TRY
         description,
 		comment,
 		noteToSelf,
+    utilityRef,
         reversed
     )
     OUTPUT
@@ -247,6 +250,7 @@ BEGIN TRY
         INSERTED.description,
 		INSERTED.comment,
 		INSERTED.noteToSelf,
+    INSERTED.utilityRef,
         @merchantMode merchantMode,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @merchantSettlementDate, 120),'-',''),':',''),' ','') merchantSettlementDate,
         @merchantSerialNumber merchantSerialNumber,
@@ -292,6 +296,7 @@ BEGIN TRY
         @description,
 		@comment,
 		@noteToSelf,
+    @utilityRef,
         0
 
     SELECT *

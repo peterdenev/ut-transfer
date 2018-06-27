@@ -189,3 +189,8 @@ IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'comment' and Object_ID =
 BEGIN
   ALTER TABLE  [transfer].[transfer] ADD [comment] NVARCHAR(250) NULL
 END
+
+IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'utilityRef' and Object_ID = Object_ID(N'transfer.transfer'))
+BEGIN
+  ALTER TABLE  [transfer].[transfer] ADD [utilityRef] NVARCHAR(250) NULL
+END
