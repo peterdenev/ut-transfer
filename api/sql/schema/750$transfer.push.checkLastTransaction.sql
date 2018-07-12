@@ -14,7 +14,7 @@ DECLARE @callParams XML
 BEGIN TRY
 
     DECLARE
-        @lastTx int,
+        @lastTx bigint,
         @lastSernum varchar(4),
         @lastNotes1 int,
         @lastNotes2 int,
@@ -22,6 +22,13 @@ BEGIN TRY
         @lastNotes4 int,
         @lastAcquirerState int,
         @lastIssuerState int
+
+    SELECT
+        @lastTx = MAX(t.transferId)
+    FROM
+        [transfer].[transfer] t
+    WHERE
+        t.channelId = @channelId
 
     SELECT TOP 1
         @lastTx = t.transferId,
@@ -37,9 +44,7 @@ BEGIN TRY
     LEFT JOIN
         [transfer].[event] e ON e.transferId = t.transferId AND e.source = 'acquirer' AND e.type = 'transfer.requestAcquirer'
     WHERE
-        t.channelId = @channelId
-    ORDER BY
-        t.transferId DESC
+        t.transferId = @lastTx
 
     IF @lastAcquirerState IS NULL AND @lastTx IS NOT NULL
     BEGIN
