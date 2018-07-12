@@ -30,7 +30,7 @@ BEGIN TRY
     WHERE
         t.channelId = @channelId
 
-    SELECT TOP 1
+    SELECT
         @lastTx = t.transferId,
         @lastSernum = e.udfDetails.value('(/root/sernum)[1]', 'varchar(4)'),
         @lastAcquirerState = t.acquirerTxState,
