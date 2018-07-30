@@ -59,6 +59,11 @@ BEGIN TRY
         RETURN 55555
     END
 
+    IF EXISTS(SELECT TOP 1 1 FROM [transfer].[transfer] WHERE transferidAcquirer=@transferIdAcquirer)
+    BEGIN
+	    RAISERROR('transfer.idAlreadyExists', 16, 1);   
+    END
+
     SET @userId = (SELECT [auth.actorId] FROM @meta)
 
     BEGIN TRANSACTION
