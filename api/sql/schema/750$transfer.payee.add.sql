@@ -18,7 +18,8 @@ BEGIN TRY
     IF (ISNULL(@noResultSet, 0) = 0)
     BEGIN
         SELECT 'payee' AS resultSetName
-        SELECT userId, payeeName, accountTypeId, accountNumber, bankName, SWIFT FROM @result
+        SELECT userId, payeeName, accountTypeId, accountNumber, bankName, SWIFT
+        FROM @result
     END
 
 END TRY
