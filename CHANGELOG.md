@@ -1,3 +1,8 @@
+<a name="6.26.0"></a>
+# [6.26.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.26.0-rc-einstein.0...v6.26.0) (2018-08-02)
+
+
+
 <a name="6.25.0"></a>
 # [6.25.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.25.0-rc-diesel.5...v6.25.0) (2018-06-07)
 
