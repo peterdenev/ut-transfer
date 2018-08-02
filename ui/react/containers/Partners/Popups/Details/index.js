@@ -35,7 +35,7 @@ export class Create extends Component {
         let isEditDisable = this.props.initialPartnerData.equals(this.props.partnerData);
         return {
             actionButtons: [{
-                label: 'Edit',
+                label: 'Save',
                 disabled: isEditDisable,
                 styleType: 'primaryDialog',
                 onClick: this.editPartner
