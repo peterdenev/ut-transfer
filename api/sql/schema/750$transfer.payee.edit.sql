@@ -1,6 +1,5 @@
 ALTER PROCEDURE [transfer].[payee.edit] -- edits payee information
     @payee [transfer].payeeTT READONLY, -- the edited payee information
-    @actorId BIGINT, -- user id/owner of the payee
     @noResultSet BIT = 0 -- a flag to show if result is expected
 AS
 
