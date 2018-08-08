@@ -13,7 +13,7 @@ BEGIN TRY
 
     INSERT INTO [transfer].[payee] (userId, payeeName, accountTypeId, accountNumber, bankName, SWIFT)
     OUTPUT INSERTED.* INTO @result
-    SELECT @userId, payeeName, accountTypeId, accountNumber, bankName, SWIFT
+    SELECT ISNULL (userId, @userId), payeeName, accountTypeId, accountNumber, bankName, SWIFT
     FROM @payee
 
 
