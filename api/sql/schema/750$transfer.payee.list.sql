@@ -7,4 +7,5 @@ DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
 SELECT p.payeeId, p.payeeName, p.accountNumber, p.bankName
 FROM [transfer].payee p
 WHERE userId = @userId
+    AND isDeleted = 0
 ORDER BY p.payeeName
