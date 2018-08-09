@@ -16,5 +16,5 @@ IF @languageId IS NULL
 SELECT p.payeeId, p.payeeName, p.accountTypeId, ISNULL(itt.itemNameTranslation, itn.itemName) AS accountType, p.accountNumber, p.bankName, p.SWIFT
 FROM [transfer].payee p
 JOIN core.itemName itn ON itn.itemNameId = p.accountTypeId
-JOIN core.itemTranslation itt ON itt.itemNameId = itn.itemNameId AND languageId = @languageId
+LEFT JOIN core.itemTranslation itt ON itt.itemNameId = itn.itemNameId AND languageId = @languageId
 WHERE payeeId = @payeeId
