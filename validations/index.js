@@ -14,5 +14,11 @@ module.exports = {
     'report.byWeekOfYear': require('./report/report.byWeekOfYear'),
     'report.transfer': require('./report/report.transfer'),
     'report.settlement': require('./report/report.settlement'),
-    'report.settlementDetails': require('./report/report.settlementDetails')
+    'report.settlementDetails': require('./report/report.settlementDetails'),
+    'payee.add': require('./payees/payee.add'),
+    'payee.edit': require('./payees/payee.edit'),
+    'payee.delete': require('./payees/payee.delete'),
+    'payee.fetch': require('./payees/payee.fetch'),
+    'payee.get': require('./payees/payee.get'),
+    'payee.list': require('./payees/payee.list'),
 };
