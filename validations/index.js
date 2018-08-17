@@ -20,5 +20,5 @@ module.exports = {
     'payee.delete': require('./payees/payee.delete'),
     'payee.fetch': require('./payees/payee.fetch'),
     'payee.get': require('./payees/payee.get'),
-    'payee.list': require('./payees/payee.list'),
+    'payee.list': require('./payees/payee.list')
 };

@@ -146,9 +146,9 @@ module.exports = function(opt) {
                                     assert.equals(customerJoiValidation.validateAddOrganization(result['organization.info'][0]).error, null, 'return all details after creating the organization');
                                 }),
                                 customerMethods.approveOrganization('approve organization', context2 => orgId1)]
-                                ).then(() => {
-                                    return {};
-                                });
+                            ).then(() => {
+                                return {};
+                            });
                         }, (result, assert) => {
                             assert.pass('Add and approve organization passed');
                         });
