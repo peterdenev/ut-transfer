@@ -7,23 +7,16 @@ DECLARE @result [transfer].payeeTT
 
 BEGIN TRY
 
-    DECLARE @tranCounter INT = @@TRANCOUNT;
-    IF @tranCounter = 0
-        BEGIN TRANSACTION
-
-            UPDATE p
-            SET p.payeeName = pp.payeeName,
-                p.accountTypeId = pp.accountTypeId,
-                p.accountNumber = pp.accountNumber,
-                p.bankName = pp.bankName,
-                p.SWIFT = pp.SWIFT
-            OUTPUT INSERTED.payeeId, INSERTED.payeeName, INSERTED.accountTypeId, INSERTED.accountNumber, INSERTED.bankName, INSERTED.SWIFT
-            INTO @result (payeeId, payeeName, accountTypeId, accountNumber, bankName, SWIFT)
-            FROM [transfer].payee p
-            INNER JOIN @payee pp ON p.payeeId = pp.payeeId
-
-            IF @tranCounter = 0
-        COMMIT TRANSACTION
+    UPDATE p
+    SET p.payeeName = pp.payeeName,
+        p.accountTypeId = pp.accountTypeId,
+        p.accountNumber = pp.accountNumber,
+        p.bankName = pp.bankName,
+        p.SWIFT = pp.SWIFT
+    OUTPUT INSERTED.payeeId, INSERTED.payeeName, INSERTED.accountTypeId, INSERTED.accountNumber, INSERTED.bankName, INSERTED.SWIFT
+    INTO @result (payeeId, payeeName, accountTypeId, accountNumber, bankName, SWIFT)
+    FROM [transfer].payee p
+    INNER JOIN @payee pp ON p.payeeId = pp.payeeId
 
     IF (ISNULL(@noResultSet, 0) = 0)
     BEGIN
