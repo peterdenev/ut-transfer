@@ -37,11 +37,12 @@ const processReversal = (bus, log, $meta, transfer) => {
             }
             throw error;
         })
-        .then(() => bus.importMethod(`db/transfer.push.confirmReversal${target}`)(transfer))
-        .then(() => {
+        .then((result) => {
             transfer[`reversed${{Issuer: '', Ledger: 'Ledger'}[target]}`] = true;
-            return transfer;
+            transfer.reversalResult = result;
+            return bus.importMethod(`db/transfer.push.confirmReversal${target}`)({transferId: transfer.transferId, details: result});
         })
+        .then(() => transfer)
         .catch(reversalError => {
             let connected = !['port.notConnected', 'transfer.issuerNotConnected'].includes(reversalError && reversalError.type);
             return Promise.resolve(connected && bus.importMethod(`db/transfer.push.failReversal${target}`)({
