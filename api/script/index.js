@@ -31,37 +31,18 @@ const processReversal = (bus, log, $meta, transfer) => {
     const reverse = (port, target) => {
         let method = `${port}.${transfer.transferType}.${transfer.operation}`;
         return bus.importMethod(method, {timeout: 30000})(transfer, $meta)
-        .catch(error => {
-            if (error.type === 'transfer.transferAlreadyReversed') {
-                return transfer;
-            }
-            throw error;
-        })
-        .then((result) => {
-            transfer[`reversed${{Issuer: '', Ledger: 'Ledger'}[target]}`] = true;
-            transfer.reversalResult = result;
-            return bus.importMethod(`db/transfer.push.confirmReversal${target}`)({transferId: transfer.transferId, details: result});
-        })
-        .then(() => transfer)
-        .catch(reversalError => {
-            let connected = !['port.notConnected', 'transfer.issuerNotConnected'].includes(reversalError && reversalError.type);
-            return Promise.resolve(connected && bus.importMethod(`db/transfer.push.failReversal${target}`)({
-                transferId: transfer.transferId,
-                type: reversalError.type || (`${target.toLowerCase()}.error`),
-                message: reversalError.message,
-                details: reversalError
-            }))
             .catch(error => {
                 if (error.type === 'transfer.transferAlreadyReversed') {
                     return transfer;
                 }
                 throw error;
             })
-            .then(() => bus.importMethod(`db/transfer.push.confirmReversal${target}`)(transfer))
-            .then(() => {
+            .then((result) => {
                 transfer[`reversed${{Issuer: '', Ledger: 'Ledger'}[target]}`] = true;
-                return transfer;
+                transfer.reversalResult = result;
+                return bus.importMethod(`db/transfer.push.confirmReversal${target}`)({transferId: transfer.transferId, details: result});
             })
+            .then(() => transfer)
             .catch(reversalError => {
                 let connected = !['port.notConnected', 'transfer.issuerNotConnected'].includes(reversalError && reversalError.type);
                 return Promise.resolve(connected && bus.importMethod(`db/transfer.push.failReversal${target}`)({
@@ -71,12 +52,31 @@ const processReversal = (bus, log, $meta, transfer) => {
                     details: reversalError
                 }))
                     .catch(error => {
-                        log.error && log.error(error);
-                        return Promise.reject(reversalError);
+                        if (error.type === 'transfer.transferAlreadyReversed') {
+                            return transfer;
+                        }
+                        throw error;
                     })
-                    .then(() => Promise.reject(reversalError));
+                    .then(() => bus.importMethod(`db/transfer.push.confirmReversal${target}`)(transfer))
+                    .then(() => {
+                        transfer[`reversed${{Issuer: '', Ledger: 'Ledger'}[target]}`] = true;
+                        return transfer;
+                    })
+                    .catch(reversalError => {
+                        let connected = !['port.notConnected', 'transfer.issuerNotConnected'].includes(reversalError && reversalError.type);
+                        return Promise.resolve(connected && bus.importMethod(`db/transfer.push.failReversal${target}`)({
+                            transferId: transfer.transferId,
+                            type: reversalError.type || (`${target.toLowerCase()}.error`),
+                            message: reversalError.message,
+                            details: reversalError
+                        }))
+                            .catch(error => {
+                                log.error && log.error(error);
+                                return Promise.reject(reversalError);
+                            })
+                            .then(() => Promise.reject(reversalError));
+                    });
             });
-        });
     };
     return bus.importMethod('db/transfer.push.reverse')(transfer, $meta).then(() => {
         transfer.operation = transfer.operation || 'reverse';
