@@ -137,9 +137,9 @@ module.exports = function(opt) {
                                     assert.equals(customerJoiValidation.validateAddOrganization(result['organization.info'][0]).error, null, 'return all details after creating the organization');
                                 }),
                                 customerMethods.approveOrganization('approve organization', context2 => orgId1)]
-                                ).then(() => {
-                                    return {};
-                                });
+                            ).then(() => {
+                                return {};
+                            });
                         }, (result, assert) => {
                             assert.pass('Add and approve organization passed');
                         });
@@ -443,9 +443,9 @@ module.exports = function(opt) {
                             description: operationNameCashOutBranch
                         };
                     }, null,
-                        (error, assert) => {
-                            assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transaction');
-                        }),
+                    (error, assert) => {
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transaction');
+                    }),
                     userMethods.logout('logout admin', context => context.login['identity.check'].sessionId),
                     commonFunc.createStep('identity.check', 'login user 1', (context) => {
                         return {
@@ -532,7 +532,7 @@ module.exports = function(opt) {
                     accountMethods.getAccountBalance('get fee account balance 1', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 1', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 1', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
-                     /** Scenarios with product which is with min and max account balance */
+                    /** Scenarios with product which is with min and max account balance */
                     productMethods.editProduct('edit product - set min and max account balances', context => {
                         return {
                             productId: context['get product 2'].product[0].productId,

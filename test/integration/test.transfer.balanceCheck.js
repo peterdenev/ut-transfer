@@ -142,9 +142,9 @@ module.exports = function(opt) {
                                     assert.equals(customerJoiValidation.validateAddOrganization(result['organization.info'][0]).error, null, 'return all details after creating the organization');
                                 }),
                                 customerMethods.approveOrganization('approve organization', context2 => orgId1)]
-                                ).then(() => {
-                                    return {};
-                                });
+                            ).then(() => {
+                                return {};
+                            });
                         }, (result, assert) => {
                             assert.pass('Add and approve organization passed');
                         });
@@ -505,8 +505,8 @@ module.exports = function(opt) {
                     transferMethods.setBalance('set insufficient balance in customer account - less than balance check fee',
                         context => [accountId1], TRANSACTIONFEE - SMALLESTNUM),
                     transferMethods.setBalance('set default balance in fee, vat and otherTax accounts',
-                         context => [context['fetch fee account id'].account[0].accountId,
-                             context['fetch vat account id'].account[0].accountId, context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
+                        context => [context['fetch fee account id'].account[0].accountId,
+                            context['fetch vat account id'].account[0].accountId, context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - customer account balance is less than balance check fee', (context) => {
                         return {
                             transferType: operationeCodeBalanceCheck,
@@ -597,9 +597,9 @@ module.exports = function(opt) {
                             description: operationNameBalanceCheck
                         };
                     }, null,
-                        (error, assert) => {
-                            assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transcton');
-                        }),
+                    (error, assert) => {
+                        assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transcton');
+                    }),
                     /** Scenarios with product which is with min and max account balance */
                     productMethods.editProduct('edit product - set min and max account balances', context => {
                         return {
@@ -691,9 +691,9 @@ module.exports = function(opt) {
                     transferMethods.setBalance('set customer account balance more than product max account balance + balance check fee',
                         context => [accountId1], MAXACCOUNTBALANCE + TRANSACTIONFEE + SMALLESTNUM),
                     transferMethods.setBalance('set default balance in fee, vat and otherTax accounts 2',
-                    context => [context['fetch fee account id'].account[0].accountId,
-                        context['fetch vat account id'].account[0].accountId,
-                        context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
+                        context => [context['fetch fee account id'].account[0].accountId,
+                            context['fetch vat account id'].account[0].accountId,
+                            context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - customer balance more than the product maxAccountBalance limit', (context) => {
                         return {
                             transferType: operationeCodeBalanceCheck,
@@ -842,10 +842,10 @@ module.exports = function(opt) {
                         assert.true(result.split.every(split => split.conditionId === conditionId), 'return correct conditionId');
                     }),
                     transferMethods.setBalance('set default balance in all accounts',
-                         context => [accountId1,
-                             context['fetch fee account id'].account[0].accountId,
-                             context['fetch vat account id'].account[0].accountId,
-                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
+                        context => [accountId1,
+                            context['fetch fee account id'].account[0].accountId,
+                            context['fetch vat account id'].account[0].accountId,
+                            context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.execute', 'unsuccessfully check balance - duplicate transferIdAcquirer', (context) => {
                         return {
                             transferType: operationeCodeBalanceCheck,
@@ -1008,10 +1008,10 @@ module.exports = function(opt) {
                         assert.equals(accountJoiValidation.validateEditAccount(result).error, null, 'return all detais after editing an account');
                     }),
                     transferMethods.setBalance('set default balance in all accounts 1',
-                         context => [accountId1,
-                             context['fetch fee account id'].account[0].accountId,
-                             context['fetch vat account id'].account[0].accountId,
-                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
+                        context => [accountId1,
+                            context['fetch fee account id'].account[0].accountId,
+                            context['fetch vat account id'].account[0].accountId,
+                            context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     userMethods.logout('logout admin 4', context => context.login['identity.check'].sessionId),
                     userMethods.loginMobile('login user 5', PHONENUMBER, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - account in status pending', (context) => {
@@ -1332,10 +1332,10 @@ module.exports = function(opt) {
                     userMethods.logout('logout admin 8', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller', userConstants.USERNAME, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
                     transferMethods.setBalance('set default balance in all accounts 3',
-                         context => [accountId1,
-                             context['fetch fee account id'].account[0].accountId,
-                             context['fetch vat account id'].account[0].accountId,
-                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
+                        context => [accountId1,
+                            context['fetch fee account id'].account[0].accountId,
+                            context['fetch vat account id'].account[0].accountId,
+                            context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'successful transaction validation - by teller user', (context) => {
                         return {
                             transferType: operationeCodeBalanceCheck,

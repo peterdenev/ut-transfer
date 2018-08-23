@@ -141,9 +141,9 @@ module.exports = function(opt) {
                                     assert.equals(customerJoiValidation.validateAddOrganization(result['organization.info'][0]).error, null, 'return all details after creating the organization');
                                 }),
                                 customerMethods.approveOrganization('approve organization', context2 => orgId1)]
-                                ).then(() => {
-                                    return {};
-                                });
+                            ).then(() => {
+                                return {};
+                            });
                         }, (result, assert) => {
                             assert.pass('Add and approve organization passed');
                         });
@@ -990,7 +990,7 @@ module.exports = function(opt) {
                     }, (result, assert) => {
                         assert.equals(ruleJoiValidation.validateEditRule(result).error, null, 'Return all detals after edit rule');
                     }),
-                     /** Negative scenarios with account status - transactions can be processed only with approved accounts */
+                    /** Negative scenarios with account status - transactions can be processed only with approved accounts */
                     commonFunc.createStep('ledger.account.edit', 'edit account 1', context => {
                         return {
                             account: {
