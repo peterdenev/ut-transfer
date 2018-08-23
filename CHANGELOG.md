@@ -1,3 +1,25 @@
+<a name="6.27.0"></a>
+# [6.27.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.26.1...v6.27.0) (2018-08-23)
+
+
+### Bug Fixes
+
+* add accountTypeId in result set ([1a19164](https://github.com/softwaregroup-bg/ut-transfer/commit/1a19164))
+* add payee table and stored procedures for add and edit ([9f760b8](https://github.com/softwaregroup-bg/ut-transfer/commit/9f760b8))
+* get userId from [@meta](https://github.com/meta) ([db44630](https://github.com/softwaregroup-bg/ut-transfer/commit/db44630))
+* get userId from TT table if is null get from meta ([ea666d8](https://github.com/softwaregroup-bg/ut-transfer/commit/ea666d8))
+* remove transactions ([7829bfd](https://github.com/softwaregroup-bg/ut-transfer/commit/7829bfd))
+* update procedure for get payee with left join to table itemTranslation ([1886efc](https://github.com/softwaregroup-bg/ut-transfer/commit/1886efc))
+* update procedure payee.list and add condition isDeleted = 0 ([fdec021](https://github.com/softwaregroup-bg/ut-transfer/commit/fdec021))
+
+
+### Features
+
+* add procedures for add, edit, fetch, get, delete payees ([0f4bd7a](https://github.com/softwaregroup-bg/ut-transfer/commit/0f4bd7a))
+* payee joi validations ([46e6cce](https://github.com/softwaregroup-bg/ut-transfer/commit/46e6cce))
+
+
+
 <a name="6.26.1"></a>
 ## [6.26.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.26.0...v6.26.1) (2018-08-23)
 
