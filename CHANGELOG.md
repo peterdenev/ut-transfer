@@ -1,3 +1,18 @@
+<a name="6.26.1"></a>
+## [6.26.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.26.0...v6.26.1) (2018-08-23)
+
+
+### Bug Fixes
+
+* improve reversals, pass data to confirm reversal procedures ([e582f64](https://github.com/softwaregroup-bg/ut-transfer/commit/e582f64))
+
+
+
+<a name="6.26.0"></a>
+# [6.26.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.26.0-rc-einstein.0...v6.26.0) (2018-08-02)
+
+
+
 <a name="6.25.0"></a>
 # [6.25.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.25.0-rc-diesel.5...v6.25.0) (2018-06-07)
 

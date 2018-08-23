@@ -1,5 +1,6 @@
 ALTER PROCEDURE [transfer].[push.confirmReversalLedger]
-    @transferId BIGINT
+    @transferId BIGINT,
+    @details XML
 AS
 SET NOCOUNT ON
 
@@ -33,7 +34,7 @@ BEGIN TRY
                 @state = 'reverse',
                 @source = 'acquirer',
                 @message = 'TRANSACTION was succesfully reversed',
-                @udfDetails = NULL
+                @udfDetails = @details
         END
     COMMIT TRANSACTION
 END TRY
