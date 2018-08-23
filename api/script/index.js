@@ -76,6 +76,7 @@ const processReversal = (bus, log, $meta, transfer) => {
                     })
                     .then(() => Promise.reject(reversalError));
             });
+        });
     };
     return bus.importMethod('db/transfer.push.reverse')(transfer, $meta).then(() => {
         transfer.operation = transfer.operation || 'reverse';
