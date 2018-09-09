@@ -85,6 +85,16 @@ var processReversal = (bus, log, $meta) => params => {
         .catch(failReversal);
 };
 
+var assignmentCalc = (decision, tag) => {
+    let amount = 0;
+    decision.split.forEach(split => {
+        if (split.tag.indexOf(tag) > -1) {
+            amount = split.amount;
+        }
+    });
+    return amount || decision.amount[tag];
+}
+
 var ruleValidate = (bus, transfer) => {
     return bus.importMethod('db/rule.decision.lookup')({
         channelType: transfer.channelType,
@@ -104,10 +114,10 @@ var ruleValidate = (bus, transfer) => {
             transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
             transfer.acquirerFee = decision.amount.acquirerFee;
             transfer.issuerFee = decision.amount.issuerFee;
-            transfer.taxVAT = decision.amount.vat;
-            transfer.taxWTH = decision.amount.wth;
-            transfer.taxOther = decision.amount.otherTax;
-            transfer.commission = decision.amount.commission;
+            transfer.taxVAT = assignmentCalc(decision, 'vat');
+            transfer.taxWTH = assignmentCalc(decision, 'wth');
+            transfer.taxOther = assignmentCalc(decision, 'otherTax');
+            transfer.commission = assignmentCalc(decision, 'commission');
             transfer.amount.acquirerFee = currency.amount(transfer.transferCurrency, transfer.acquirerFee);
             transfer.amount.issuerFee = currency.amount(transfer.transferCurrency, transfer.issuerFee);
             transfer.amount.taxVAT = currency.amount(transfer.transferCurrency, transfer.taxVAT);
