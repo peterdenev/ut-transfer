@@ -276,7 +276,7 @@ BEGIN TRY
         @issuerSettlementDate,
         @channelId,
         @channelType,
-        @ordererId,
+        @userId,
         @merchantId,
         @merchantInvoice,
         @merchantPort,
