@@ -108,7 +108,11 @@ var ruleValidate = (bus, transfer) => {
         transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
         transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
         transfer.split = decision.split || [];
-
+        transfer.split.forEach((split, key) => {
+            if (transfer.split[key].tag.indexOf('agentCommission') > -1) {
+                transfer.split[key].state = '1'; // "Request was sent"
+            }
+        });
         if (decision.amount) {
             transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
             transfer.acquirerFee = decision.amount.acquirerFee;
