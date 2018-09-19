@@ -10,6 +10,7 @@ SELECT
     t.[actualAmount],
     t.[replacementAmount],
     t.[description],
+    t.[credentialId],
     t.[transferCurrency],
     t.[transferIdAcquirer],
     t.[merchantId],
