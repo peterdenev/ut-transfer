@@ -8,7 +8,7 @@ module.exports = {
     params: joi.object().keys({
         payee: joi.object().keys({
             payeeName: joi.string().required(),
-            accountTypeId: joi.string().required(),
+            accountTypeId: joi.number().required(),
             accountNumber: joi.string().required(),
             bankName: joi.string().required(),
             SWIFT: joi.string().required()
