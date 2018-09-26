@@ -1,5 +1,9 @@
 module.exports = {
     'push.execute': require('./transfer/push.execute'),
+    'push.create': require('./transfer/push.create'),
+    'push.requestIssuer': require('./transfer/push.requestIssuer'),
+    'push.confirmIssuer': require('./transfer/push.confirmIssuer'),
+    'push.failIssuer': require('./transfer/push.failIssuer'),
     'transfer.get': require('./transfer/transfer.get'),
     'reason.list': require('./transfer/reason.list'),
     'partner.fetch': require('./partner/partner.fetch'),
