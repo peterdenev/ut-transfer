@@ -9,7 +9,7 @@ module.exports = {
         localDateTime: joi.string().max(14),
         settlementDate: joi.string().max(14),
         tramsferIdAcquirer: joi.string().max(50),
-        retrievalReferenceNumber: joi.string().max(12),        
+        retrievalReferenceNumber: joi.string().max(12),
         channelId: joi.number(),
         channelType: joi.string().max(50),
         ordererId: joi.number(),
