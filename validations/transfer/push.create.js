@@ -1,7 +1,7 @@
 var joi = require('joi');
 
 module.exports = {
-    description: 'Creates a record in the [transfer] table',
+    description: 'Creates a record in the transfer.transfer table',
     params: joi.object().keys({
         transferTypeId: joi.number(),
         acquirerCode: joi.string().max(50),
