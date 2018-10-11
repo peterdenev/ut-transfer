@@ -1,18 +1,11 @@
 ALTER PROCEDURE [transfer].[transfer.updateSettlementDate]
-    
+    @transfersId [core].[arrayNumberList] READONLY,
     @settlementDate DATE
 AS
-DECLARE @dateFrom DATE,
-        @dateTo DATE
 BEGIN TRY
-    SET @dateFrom=@settlementDate
-    SET @dateTo=DATEADD(day,1,@settlementDate)
-    
-    UPDATE t SET settlementDate=@settlementDate
+    UPDATE  t SET settlementDate=@settlementDate 
     FROM[transfer].[transfer] t
-    WHERE t.transferDateTime >= @dateFrom   
-    AND   t.transferDateTime < @dateTo 
- 
+    JOIN @transfersId ti on t.transferId=ti.value 
  END TRY
 BEGIN CATCH
     EXEC [core].[error]
