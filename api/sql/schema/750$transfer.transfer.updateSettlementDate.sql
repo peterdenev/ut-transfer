@@ -9,7 +9,8 @@ BEGIN TRY
     SET @dateTo=DATEADD(day,1,@settlementDate)
     UPDATE t SET settlementDate=@settlementDate
     FROM[transfer].[transfer] t
-    WHERE( @dateFrom IS NULL OR t.transferDateTime >= @dateFrom  ) AND ( @dateTo IS NULL OR t.transferDateTime < @dateTo )
+    WHERE t.transferDateTime >= @dateFrom   
+    AND   t.transferDateTime < @dateTo 
  
  END TRY
 BEGIN CATCH
