@@ -7,6 +7,7 @@ DECLARE @dateFrom DATE,
 BEGIN TRY
     SET @dateFrom=@settlementDate
     SET @dateTo=DATEADD(day,1,@settlementDate)
+    
     UPDATE t SET settlementDate=@settlementDate
     FROM[transfer].[transfer] t
     WHERE t.transferDateTime >= @dateFrom   
