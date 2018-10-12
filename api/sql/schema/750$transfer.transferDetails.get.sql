@@ -68,6 +68,8 @@ BEGIN TRY
             t.ledgerTxState AS ledgerTxState,
             t.merchantTxState AS merchantTxState,
             t.description AS description,
+            t.sourceAccount AS sourceAccount,
+            t.destinationAccount AS destinationAccount,
             NULL AS isError, -- WHEN alerts != '' THEN ' style="background-color:#F3F781"'
             NULL AS alerts,
             ROW_NUMBER() OVER ( ORDER BY
@@ -128,6 +130,8 @@ BEGIN TRY
         ledgerTxState,
         merchantTxState,
         description,
+        sourceAccount,
+        destinationAccount,
         isError,
         alerts,
         rowNum,
@@ -162,6 +166,8 @@ BEGIN TRY
         ledgerTxState,
         merchantTxState,
         description,
+        sourceAccount,
+        destinationAccount,
         isError,
         alerts,
         rowNum,
