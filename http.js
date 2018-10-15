@@ -7,7 +7,7 @@ module.exports = {
         this.registerRequestHandler([{
             method: 'GET',
             path: '/s/ut-transfer/repository/{p*}',
-            config: {
+            options: {
                 auth: 'jwt'
             },
             handler: {
