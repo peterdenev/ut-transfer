@@ -1,4 +1,4 @@
-ALTER PROCEDURE [transfer].[transfer.updateSettlementDate]
+ALTER PROCEDURE [transfer].[transfer.updateInternalAccountsAndTransfers]
     @transfersId [core].[arrayNumberList] READONLY,
     @settlementDate DATE
 AS
