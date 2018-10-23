@@ -31,7 +31,7 @@ BEGIN TRY
 			 JOIN @splitId st on st.value=s.splitId)s ON s.transferId = t.transferId
 
 	   UPDATE b 
-	   SET debit=b.debit+r.debit
+	   SET credit=b.credit+r.debit
 	   FROM ledger.balance b 
 	   JOIN ledger.account a on b.accountId=a.accountId
 	   JOIN(
@@ -45,7 +45,7 @@ BEGIN TRY
 	   )r ON a.accountId=r.accountId
 
 	   UPDATE b 
-	   SET debit=b.credit+r.credit
+	   SET debit=b.debit+r.credit
 	   FROM ledger.balance b 
 	   JOIN ledger.account a on b.accountId=a.accountId
 	   JOIN(
