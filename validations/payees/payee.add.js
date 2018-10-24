@@ -19,6 +19,7 @@ module.exports = {
             payee: joi.object().keys({
                 payeeName: joi.string().required(),
                 payeeId: joi.number().required(),
+                userId: joi.number().required(),
                 accountTypeId: joi.number().required(),
                 accountNumber: joi.string().required(),
                 bankName: joi.string().required(),
