@@ -9,7 +9,7 @@ BEGIN TRY
 	INSERT INTO @splitId
 	SELECT s.splitId 
 	FROM [transfer].[transfer] t
-		  JOIN @transfersId ti on t.transferId=ti.value 
+		  JOIN (SELECT DISTINCT value FROM  @transfersId) ti on t.transferId=ti.value 
 		  JOIN [transfer].[split] s ON s.transferId = t.transferId
 		  JOIN (SELECT s.transferTypeId,s.splitDescription FROM [settlement].[transferTypeSplitTagMapping] s
 				UNION
