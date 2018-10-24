@@ -28,6 +28,7 @@ var errors = require('../../errors');
 var currency = require('../../currency');
 
 const processReversal = (bus, log, $meta, transfer) => {
+    let {forward} = $meta;
     const reverse = (port, target) => {
         let method = `${port}.${transfer.transferType}.${transfer.operation}`;
         return bus.importMethod(method, {timeout: 30000})(transfer, $meta)
@@ -40,7 +41,7 @@ const processReversal = (bus, log, $meta, transfer) => {
             .then((result) => {
                 transfer[`reversed${{Issuer: '', Ledger: 'Ledger'}[target]}`] = true;
                 transfer.reversalResult = result;
-                return bus.importMethod(`db/transfer.push.confirmReversal${target}`)({transferId: transfer.transferId, details: result});
+                return bus.importMethod(`db/transfer.push.confirmReversal${target}`)({transferId: transfer.transferId, details: result}, {forward});
             })
             .then(() => transfer)
             .catch(reversalError => {
@@ -50,14 +51,14 @@ const processReversal = (bus, log, $meta, transfer) => {
                     type: reversalError.type || (`${target.toLowerCase()}.error`),
                     message: reversalError.message,
                     details: reversalError
-                }))
+                }, {forward}))
                     .catch(error => {
                         if (error.type === 'transfer.transferAlreadyReversed') {
                             return transfer;
                         }
                         throw error;
                     })
-                    .then(() => bus.importMethod(`db/transfer.push.confirmReversal${target}`)(transfer))
+                    .then(() => bus.importMethod(`db/transfer.push.confirmReversal${target}`)(transfer), {forward})
                     .then(() => {
                         transfer[`reversed${{Issuer: '', Ledger: 'Ledger'}[target]}`] = true;
                         return transfer;
@@ -69,7 +70,7 @@ const processReversal = (bus, log, $meta, transfer) => {
                             type: reversalError.type || (`${target.toLowerCase()}.error`),
                             message: reversalError.message,
                             details: reversalError
-                        }))
+                        }, {forward}))
                             .catch(error => {
                                 log.error && log.error(error);
                                 return Promise.reject(reversalError);
@@ -95,6 +96,7 @@ const processReversal = (bus, log, $meta, transfer) => {
 };
 
 const processAdjustment = (bus, log, $meta, transfer) => {
+    let {forward} = $meta;
     const adjust = (port, target) => {
         let method = `${port}.${transfer.transferType}.${transfer.operation}`;
         return bus.importMethod(method, {timeout: 30000})(transfer, $meta)
@@ -116,7 +118,7 @@ const processAdjustment = (bus, log, $meta, transfer) => {
                     message: adjustmentError.message,
                     source: target,
                     details: adjustmentError
-                }))
+                }, {forward}))
                     .catch(error => {
                         log.error && log.error(error);
                         return Promise.reject(adjustmentError);
@@ -149,7 +151,7 @@ const processAny = (bus, log, $meta) => transfer => {
         : processReversal(bus, log, $meta, transfer);
 };
 
-var ruleValidate = (bus, transfer) => {
+var ruleValidate = (bus, transfer, forward) => {
     return Promise.resolve()
         .then(() => transfer.abortAcquirer && Promise.reject(transfer.abortAcquirer))
         .then(() => bus.importMethod('db/rule.decision.lookup')({
@@ -161,7 +163,7 @@ var ruleValidate = (bus, transfer) => {
             amount: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount,
             currency: transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency,
             isSourceAmount: false
-        })
+        }, {forward})
             .then(decision => {
                 transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
                 transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
@@ -185,7 +187,7 @@ var ruleValidate = (bus, transfer) => {
             transfer.abortAcquirer = error;
             transfer.transferAmount = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.amount;
             transfer.transferCurrency = transfer.amount && transfer.amount.transfer && transfer.amount.transfer.currency;
-            return bus.importMethod('db/rule.operation.lookup')({operation: transfer.transferType})
+            return bus.importMethod('db/rule.operation.lookup')({operation: transfer.transferType}, {forward})
                 .then(result => {
                     transfer.transferDateTime = result && result.operation && result.operation.transferDateTime;
                     transfer.transferTypeId = result && result.operation && result.operation.transferTypeId;
@@ -194,21 +196,22 @@ var ruleValidate = (bus, transfer) => {
         });
 };
 
-var hashTransferPendingSecurityCode = (bus, transfer) => {
+var hashTransferPendingSecurityCode = (bus, transfer, forward) => {
     if (transfer.transferPending && transfer.pullTransfer && transfer.pullTransfer.pending && transfer.pullTransfer.pending.params && transfer.transferPending.securityCode) {
-        return bus.importMethod('user.genHash')(transfer.transferPending.securityCode, JSON.parse(transfer.pullTransfer.pending.params));
+        return bus.importMethod('user.genHash')(transfer.transferPending.securityCode, JSON.parse(transfer.pullTransfer.pending.params), {forward});
     } else if (transfer.transferPending && transfer.transferPending.securityCode) {
-        return bus.importMethod('user.getHash')({ value: transfer.transferPending.securityCode });
+        return bus.importMethod('user.getHash')({ value: transfer.transferPending.securityCode }, undefined, {forward});
     } else {
         return Promise.resolve(null);
     }
 };
 
 module.exports = {
-    'rule.validate': function(params) {
-        return ruleValidate(this.bus, params);
+    'rule.validate': function(params, {forward}) {
+        return ruleValidate(this.bus, params, forward);
     },
     'push.execute': function(params, $meta) {
+        let {forward} = $meta;
         var handleError = (transfer, where) => error => {
             var method;
             if (where === 'Acquirer') {
@@ -219,14 +222,14 @@ module.exports = {
                 method = this.bus.importMethod('db/transfer.push.reverse' + where);
             }
             let transferDetails = Object.assign({}, transfer, error.transferDetails);
-            error = Object.assign({}, error, {transferDetails});
+            error = Object.assign(new Error(), error, {transferDetails});
             return method({
                 transferId: transfer.transferId,
                 source: where,
                 type: error.type || (where + '.error'),
                 message: error.message,
                 details: error
-            })
+            }, {forward})
                 .catch(x => {
                     this.log.error && this.log.error(x);
                     return Promise.reject(error);
@@ -239,7 +242,7 @@ module.exports = {
                     transfer.ledgerId = transfer.issuerId;
                     break;
             }
-            return this.bus.importMethod('db/transfer.push.create')(transfer, Object.assign($meta, {method: 'db/transfer.push.create'}))
+            return this.bus.importMethod('db/transfer.push.create')(transfer, $meta)
                 .then(pushResult => {
                     pushResult = pushResult && pushResult[0] && pushResult[0][0];
                     if (pushResult && pushResult.transferId) {
@@ -269,7 +272,7 @@ module.exports = {
 
         const merchantTransferValidate = (transfer) => {
             if (transfer.merchantPort) {
-                return this.bus.importMethod([transfer.merchantPort, transfer.transferType, 'validate'].join('.'))(transfer)
+                return this.bus.importMethod([transfer.merchantPort, transfer.transferType, 'validate'].join('.'))(transfer, {forward})
                     .then(() => transfer);
             } else {
                 return transfer;
@@ -298,9 +301,9 @@ module.exports = {
             if (transfer.skipLedger === true || (!transfer.ledgerPort || transfer.issuerPort === transfer.ledgerPort)) {
                 return transfer;
             }
-            return this.bus.importMethod('db/transfer.push.requestLedger')(transfer)
+            return this.bus.importMethod('db/transfer.push.requestLedger')(transfer, {forward})
                 .then(() => transfer)
-                .then(this.bus.importMethod(transfer.ledgerPort + '.push.execute'))
+                .then(result => this.bus.importMethod(transfer.ledgerPort + '.push.execute')(result, {forward}))
                 .then(result => {
                     result.transferIdLedger = result.transferIdIssuer;
                     return parseResult(transfer, result, 'Ledger');
@@ -315,7 +318,7 @@ module.exports = {
                     issuerFee: result.issuerFee,
                     message: transfer.transferType,
                     details: result
-                }))
+                }, {forward}))
                 .then(() => transfer);
         };
 
@@ -328,12 +331,12 @@ module.exports = {
             }
             return this.bus.importMethod('db/transfer.push.requestIssuer')({
                 transferId: transfer.transferId
-            })
+            }, {forward})
                 .then(result => {
                     transfer.issuerRequestedDateTime = result[0][0].issuerRequestedDateTime;
                     return transfer;
                 })
-                .then(this.bus.importMethod(transfer.issuerPort + '.push.execute'))
+                .then(result => this.bus.importMethod(transfer.issuerPort + '.push.execute')(result, {forward}))
                 .then(result => {
                     if (transfer.transferType === 'ministatement') {
                         transfer.ministatement = result.ministatement;
@@ -360,7 +363,7 @@ module.exports = {
                     settlementDate: transfer.settlementDate,
                     message: transfer.transferType,
                     details: result
-                }))
+                }, {forward}))
                 .then(() => transfer);
         };
 
@@ -368,9 +371,9 @@ module.exports = {
             if (!transfer.merchantPort) {
                 return transfer;
             }
-            return this.bus.importMethod('db/transfer.push.requestMerchant')(transfer)
+            return this.bus.importMethod('db/transfer.push.requestMerchant')(transfer, {forward})
                 .then(() => transfer)
-                .then(this.bus.importMethod([transfer.merchantPort, transfer.transferType, 'execute'].join('.')))
+                .then(result => this.bus.importMethod([transfer.merchantPort, transfer.transferType, 'execute'].join('.'))(result, {forward}))
                 .then(merchantResult => {
                     transfer.transferIdMerchant = merchantResult.transferIdMerchant;
                     merchantResult.transferId = transfer.transferId;
@@ -378,11 +381,11 @@ module.exports = {
                     return merchantResult;
                 })
                 .catch(handleError(transfer, 'Merchant'))
-                .then(this.bus.importMethod('db/transfer.push.confirmMerchant'))
+                .then(result => this.bus.importMethod('db/transfer.push.confirmMerchant')(result, {forward}))
                 .then(() => transfer);
         };
 
-        return ruleValidate(this.bus, params)
+        return ruleValidate(this.bus, params, forward)
             .then(dbPushExecute)
             .then(merchantTransferValidate)
             .then(ledgerPushExecute)
@@ -390,6 +393,7 @@ module.exports = {
             .then(merchantTransferExecute);
     },
     'pending.pullExecute': function(params, $meta) {
+        let {forward} = $meta;
         var preparePushExecuteParams = (securityCode) => {
             var transfer = Object.assign({}, params);
             transfer.isPending = true;
@@ -401,17 +405,16 @@ module.exports = {
 
         var pushExecute = (transfer) => this.config['transfer.push.execute'](transfer, $meta);
 
-        return hashTransferPendingSecurityCode(this.bus, params)
+        return hashTransferPendingSecurityCode(this.bus, params, forward)
             .then(preparePushExecuteParams)
             .then(pushExecute);
     },
     'pending.pushExecute': function(params, $meta) {
+        let {forward} = $meta;
         var dbPendingPushExecute = (transfer) => {
-            var method = `db/transfer.push.${transfer.pullTransferStatus}`;
-            var $pendingPushExecuteMeta = Object.assign($meta, { method });
-            return this.bus.importMethod($pendingPushExecuteMeta.method)({
+            return this.bus.importMethod(`db/transfer.push.${transfer.pullTransferStatus}`)({
                 transferId: transfer.pullTransferId
-            }, $pendingPushExecuteMeta)
+            }, $meta)
                 .then(() => {
                     return transfer;
                 });
@@ -437,7 +440,7 @@ module.exports = {
                 });
         };
         var prepareParams = (transfer) => {
-            return hashTransferPendingSecurityCode(this.bus, params)
+            return hashTransferPendingSecurityCode(this.bus, params, forward)
                 .then(securityCode => {
                     transfer.transferPending.securityCode = securityCode;
                     return transfer;
@@ -448,23 +451,21 @@ module.exports = {
             if (transfer.pullTransferStatus === 'approve') { // Confirm pending transfer
                 return this.config['transfer.push.execute'](transfer, $meta);
             } else if (transfer.pullTransferStatus === 'reject') { // Reject pending transfer
-                var $transferRejectMeta = Object.assign($meta, { method: 'db/transfer.pending.reject' });
-                return this.bus.importMethod($transferRejectMeta.method)({
+                return this.bus.importMethod('db/transfer.pending.reject')({
                     transferId: params.pullTransferId,
                     userAvailableAccounts: params.userAvailableAccounts,
                     message: transfer.description,
                     reasonId: transfer.reasonId
-                }, $transferRejectMeta)
+                }, $meta)
                     .then(rejectResult => {
                         return transfer;
                     });
             } else if (transfer.pullTransferStatus === 'cancel') { // Cancel pending transfer
-                var $transferCancelMeta = Object.assign($meta, {method: 'db/transfer.pending.cancel'});
-                return this.bus.importMethod($transferCancelMeta.method)({
+                return this.bus.importMethod('db/transfer.pending.cancel')({
                     transferId: params.pullTransferId,
                     message: transfer.description,
                     reasonId: transfer.reasonsId
-                }, $transferCancelMeta)
+                }, $meta)
                     .then(rejectResult => {
                         return transfer;
                     });
@@ -473,12 +474,11 @@ module.exports = {
             }
         };
         var handleError = (transfer) => error => {
-            var $transferPushFailMeta = Object.assign($meta, {method: 'db/transfer.push.fail'});
-            return this.bus.importMethod($transferPushFailMeta.method)({
+            return this.bus.importMethod('db/transfer.push.fail')({
                 transferId: transfer.pullTransferId,
                 type: error.type,
                 message: error.message
-            }, $transferPushFailMeta)
+            }, $meta)
                 .then(() => Promise.reject(error));
         };
 
@@ -508,7 +508,7 @@ module.exports = {
                 .then(() => this.bus.importMethod('db/transfer.idle.execute')({
                     count: 10,
                     ports
-                }))
+                }, {forward: $meta.forward}))
                 .then(idleResult => {
                     if (idleResult && idleResult.transferInfo && Array.isArray(idleResult.transferInfo) && idleResult.transferInfo.length > 0) {
                         let reverse = processAny(this.bus, this.log, $meta);
@@ -561,6 +561,7 @@ module.exports = {
             .then(processAny(this.bus, this.log, $meta));
     },
     'card.execute': function(params, $meta) {
+        let {forward} = $meta;
         if (params.abortAcquirer) {
             return this.bus.importMethod('transfer.push.execute')(params, $meta);
         } else {
@@ -575,7 +576,7 @@ module.exports = {
                 pinOffset: params.pinOffset,
                 pinOffsetNew: params.pinOffsetNew,
                 mode: params.mode
-            })
+            }, {forward})
                 .then(result => {
                     if (!result.issuerId) {
                         throw errors.unknownIssuer();
@@ -601,7 +602,7 @@ module.exports = {
                 }))
                 .then(result => !params.transferIdAcquirer && this.bus.importMethod(`db/${params.channelType}.terminal.nextId`)({
                     channelId: result.channelId
-                }))
+                }, {forward}))
                 .then(result => {
                     if (params.transferIdAcquirer) {
                         return params;
@@ -616,8 +617,7 @@ module.exports = {
         }
     },
     'transfer.get': function(msg, $meta) {
-        var $getTransferMeta = Object.assign($meta, { method: 'db/transfer.transfer.get' });
-        return this.bus.importMethod($getTransferMeta.method)(msg, $getTransferMeta)
+        return this.bus.importMethod('db/transfer.transfer.get')(msg, $meta)
             .then((dbResult) => {
                 var transferResults = dbResult.transfer;
                 var transferPending = dbResult.transferPending;
