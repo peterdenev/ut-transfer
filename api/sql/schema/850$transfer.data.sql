@@ -18,6 +18,7 @@ USING
         ('loanDisburse', 'Loan disbursement'),
         ('loanRepay', 'Loan repayment'),
         ('forex', 'Foreign currency exchange'),
+        ('accountList', 'List accounts'),
         ('tia', 'Teller initiated audit')
     ) AS source (itemCode, itemName)
 JOIN
