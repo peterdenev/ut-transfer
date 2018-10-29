@@ -20,7 +20,8 @@ module.exports = {
                 'loanDisburse',
                 'loanRepay',
                 'forex',
-                'walletToWallet'
+                'walletToWallet',
+                'accountList'
             ]
         ),
         acquirerCode: joi.string().allow(null),

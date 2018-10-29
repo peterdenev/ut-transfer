@@ -52,17 +52,18 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             t.[actualAmount],
             t.[replacementAmount],
             CASE
-                WHEN t.channelType = 'iso' THEN t.processorFee
+                WHEN t.channelType IN ('iso', 'pos') THEN t.processorFee
                 ELSE t.acquirerFee
             END [acquirerFee],
             t.[issuerFee],
             CASE t.channelType
+                WHEN 'pos' THEN t.acquirerFee
                 WHEN 'iso' THEN t.acquirerFee
                 WHEN 'atm' THEN t.transferFee
             END [conveinienceFee],
             t.[transferCurrency],
             CASE
-                WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] IN (2, 8, 12)) THEN 1
+                WHEN ((t.channelType IN ('iso', 'pos') AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] IN (2, 8, 12)) THEN 1
                 ELSE 0
             END AS success,
             ROW_NUMBER() OVER(ORDER BY t.[transferId] DESC) AS [RowNum],
@@ -140,11 +141,12 @@ SELECT
     t.[actualAmount],
     t.[replacementAmount],
     CASE
-        WHEN t.channelType = 'iso' THEN t.processorFee
+        WHEN t.channelType IN ('iso', 'pos') THEN t.processorFee
         ELSE t.acquirerFee
     END [acquirerFee],
     t.[issuerFee],
     CASE t.channelType
+        WHEN 'pos' THEN t.acquirerFee
         WHEN 'iso' THEN t.acquirerFee
         WHEN 'atm' THEN t.transferFee
     END [conveinienceFee],
@@ -173,6 +175,7 @@ SELECT
         ELSE t.transferId
     END [traceNumber],
     CASE t.channelType
+        WHEN 'pos' THEN t.transferIdAcquirer
         WHEN 'iso' THEN t.transferIdAcquirer
         WHEN 'atm' THEN t.issuerSerialNumber
         ELSE t.transferId
