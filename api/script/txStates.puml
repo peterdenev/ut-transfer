@@ -1,0 +1,58 @@
+@startuml txStates
+
+state Acquirer {
+    state "Operation\nrequest sent" as acq1
+    state "Operation\nrequest confirmed" as acq2
+    state "Operation\nrequest declined" as acq3
+    state "Operation\nunknown response" as acq4
+    state "Operation aborted" as acq5
+    state "Unexpected error" as acq6
+
+    acq1: Operation was initiated
+    acq1: at acquirer's system
+
+    acq2: Operation was successfully
+    acq2: completed by acquirer
+
+    acq3: Operation was declined
+    acq3: by acquirer
+
+    acq4: Operation result is unknown
+
+    acq5: Operation was not valid
+    acq5: and was aborted by acquirer
+    acq5: but recorded in the database
+
+    acq6: Operation completion was
+    acq6: attempted, but failed
+
+    [*] --> acq1 : initiate operation
+    [*] --> acq5 : abort operation
+    acq1 --> acq2 : confirm operation
+    acq1 --> acq3 : decline operation
+    acq1 --> acq6 : error while completing the operation
+    acq1 --> acq4 : unknown result
+}
+state "Issuer / Ledger / Merchant" as issuer {
+    state "Operation\nrequest sent" as iss1
+    iss1: Operation request was sent
+    iss1: to the third party system
+
+    state "Operation\nrequest confirmed" as iss2
+    iss2: Operation was confirmed
+    iss2: by the third party system
+
+    state "Operation\nrequest declined" as iss3
+    iss3: Operation was declined
+    iss3: by the third party system
+
+    state "Operation\nunknown response" as iss4
+    iss4: The third party system did
+    iss4: not return a known response
+
+    [*] --> iss1 : initiate operation
+    iss1 --> iss2 : confirm operation
+    iss1 --> iss3 : decline operation
+    iss1 --> iss4 : unknown result
+}
+@enduml
