@@ -1,6 +1,6 @@
 ALTER PROCEDURE [transfer].[report.transfer]
     @transferId BIGINT,
-    @cardNumber VARCHAR(32),
+    @cardNumberId BIGINT,
     @traceNumber BIGINT,
     @accountNumber VARCHAR(100),
     @deviceId VARCHAR(100),
@@ -17,7 +17,6 @@ AS
 SET NOCOUNT ON
 
 DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
-DECLARE @cardNumberId BIGINT
 
 -- checks if the user has a right to make the operation
 DECLARE @actionID VARCHAR(100) = OBJECT_SCHEMA_NAME(@@PROCID) + '.' + OBJECT_NAME(@@PROCID), @RETURN INT = 0
@@ -26,9 +25,6 @@ IF @RETURN != 0
 BEGIN
     RETURN 55555
 END
-
-IF @cardNumber IS NOT NULL
-    SET @cardNumberId = (SELECT numberId FROM [card].[number] WHERE pan = @cardNumber)
 
 IF @pageNumber IS NULL
     SET @pageNumber = 1
@@ -81,8 +77,7 @@ IF OBJECT_ID('tempdb..#transfersReport') IS NOT NULL
             AND (@endDate IS NULL OR t.[transferDateTime] <= @endDate)
             AND (@issuerTxState IS NULL OR t.[issuerTxState] = @issuerTxState)
             AND (@traceNumber IS NULL OR t.[transferId] = @traceNumber OR t.[issuerSerialNumber] = @traceNumber)
-            -- AND (@cardNumber IS NULL OR c.[cardNumber] LIKE '%' + @cardNumber + '%')
-            AND (@cardNumber IS NULL OR t.cardId = @cardNumberId)
+            AND (@cardNumberId IS NULL OR t.cardId = @cardNumberId)
             -- AND (@deviceId IS NULL OR t.[requestDetails].value('(/root/terminalId)[1]', 'VARCHAR(8)') LIKE '%' + @deviceId + '%')
             AND (@deviceId IS NULL OR tl.terminalId LIKE '%' + @deviceId + '%')
             AND (@processingCode IS NULL OR t.[transferTypeId] = @processingCode)
