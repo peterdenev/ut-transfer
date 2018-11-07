@@ -212,6 +212,7 @@ module.exports = {
                         }
                         transfer.balance = result.balance;
                         transfer.transferIdIssuer = result.transferIdIssuer;
+                        transfer.issuerOriginalResponse = result;
 
                         result.transferId = transfer.transferId;
                         return result;
