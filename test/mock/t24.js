@@ -1,4 +1,4 @@
-const getAmount = require('ut-transfer/currency').amount;
+const getAmount = require('../../currency').amount;
 
 module.exports = {
     id: 't24-mock',
