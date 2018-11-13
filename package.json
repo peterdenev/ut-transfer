@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.28.0-rc-godfather.18",
+  "version": "6.28.0-rc-godfather.19",
   "main": "./index.js",
   "pkg": {
     "assets": [
