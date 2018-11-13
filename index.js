@@ -5,7 +5,7 @@ module.exports = () => function utTransfer({t24Mock} = {}) {
                 modules: {
                     errors: require('./errors'),
                     'db/transfer': require('./api/sql/schema'),
-                    transferSeed: require('./api/sql/seed'),
+                    transferSeed: () => require('./api/sql/seed'),
                     transferTest: () => require('./test/schema')
                 }
             };
