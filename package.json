@@ -4,8 +4,7 @@
   "main": "./index.js",
   "pkg": {
     "assets": [
-      "api/sql/schema/*.sql",
-      "api/sql/seed/*.sql"
+      "api/sql/**/*.sql"
     ]
   },
   "dependencies": {
