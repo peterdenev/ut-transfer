@@ -145,14 +145,14 @@ OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
         FROM [transfer].[event]
-        WHERE [state] = N'fail' AND [type] = N'atm.cardReaderFault' AND t.transferId = transferId
+        WHERE [state] = N'alert' AND [type] = N'atm.cardReaderFault' AND t.transferId = transferId
         ORDER BY eventId ASC
     ) cardAlert
 OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
         FROM [transfer].[event]
-        WHERE [state] = N'fail' AND [type] = N'atm.cashHandlerFault' AND t.transferId = transferId
+        WHERE [state] = N'alert' AND [type] = N'atm.cashHandlerFault' AND t.transferId = transferId
         ORDER BY eventId ASC
     ) cashAlert
 INNER JOIN
