@@ -30,6 +30,7 @@ module.exports = () => function utTransfer({t24Mock} = {}) {
         function eft() {
             return {
                 ports: [
+                    require('ut-dispatch-db')(['transfer']),
                     t24Mock && require('./test/mock/t24')
                 ],
                 modules: {
