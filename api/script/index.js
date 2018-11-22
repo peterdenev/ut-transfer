@@ -195,33 +195,34 @@ module.exports = {
             .then(pushResult => {
                 pushResult = pushResult && pushResult[0] && pushResult[0][0];
                 if (pushResult && pushResult.transferId) {
-                    this.bus.importMethod('history.transferTransferDetails.insert')({
+                    return this.bus.importMethod('history.transferTransferDetails.insert')({
                         transferId: pushResult.transferId
+                    })
+                    .then((res) => {
+                        transfer.transferId = pushResult.transferId;
+                        transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
+                        transfer.localDateTime = pushResult.localDateTime;
+    
+                        // Set ports
+                        transfer.merchantPort = pushResult.merchantPort;
+                        transfer.issuerPort = pushResult.issuerPort;
+                        transfer.ledgerPort = pushResult.ledgerPort;
+    
+                        if (transfer.abortAcquirer) {
+                            return handleError(transfer, 'Acquirer')(transfer.abortAcquirer);
+                        } else {
+                            // Add splits for pending transaction
+                            if (transfer.pullTransferId) {
+                                transfer.split = transfer.split.concat(transfer.pullTransfer.split);
+                            }
+                            return transfer;
+                        }
                     })
                     .catch(e => {
                         if (this.log && this.log.error) {
                             this.log.error(e);
                         }
                     });
-
-                    transfer.transferId = pushResult.transferId;
-                    transfer.issuerSettlementDate = pushResult.issuerSettlementDate;
-                    transfer.localDateTime = pushResult.localDateTime;
-
-                    // Set ports
-                    transfer.merchantPort = pushResult.merchantPort;
-                    transfer.issuerPort = pushResult.issuerPort;
-                    transfer.ledgerPort = pushResult.ledgerPort;
-
-                    if (transfer.abortAcquirer) {
-                        return handleError(transfer, 'Acquirer')(transfer.abortAcquirer);
-                    } else {
-                        // Add splits for pending transaction
-                        if (transfer.pullTransferId) {
-                            transfer.split = transfer.split.concat(transfer.pullTransfer.split);
-                        }
-                        return transfer;
-                    }
                 } else {
                     throw errors.systemDecline('transfer.push.create');
                 }
