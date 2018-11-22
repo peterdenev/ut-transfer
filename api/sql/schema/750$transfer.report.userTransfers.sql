@@ -20,6 +20,13 @@ AS
         RETURN 55555
     END
 
+    IF @endDate IS NULL
+    BEGIN
+        SET @endDate = DATEADD(day, DATEDIFF(day, 0, GETDATE()), 1)
+        IF @startDate IS NULL
+            SET @startDate = DATEADD(day, DATEDIFF(day, 0, @endDate), -1)
+    END
+
     IF OBJECT_ID('tempdb..#transfers') IS NOT NULL
     BEGIN
         DROP TABLE #transfers
