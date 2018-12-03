@@ -19,7 +19,8 @@ module.exports = {
                 'changePin',
                 'loanDisburse',
                 'loanRepay',
-                'forex'
+                'forex',
+                'agentFloatRequest'
             ]
         ),
         transferIdAcquirer: joi.string().allow(null),
@@ -44,28 +45,5 @@ module.exports = {
         udfIssuer: joi.object().allow(null), // todo include key types
         udfTransfer: joi.object().allow(null) // todo include key types
     }),
-    result: joi.object().keys({
-        transferId: joi.number(),
-        transferTypeId: joi.number(),
-        localDateTime: joi.string(),
-        balance: joi.string(),
-        transferIdIssuer: joi.string().allow(null),
-        transferIdMerchant: joi.string().allow(null),
-        expireTime: joi.string().allow(null),
-        expireCount: joi.number().allow(null),
-        reversed: joi.number(),
-        retryTime: joi.string().allow(null),
-        retryCount: joi.number().allow(null),
-        issuerTxState: joi.number().allow(null),
-        acquirerTxState: joi.number().allow(null),
-        merchantTxState: joi.number().allow(null),
-        issuerErrorType: joi.string().allow(null),
-        issuerErrorMessage: joi.string().allow(null),
-        reversalErrorType: joi.string().allow(null),
-        reversalErrorMessage: joi.string().allow(null),
-        acquirerErrorType: joi.string().allow(null),
-        acquirerErrorMessage: joi.string().allow(null),
-        merchantErrorType: joi.string().allow(null),
-        merchantErrorMessage: joi.string().allow(null)
-    })
+    result: joi.any()
 };

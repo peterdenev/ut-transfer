@@ -2,6 +2,7 @@ ALTER PROCEDURE [transfer].[push.execute]
     @transferTypeId bigint,
     @transferDateTime datetime,
     @transferIdAcquirer varchar(50),
+    @transferIdPrevTxn bigint,
     @channelId bigint,
     @channelType varchar(50),
     @ordererId bigint,
@@ -18,7 +19,7 @@ ALTER PROCEDURE [transfer].[push.execute]
     @acquirerFee money,
     @issuerFee money,
     @transferFee money,
-    @description varchar(250),
+    @description varchar(500),
     @udfAcquirer XML,
     @split transfer.splitTT READONLY,
     @meta core.metaDataTT READONLY
@@ -65,6 +66,7 @@ BEGIN TRY
         transferDateTime,
         transferTypeId,
         transferIdAcquirer,
+        transferIdPrevTxn,
         localDateTime,
         settlementDate,
         channelId,
@@ -101,6 +103,7 @@ BEGIN TRY
         @transferDateTime,
         @transferTypeId,
         @transferIdAcquirer,
+        @transferIdPrevTxn,
         REPLACE(REPLACE(REPLACE(CONVERT(varchar, @transferDateTime, 120),'-',''),':',''),' ',''),
         @destinationSettlementDate,
         @channelId,
@@ -116,10 +119,10 @@ BEGIN TRY
         @expireTime,
         @destinationPort,
         @transferCurrency,
-        @transferAmount,
-        @acquirerFee,
-        @issuerFee,
-        @transferFee,
+        CONVERT( DECIMAL(17,2), @transferAmount ), --@transferAmount,
+        CONVERT( DECIMAL(17,2), @acquirerFee ), --@acquirerFee
+        CONVERT( DECIMAL(17,2), @issuerFee ), --@issuerFee
+        CONVERT( DECIMAL(17,2), @transferFee ), --@transferFee
         @description,
         0
 
@@ -132,29 +135,46 @@ BEGIN TRY
         @udfDetails = @udfAcquirer,
         @message = 'Transfer created'
 
-    INSERT INTO
-        [transfer].[split](
-            transferId,
+    IF EXISTS (SELECT 1 FROM @Split)
+    BEGIN
+        DECLARE @splitTT [transfer].splitTT
+
+        INSERT @splitTT
+        EXEC [integration].[splitAliasAccount.replace] -- replace Alias with Account in splitAssignment
+            @actorId = @channelId,-- actorId of agent
+            @split = @split, -- split with Alias as accounts
+            @debitAccount= @sourceAccount, --debit Account of transaction
+            @creditAccount= @destinationAccount, --credit Account of transaction
+	       @meta = @meta -- information for the user that makes the operation
+
+        INSERT INTO
+                [transfer].[split](
+                    transferId,
+                    debit,
+                    credit,
+                    amount,
+                    conditionId,
+                    splitNameId,
+                    [description],
+                    tag,
+                    actorId
+                )
+        OUTPUT
+			INSERTED.*,
+			'true' as splitReturn
+        SELECT
+            @transferId,
             debit,
             credit,
-            amount,
+            CONVERT( DECIMAL(17,2), amount ), --amount
             conditionId,
             splitNameId,
             [description],
-            tag
-        )
-    SELECT
-        @transferId,
-        debit,
-        credit,
-        amount,
-        conditionId,
-        splitNameId,
-        [description],
-        tag
-    FROM
-        @split
-
+            tag,
+            actorId
+        FROM
+            @splitTT
+    END
     COMMIT TRANSACTION
 
     EXEC core.auditCall @procid = @@PROCID, @params = @callParams

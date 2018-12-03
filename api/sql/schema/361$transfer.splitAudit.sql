@@ -1,0 +1,9 @@
+CREATE TABLE [transfer].splitAudit(
+	id BIGINT IDENTITY(1,1) NOT NULL,
+	splitId BIGINT NOT NULL,
+	field VARCHAR(100) NULL,
+	oldValue NVARCHAR(250) NULL,
+	createdBy BIGINT NOT NULL,
+	createdOn DATETIMEOFFSET(7) NOT NULL,
+  CONSTRAINT pk_splitAudit PRIMARY KEY CLUSTERED (id)
+)
