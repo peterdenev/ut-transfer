@@ -726,13 +726,15 @@ function getScale(code) {
     return scale;
 }
 
-module.exports = {
-    numeric: numeric,
-    alphabetic: alphabetic,
-    scale: getScale,
-    cents: (currency, cents, sign = 1) => amountObject(cents, getScale(currency), sign, currency, cents),
-    amount: function(currency, amount, sign = 1) {
-        var scale = getScale(currency);
-        return amountObject(roundCents(amount, scale), scale, sign, currency, amount);
-    }
+module.exports = function currency() {
+    return {
+        numeric: numeric,
+        alphabetic: alphabetic,
+        scale: getScale,
+        cents: (currency, cents, sign = 1) => amountObject(cents, getScale(currency), sign, currency, cents),
+        amount: function(currency, amount, sign = 1) {
+            var scale = getScale(currency);
+            return amountObject(roundCents(amount, scale), scale, sign, currency, amount);
+        }
+    };
 };

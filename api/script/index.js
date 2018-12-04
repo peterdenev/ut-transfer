@@ -206,11 +206,11 @@ var hashTransferPendingSecurityCode = (bus, transfer, forward) => {
     }
 };
 
-module.exports = {
-    'rule.validate': function(params, {forward}) {
+let transferHandlers = {
+    'transfer.rule.validate': function(params, {forward}) {
         return ruleValidate(this.bus, params, forward);
     },
-    'push.execute': function(params, $meta) {
+    'transfer.push.execute': function(params, $meta) {
         let {forward} = $meta;
         var handleError = (transfer, where) => error => {
             var method;
@@ -392,7 +392,7 @@ module.exports = {
             .then(issuerPushExecute)
             .then(merchantTransferExecute);
     },
-    'pending.pullExecute': function(params, $meta) {
+    'transfer.pending.pullExecute': function(params, $meta) {
         let {forward} = $meta;
         var preparePushExecuteParams = (securityCode) => {
             var transfer = Object.assign({}, params);
@@ -409,7 +409,7 @@ module.exports = {
             .then(preparePushExecuteParams)
             .then(pushExecute);
     },
-    'pending.pushExecute': function(params, $meta) {
+    'transfer.pending.pushExecute': function(params, $meta) {
         let {forward} = $meta;
         var dbPendingPushExecute = (transfer) => {
             return this.bus.importMethod(`db/transfer.push.${transfer.pullTransferStatus}`)({
@@ -491,7 +491,7 @@ module.exports = {
     start: function() {
         this.idlePorts = new Set();
     },
-    'idle.execute': function(params, $meta) {
+    'transfer.idle.execute': function(params, $meta) {
         $meta.mtid = 'discard';
         params && params.issuerPort && this.idlePorts.add(params.issuerPort);
         if (this.idleExecuting) {
@@ -528,7 +528,7 @@ module.exports = {
             return true;
         }
     },
-    'push.reverse': function(params, $meta) {
+    'transfer.push.reverse': function(params, $meta) {
         var getTransfer = (params) => this.config['transfer.transfer.get']({
             transferId: params.transferId,
             transferIdAcquirer: params.transferIdAcquirer,
@@ -560,7 +560,7 @@ module.exports = {
         return getTransfer(params)
             .then(processAny(this.bus, this.log, $meta));
     },
-    'card.execute': function(params, $meta) {
+    'transfer.card.execute': function(params, $meta) {
         let {forward} = $meta;
         if (params.abortAcquirer) {
             return this.bus.importMethod('transfer.push.execute')(params, $meta);
@@ -616,7 +616,7 @@ module.exports = {
                 .then(params => this.bus.importMethod('transfer.push.execute')(params, $meta));
         }
     },
-    'transfer.get': function(msg, $meta) {
+    'transfer.transfer.get': function(msg, $meta) {
         return this.bus.importMethod('db/transfer.transfer.get')(msg, $meta)
             .then((dbResult) => {
                 var transferResults = dbResult.transfer;
@@ -633,8 +633,12 @@ module.exports = {
                 return result;
             });
     },
-    'pendingUserTransfers.fetch': function(msg, $meta) {
+    'transfer.pendingUserTransfers.fetch': function(msg, $meta) {
         return this.bus.importMethod('db/transfer.pendingUserTransfers.fetch')(msg, $meta);
     }
 };
 // todo handle timeout from destination port
+
+module.exports = function transfer() {
+    return transferHandlers;
+};
