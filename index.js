@@ -7,7 +7,7 @@ module.exports = () => function utTransfer() {
             require('./test/schema')
         ],
         orchestrator: () => [
-            require('ut-dispatch-db')(['transfer'])
+            require('ut-dispatch-db')(['transfer'], ['utTransfer.transfer'])
         ],
         gateway: () => [
             require('./http'),
