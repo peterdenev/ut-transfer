@@ -29,7 +29,6 @@ SELECT
     t.[issuerSerialNumber],
     t.[issuerId],
     t.[processorFee],
-    t.[credentialId],
     request.udfDetails [requestDetails],
     request.eventDateTime [requestDateTime],
     request.[type] [requestType],
