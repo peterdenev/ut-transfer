@@ -10,6 +10,7 @@ SELECT
     t.[actualAmount],
     t.[replacementAmount],
     t.[description],
+    t.[credentialId],
     t.[transferCurrency],
     t.[transferIdAcquirer],
     t.[merchantId],
@@ -26,7 +27,7 @@ SELECT
     t.[issuerFee],
     t.[retrievalReferenceNumber],
     t.[issuerSerialNumber],
-    t.issuerId,
+    t.[issuerId],
     t.[processorFee],
     request.udfDetails [requestDetails],
     request.eventDateTime [requestDateTime],
@@ -76,7 +77,7 @@ SELECT
     (CASE
         WHEN t.[reversed] = 1 AND (t.issuerId = t.ledgerId OR t.[reversedLedger] = 1) THEN N'transferReversed'
         WHEN t.[issuerTxState] IN (2, 8, 12) AND ISNULL(cardAlert.type, cashAlert.type) IS NOT NULL THEN N'transferAlert'
-        WHEN t.channelType = N'iso' AND t.[issuerTxState] IN (2, 8, 12) THEN N'transferNormal'
+        WHEN t.channelType IN (N'iso', N'pos') AND t.[issuerTxState] IN (2, 8, 12) THEN N'transferNormal'
         WHEN t.[acquirerTxState] IN (2, 8, 12) THEN N'transferNormal'
         ELSE N'transferError'
     END) [style],
@@ -85,7 +86,7 @@ SELECT
         ELSE ISNULL(cashAlert.[message], N'') + ISNULL(cardAlert.[message], N'')
     END AS alerts,
     CASE
-        WHEN ((t.channelType = 'iso' AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] IN (2, 8, 12)) THEN 1
+        WHEN ((t.channelType IN ('iso', 'pos') AND t.[issuerTxState] IN (2, 8, 12)) OR [acquirerTxState] IN (2, 8, 12)) THEN 1
         ELSE 0
     END success,
     ISNULL(
@@ -145,14 +146,14 @@ OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
         FROM [transfer].[event]
-        WHERE [state] = N'fail' AND [type] = N'atm.cardReaderFault' AND t.transferId = transferId
+        WHERE [state] = N'alert' AND [type] = N'atm.cardReaderFault' AND t.transferId = transferId
         ORDER BY eventId ASC
     ) cardAlert
 OUTER APPLY
     (
         SELECT TOP 1 udfDetails, transferId, [type], [message], eventDateTime
         FROM [transfer].[event]
-        WHERE [state] = N'fail' AND [type] = N'atm.cashHandlerFault' AND t.transferId = transferId
+        WHERE [state] = N'alert' AND [type] = N'atm.cashHandlerFault' AND t.transferId = transferId
         ORDER BY eventId ASC
     ) cashAlert
 INNER JOIN
