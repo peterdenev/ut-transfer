@@ -1,3 +1,13 @@
+<a name="6.27.1"></a>
+## [6.27.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.27.0...v6.27.1) (2018-12-07)
+
+
+### Bug Fixes
+
+* copy view code from major/rc-dss ([#193](https://github.com/softwaregroup-bg/ut-transfer/issues/193)) ([80efd24](https://github.com/softwaregroup-bg/ut-transfer/commit/80efd24))
+
+
+
 <a name="6.27.0"></a>
 # [6.27.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.26.1...v6.27.0) (2018-08-23)
 
