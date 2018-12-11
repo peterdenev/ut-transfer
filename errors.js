@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function error({utError: {defineError, getError, fetchErrors}}) {
     if (!getError('transfer')) {
-        const Transfer = getError('transfer') || defineError('transfer', undefined, 'Transfer generic');
+        const Transfer = defineError('transfer', undefined, 'Transfer generic');
         defineError('systemDecline', Transfer, 'System decline error');
         defineError('insufficientFunds', Transfer, 'Insufficient funds');
         defineError('idAlreadyExists', Transfer, 'Transfer ID already exists');
@@ -27,6 +27,7 @@ module.exports = function error({utError: {defineError, getError, fetchErrors}})
         defineError('issuerNotConnected', Transfer, 'No connection to issuer');
         defineError('issuerTimeout', Transfer, 'Issuer times out');
         defineError('issuerDisconnected', Transfer, 'Destination not Available');
+        defineError('nextId', Transfer, 'Invalid tsn');
     }
     if (!getError('merchant')) {
         const Merchant = getError('merchant') || defineError('merchant', undefined, 'Merchant generic');
