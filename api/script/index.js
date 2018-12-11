@@ -51,12 +51,6 @@ const processReversal = (bus, log, $meta, transfer) => {
                     message: reversalError.message,
                     details: reversalError
                 }))
-                    .catch(error => {
-                        if (error.type === 'transfer.transferAlreadyReversed') {
-                            return transfer;
-                        }
-                        throw error;
-                    })
                     .then(() => bus.importMethod(`db/transfer.push.confirmReversal${target}`)(transfer))
                     .then(() => {
                         transfer[`reversed${{Issuer: '', Ledger: 'Ledger'}[target]}`] = true;
