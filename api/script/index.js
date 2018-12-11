@@ -206,16 +206,16 @@ var hashTransferPendingSecurityCode = (bus, transfer, forward) => {
     }
 };
 
-module.exports = function transfer({utError: {fetchErrors}}) {
+module.exports = function transferFlow({utError: {fetchErrors}}) {
     let transferHandlers = {
         start: function() {
             this.idlePorts = new Set();
             errors = fetchErrors('transfer');
         },
-        'transfer.rule.validate': function(params, {forward}) {
+        'transferFlow.rule.validate': function(params, {forward}) {
             return ruleValidate(this.bus, params, forward);
         },
-        'transfer.push.execute': function(params, $meta) {
+        'transferFlow.push.execute': function(params, $meta) {
             let {forward} = $meta;
             var handleError = (transfer, where) => error => {
                 var method;
@@ -397,7 +397,7 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                 .then(issuerPushExecute)
                 .then(merchantTransferExecute);
         },
-        'transfer.pending.pullExecute': function(params, $meta) {
+        'transferFlow.pending.pullExecute': function(params, $meta) {
             let {forward} = $meta;
             var preparePushExecuteParams = (securityCode) => {
                 var transfer = Object.assign({}, params);
@@ -408,13 +408,13 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                 return transfer;
             };
 
-            var pushExecute = (transfer) => transferHandlers['transfer.push.execute'].call(this, transfer, $meta);
+            var pushExecute = (transfer) => transferHandlers['transferFlow.push.execute'].call(this, transfer, $meta);
 
             return hashTransferPendingSecurityCode(this.bus, params, forward)
                 .then(preparePushExecuteParams)
                 .then(pushExecute);
         },
-        'transfer.pending.pushExecute': function(params, $meta) {
+        'transferFlow.pending.pushExecute': function(params, $meta) {
             let {forward} = $meta;
             var dbPendingPushExecute = (transfer) => {
                 return this.bus.importMethod(`db/transfer.push.${transfer.pullTransferStatus}`)({
@@ -425,7 +425,7 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                     });
             };
             var getPullTransferInfo = (transfer, securityCode) => {
-                return transferHandlers['transfer.transfer.get'].call(this, { transferId: transfer.pullTransferId }, $meta)
+                return transferHandlers['transferFlow.transfer.get'].call(this, { transferId: transfer.pullTransferId }, $meta)
                     .then(pullTransfer => {
                         if (!pullTransfer || !pullTransfer.transferId) {
                             throw errors['transfer.notFound']();
@@ -454,7 +454,7 @@ module.exports = function transfer({utError: {fetchErrors}}) {
             var handlePendingTransfer = (transfer) => {
                 transfer.pullTransferApprove = params.pullTransferApprove;
                 if (transfer.pullTransferStatus === 'approve') { // Confirm pending transfer
-                    return transferHandlers['transfer.push.execute'].call(this, transfer, $meta);
+                    return transferHandlers['transferFlow.push.execute'].call(this, transfer, $meta);
                 } else if (transfer.pullTransferStatus === 'reject') { // Reject pending transfer
                     return this.bus.importMethod('db/transfer.pending.reject')({
                         transferId: params.pullTransferId,
@@ -493,7 +493,7 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                 .then(handlePendingTransfer)
                 .catch(handleError(params));
         },
-        'transfer.idle.execute': function(params, $meta) {
+        'transferFlow.idle.execute': function(params, $meta) {
             $meta.mtid = 'discard';
             params && params.issuerPort && this.idlePorts.add(params.issuerPort);
             if (this.idleExecuting) {
@@ -503,7 +503,7 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                 this.idlePorts.clear();
                 let finish = () => {
                     this.idleExecuting = false;
-                    this.idlePorts.size && this.publish({}, {mtid: 'notification', method: 'transfer.idle.execute'});
+                    this.idlePorts.size && this.publish({}, {mtid: 'notification', method: 'transferFlow.idle.execute'});
                 };
                 this.idleExecuting = true;
                 Promise.resolve()
@@ -530,8 +530,8 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                 return true;
             }
         },
-        'transfer.push.reverse': function(params, $meta) {
-            var getTransfer = (params) => transferHandlers['transfer.transfer.get'].call(this, {
+        'transferFlow.push.reverse': function(params, $meta) {
+            var getTransfer = (params) => transferHandlers['transferFlow.transfer.get'].call(this, {
                 transferId: params.transferId,
                 transferIdAcquirer: params.transferIdAcquirer,
                 retrievalReferenceNumber: params.retrievalReferenceNumber,
@@ -570,10 +570,10 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                         });
                 });
         },
-        'transfer.card.execute': function(params, $meta) {
+        'transferFlow.card.execute': function(params, $meta) {
             let {forward} = $meta;
             if (params.abortAcquirer) {
-                return this.bus.importMethod('transfer.push.execute')(params, $meta);
+                return this.bus.importMethod('transferFlow.push.execute')(params, $meta);
             } else {
                 return this.bus.importMethod('db/atm.card.check[0]')({
                     cardId: params.cardId,
@@ -596,7 +596,7 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                     })
                     .catch(error => {
                         params.abortAcquirer = error;
-                        return this.bus.importMethod('transfer.push.execute')(params, $meta);
+                        return this.bus.importMethod('transferFlow.push.execute')(params, $meta);
                     })
                     .then(result => Object.assign(params, {
                         cardProductName: result.cardProductName,
@@ -623,10 +623,10 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                         params.transferIdAcquirer = result[0][0].tsn;
                         return params;
                     })
-                    .then(params => this.bus.importMethod('transfer.push.execute')(params, $meta));
+                    .then(params => this.bus.importMethod('transferFlow.push.execute')(params, $meta));
             }
         },
-        'transfer.transfer.get': function(msg, $meta) {
+        'transferFlow.transfer.get': function(msg, $meta) {
             return this.bus.importMethod('db/transfer.transfer.get')(msg, $meta)
                 .then((dbResult) => {
                     var transferResults = dbResult.transfer;
@@ -643,7 +643,7 @@ module.exports = function transfer({utError: {fetchErrors}}) {
                     return result;
                 });
         },
-        'transfer.pendingUserTransfers.fetch': function(msg, $meta) {
+        'transferFlow.pendingUserTransfers.fetch': function(msg, $meta) {
             return this.bus.importMethod('db/transfer.pendingUserTransfers.fetch')(msg, $meta);
         }
     };
