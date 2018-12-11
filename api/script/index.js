@@ -25,7 +25,7 @@ const DECLINED = {
     merchant: ['merchant.genericDecline']
 };
 var errors = require('../../errors');
-var currency = require('../../currency');
+var currency = require('../../currency')();
 
 const processReversal = (bus, log, $meta, transfer) => {
     let {forward} = $meta;
@@ -558,7 +558,15 @@ let transferHandlers = {
             });
 
         return getTransfer(params)
-            .then(processAny(this.bus, this.log, $meta));
+            .then(transfer => {
+                return processAny(this.bus, this.log, $meta)(transfer)
+                    .catch(error => {
+                        if (error instanceof errors['transfer.transferAlreadyReversed']) {
+                            return transfer;
+                        }
+                        throw error;
+                    });
+            });
     },
     'transfer.card.execute': function(params, $meta) {
         let {forward} = $meta;
