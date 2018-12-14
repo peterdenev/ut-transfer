@@ -29,6 +29,7 @@ SELECT
     t.[issuerSerialNumber],
     t.[issuerId],
     t.[processorFee],
+    t.[merchantType],
     request.udfDetails [requestDetails],
     request.eventDateTime [requestDateTime],
     request.[type] [requestType],
