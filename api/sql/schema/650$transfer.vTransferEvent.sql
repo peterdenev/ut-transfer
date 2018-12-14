@@ -30,6 +30,7 @@ SELECT
     t.[issuerId],
     t.[processorFee],
     t.[merchantType],
+    t.[expireTime],
     request.udfDetails [requestDetails],
     request.eventDateTime [requestDateTime],
     request.[type] [requestType],
