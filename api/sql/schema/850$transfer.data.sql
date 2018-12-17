@@ -56,7 +56,9 @@ USING
         ('transfer.partner.edit', 'transfer.partner.edit', '{}'),
 
         ('transfer.pending.cancel', 'transfer.pending.cancel', '{}'),
+        ('transfer.pending.confirm', 'transfer.pending.confirm', '{}'),
         ('transfer.pending.reject', 'transfer.pending.reject', '{}'),
+        ('transfer.pendingTransfers.get', 'transfer.pendingTransfers.get', '{}'),
         ('transfer.pendingUserTransfers.fetch', 'transfer.pendingUserTransfers.fetch', '{}'),
         ('transfer.push.create', 'transfer.push.create', '{}'),
         ('transfer.push.reverse', 'transfer.push.reverse', '{}'),
@@ -79,6 +81,7 @@ USING
         ('db/transfer.report.transfer', 'db/transfer.report.transfer', '{}'),
         ('db/transfer.report.userTransfers', 'db/transfer.report.userTransfers', '{}'),
         ('db/transfer.report.userTransfersExport', 'db/transfer.report.userTransfersExport', '{}'),
+        ('transfer.transfer.byAccountGet', 'transfer.transfer.byAccountGet', '{}'),
         ('transfer.transfer.get', 'transfer.transfer.get', '{}'),
         ('transfer.transferDetails.get', 'transfer.transferDetails.get', '{}'),
         ('transfer.push.reject', 'transfer.push.reject', '{}'),

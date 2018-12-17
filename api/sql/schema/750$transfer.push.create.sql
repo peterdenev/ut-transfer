@@ -211,7 +211,8 @@ BEGIN TRY
                     [status],
                     approvalAccountNumber,
                     params,
-                    createdBy
+                    createdBy,
+                    initiatorName
                 )
             SELECT
                 @transferId,
@@ -221,7 +222,8 @@ BEGIN TRY
                 1,
                 approvalAccountNumber,
                 params,
-                @userId
+                @userId,
+                initiatorName
             FROM
                 @transferPending
         END ELSE IF EXISTS (SELECT * FROM [transfer].[pending] tp JOIN @transferPending s ON s.pullTransactionId = tp.pullTransactionId)
