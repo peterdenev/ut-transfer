@@ -88,7 +88,7 @@ BEGIN TRY
         core.itemName cin ON cin.itemNameId = t.transferTypeId
     WHERE
         tp.[status] = 1
-    ) 
+    )
     SELECT
         typeTransaction,
         transferId,

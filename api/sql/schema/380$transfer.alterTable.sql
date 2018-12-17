@@ -133,7 +133,7 @@ END
 
 IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'initiatorName' AND OBJECT_ID = OBJECT_ID(N'transfer.pending') )
 BEGIN
-    ALTER TABLE [transfer].[pending] ADD [initiatorName] [NVARCHAR](200) 
+    ALTER TABLE [transfer].[pending] ADD [initiatorName] [NVARCHAR](200)
 END
 
 IF NOT EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'credentialId' AND OBJECT_ID = OBJECT_ID(N'transfer.transfer') )
