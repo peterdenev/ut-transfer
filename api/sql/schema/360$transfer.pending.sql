@@ -13,6 +13,7 @@ CREATE TABLE [transfer].[pending](
     [createdBy] [BIGINT] NULL, --the id of the user, that created the pneding TRANSACTION
     [updatedBy] [BIGINT] NULL, --the id of the user, that updated (approved, rejected, canceled) the pending TRANSACTION
     [updatedOn] [DATETIME2](7) NULL, -- the exact time the user updated the pending TRANSACTION record
+    [initiatorName] [NVARCHAR](200) NULL, -- name of the user who initiated the pending transaction
     CONSTRAINT [pkTransferPending] PRIMARY KEY CLUSTERED ([PendingId] ASC),
     CONSTRAINT [fkTransferPending_PullTransactionId] FOREIGN KEY([pullTransactionId]) REFERENCES [transfer].[transfer] ([transferId]),
     CONSTRAINT [fkTransferPending_PushTransactionId] FOREIGN KEY([pushTransactionId]) REFERENCES [transfer].[transfer] ([transferId]),
