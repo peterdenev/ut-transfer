@@ -13,7 +13,7 @@ endDate.setMinutes(59);
 endDate.setSeconds(59);
 endDate.setMilliseconds(999);
 
-module.exports = (gridStyle) => ({
+export default (gridStyle) => ({
     title: 'Transfer Hour of Day Statistics ',
     export: {
         method: 'transfer.report.byHourOfDay',
