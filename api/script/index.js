@@ -33,7 +33,7 @@ const processReversal = (bus, log, $meta, transfer) => {
         return bus.importMethod(method, {timeout: 30000})(transfer, $meta)
             .catch(error => {
                 if (error.type === 'transfer.transferAlreadyReversed') {
-                    return error;
+                    return {};
                 }
                 throw error;
             })
