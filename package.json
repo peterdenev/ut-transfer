@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.27.1",
+  "version": "6.27.2-accu.0",
   "main": "./index.js",
   "pkg": {
     "assets": [
