@@ -46,7 +46,7 @@ BEGIN TRY
             cin.itemName AS typeTransaction,
             t.transferId,
             t.channelType,
-            t.transferDateTime,
+            CONVERT(VARCHAR(19), t.transferDateTime, 120) [transferDateTime],
             t.channelId AS channelId,
             t.transferCurrency AS transferCurrency,
             ISNULL(t.transferAmount, 0) AS transferAmount,
