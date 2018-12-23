@@ -28,6 +28,7 @@
     "ut-dispatch-db": "^1.1.0",
     "ut-run": "^9.8.0-rc-godfather.9",
     "react": "^15.6.1",
+    "react-hot-loader": "^4.6.3",
     "react-router": "^4.3.1",
     "react-redux": "^5.0.5",
     "redux": "^3.7.2"
