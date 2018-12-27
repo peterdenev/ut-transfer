@@ -12,3 +12,8 @@ IF NOT EXISTS(SELECT 1 FROM sys.columns WHERE [name] = N'reversalDateTime' AND o
 BEGIN
 	ALTER TABLE transfer.transfer ADD reversalDateTime DATETIME NULL;
 END
+
+IF EXISTS( SELECT 1 FROM sys.columns WHERE Name = N'description' AND Object_ID = Object_ID(N'transfer.transfer'))
+BEGIN
+	ALTER TABLE transfer.transfer ALTER COLUMN [description] NVARCHAR(500);
+END

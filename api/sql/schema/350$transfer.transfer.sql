@@ -36,7 +36,7 @@ CREATE TABLE [transfer].[transfer](
     acquirerFee money,
     issuerFee money,
     transferFee money,
-    description varchar(500),
+    description nvarchar(500),
     reversalDateTime datetime,
     reversalDateTimeCbs datetime,
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),

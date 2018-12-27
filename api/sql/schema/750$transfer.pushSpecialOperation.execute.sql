@@ -18,7 +18,7 @@ ALTER PROCEDURE [transfer].[pushSpecialOperation.execute]
     @acquirerFee money,
     @issuerFee money,
     @transferFee money,
-    @description varchar(250),
+    @description nvarchar(500),
     @udfAcquirer XML,
     @split transfer.splitTT READONLY,
     @meta core.metaDataTT READONLY
