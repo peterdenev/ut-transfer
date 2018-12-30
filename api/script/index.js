@@ -168,8 +168,13 @@ module.exports = {
             }) // .this is intentionally after catch as we do not want to this.log the original error
             .then(x => Promise.reject(error));
         };
-        var dbPushExecute = transfer =>
-            this.bus.importMethod('db/transfer.push.create')(transfer, Object.assign($meta, {method: 'db/transfer.push.create'}))
+        var dbPushExecute = ((transfer) => {
+            // use Offline Date, if present - required by the client - BPPS-449
+            if(transfer.offlineDateTime) {
+                transfer.transferDateTime = transfer.offlineDateTime.split(' ').join('T') + 'Z';
+            }
+
+            return this.bus.importMethod('db/transfer.push.create')(transfer, Object.assign($meta, {method: 'db/transfer.push.create'}))
             .then(pushResult => {
                 pushResult = pushResult && pushResult[0] && pushResult[0][0];
                 if (pushResult && pushResult.transferId) {
@@ -194,7 +199,8 @@ module.exports = {
                 } else {
                     throw errors.systemDecline('transfer.push.create');
                 }
-            });
+            })
+        });
 
         var merchantTransferValidate = (transfer) => {
             if (transfer.merchantPort) {
