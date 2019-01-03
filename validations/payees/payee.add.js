@@ -12,7 +12,7 @@ module.exports = {
             accountNumber: joi.string().required(),
             bankName: joi.string().required(),
             SWIFT: joi.string().required(),
-            userId: joi.string()
+            userId: joi.string().allow(null)
         })
     }),
     result: joi.array().items(
