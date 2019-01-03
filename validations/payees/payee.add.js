@@ -11,7 +11,8 @@ module.exports = {
             accountTypeId: joi.number().required(),
             accountNumber: joi.string().required(),
             bankName: joi.string().required(),
-            SWIFT: joi.string().required()
+            SWIFT: joi.string().required(),
+            userId: joi.string()
         })
     }),
     result: joi.array().items(
