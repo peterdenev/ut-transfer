@@ -7,7 +7,8 @@ DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
 
 SELECT 'payeeAccounts' AS resultSetName
 
-SELECT an.value AS accountNumber, p.payeeName
+SELECT an.value AS accountNumber, p.payeeName, p.bankName, p.SWIFT
 FROM @accountNumber an
 LEFT JOIN [transfer].payee p ON p.accountNumber = an.value AND [userId] = @userId
+WHERE isDeleted = 0
 ORDER BY accountNumber ASC
