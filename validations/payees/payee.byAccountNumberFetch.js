@@ -13,7 +13,9 @@ module.exports = {
         payeeAccounts: joi.array().items(
             joi.object().keys({
                 accountNumber: joi.string(),
-                payeeName: joi.string()
+                payeeName: joi.string(),
+                bankName: joi.string(),
+                SWIFT: joi.string()
             })
         )
     })
