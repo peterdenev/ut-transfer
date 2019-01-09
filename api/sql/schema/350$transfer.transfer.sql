@@ -49,6 +49,10 @@ CREATE TABLE [transfer].[transfer](
     settlementAmountCurrency VARCHAR(3),
     processorFee MONEY,
     issuerRequestedDateTime DATETIME2,
+    sourceAccountHolder NVARCHAR(200),
+    destinationAccountHolder NVARCHAR(200),
+    destinationBankName NVARCHAR(100),
+    SWIFT VARCHAR(11),
     CONSTRAINT [pkTransferTransfer] PRIMARY KEY CLUSTERED ([transferId] ASC),
     CONSTRAINT [fkTransferTransfer_TransferType] FOREIGN KEY([transferTypeId]) REFERENCES [core].[itemName] ([itemNameId])
 )

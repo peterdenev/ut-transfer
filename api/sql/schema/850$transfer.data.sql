@@ -84,6 +84,7 @@ USING
         ('transfer.transfer.byAccountGet', 'transfer.transfer.byAccountGet', '{}'),
         ('transfer.transfer.get', 'transfer.transfer.get', '{}'),
         ('transfer.transferDetails.get', 'transfer.transferDetails.get', '{}'),
+        ('transfer.transferReceipt.get', 'transfer.transferReceipt.get', '{}'),
         ('transfer.push.reject', 'transfer.push.reject', '{}'),
         ('transfer.push.cancel', 'transfer.push.cancel', '{}'),
         ('transfer.view.foreignAccounts', 'transfer.view.foreignAccounts', '{}')
