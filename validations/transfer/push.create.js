@@ -54,7 +54,11 @@ module.exports = {
             joi.boolean(),
             joi.number().allow(1, 0)
         ).allow('1', '0'),
-        userAvailableAccounts: joi.array()
+        userAvailableAccounts: joi.array(),
+        transferPending: joi.object().keys({
+            approvalAccountNumber: joi.string().max(50),
+            initiatorName: joi.string().max(200)
+        })
     }),
     result: joi.array().items(
         joi.array().items(joi.object())

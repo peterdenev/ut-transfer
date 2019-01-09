@@ -26,5 +26,10 @@ module.exports = {
     'payee.fetch': require('./payees/payee.fetch'),
     'payee.get': require('./payees/payee.get'),
     'payee.list': require('./payees/payee.list'),
-    'payee.byAccountNumberFetch': require('./payees/payee.byAccountNumberFetch')
+    'payee.byAccountNumberFetch': require('./payees/payee.byAccountNumberFetch'),
+    'pendingTransfers.get': require('./pending/pendingTransfers.get'),
+    'pending.confirm': require('./pending/pending.confirm'),
+    'pending.reject': require('./pending/pending.reject'),
+    'pending.cancel': require('./pending/pending.cancel'),
+    'transfer.byAccountGet': require('./transfer/transfer.byAccountGet')
 };
