@@ -12,7 +12,7 @@ module.exports = {
     'partner.edit': require('./partner/partner.edit'),
     'partner.get': require('./partner/partner.get'),
     'transferDetails.get': require('./report/transferDetails.get'),
-    'transferReceipt.get': require('./report/transferReceipt.get'),
+    'transferReceipt.get': require('./transfer/transferReceipt.get'),
     'report.byTypeOfTransfer': require('./report/report.byTypeOfTransfer'),
     'report.byHourOfDay': require('./report/report.byHourOfDay'),
     'report.byDayOfWeek': require('./report/report.byDayOfWeek'),
