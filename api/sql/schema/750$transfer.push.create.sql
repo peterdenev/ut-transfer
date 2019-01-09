@@ -147,7 +147,11 @@ BEGIN TRY
             reversed,
             reversedLedger,
             retrievalReferenceNumber,
-            issuerSerialNumber
+            issuerSerialNumber,
+            sourceAccountHolder,
+            destinationAccountHolder,
+            destinationBankName,
+            SWIFT
         )
         OUTPUT
             INSERTED.*,
@@ -192,7 +196,11 @@ BEGIN TRY
             0,
             0,
             @retrievalReferenceNumber,
-            @issuerSerialNumber
+            @issuerSerialNumber,
+            @sourceAccountHolder,
+            @destinationAccountHolder,
+            @destinationBankName,
+            @swift
 
         DECLARE @transferId BIGINT = @@IDENTITY
 
