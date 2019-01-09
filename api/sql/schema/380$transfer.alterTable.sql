@@ -224,3 +224,23 @@ IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'issuerRequestedDateTime' 
 BEGIN
     ALTER TABLE [transfer].[transfer] ADD issuerRequestedDateTime DATETIME2
 END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'sourceAccountHolder' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD sourceAccountHolder NVARCHAR(200)
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'destinationAccountHolder' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD destinationAccountHolder NVARCHAR(200)
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'destinationBankName' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD destinationBankName NVARCHAR(100)
+END
+
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'SWIFT' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD SWIFT VARCHAR(11)
+END

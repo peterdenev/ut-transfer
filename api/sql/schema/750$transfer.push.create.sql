@@ -31,6 +31,10 @@ ALTER PROCEDURE [transfer].[push.create]
     @isPending BIT,
     @transferPending transfer.pendingTT READONLY,
     @userAvailableAccounts [core].[arrayList] READONLY,
+    @sourceAccountHolder NVARCHAR(200) = NULL,
+    @destinationAccountHolder NVARCHAR(200) = NULL,
+    @destinationBankName NVARCHAR(100) = NULL,
+    @swift VARCHAR(11) = NULL,
     @meta core.metaDataTT READONLY
 AS
 DECLARE @callParams XML
