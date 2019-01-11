@@ -1,7 +1,7 @@
 var joi = require('joi');
 
 module.exports = {
-    description: 'Rejects a pending transfer',
+    description: 'Cancels a pending transfer',
     params: joi.object().keys({
         transferId: joi.number(),
         message: joi.string(),

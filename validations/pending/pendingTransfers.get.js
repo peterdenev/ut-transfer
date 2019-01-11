@@ -1,14 +1,18 @@
 var joi = require('joi');
 
 module.exports = {
-    description: 'Rejects a pending transfer',
+    description: 'Fetches pending transfers',
     params: joi.object().keys({
-        transferId: joi.number(),
-        message: joi.string(),
-        reasonId: joi.number().allow(null),
-        userAvailableAccounts: joi.array().items(joi.string())
+        userAvailableAccounts: joi.array().items(joi.string()),
+        pageSize: joi.number(),
+        pageNumber: joi.number(),
+        orderBy: joi.object().keys({
+            field: joi.string(),
+            dir: joi.string().valid(['asc', 'desc', ''])
+        })
     }),
-    result: joi.array().items(
-        joi.array().items(joi.object())
-    )
+    result: joi.object().keys({
+        pendingTransactions: joi.array().items(joi.object()),
+        pagination: joi.object()
+    })
 };
