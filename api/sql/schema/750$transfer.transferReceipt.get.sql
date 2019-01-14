@@ -13,6 +13,7 @@ BEGIN TRY
         RETURN 55555
     END
 
+    SELECT 'transferReceipt' AS resultSetName
     SELECT
         transferId,
         transferAmount,
