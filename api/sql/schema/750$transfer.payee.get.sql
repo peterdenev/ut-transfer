@@ -13,6 +13,7 @@ WHERE us.[actorId] = @userId)
 IF @languageId IS NULL
     SET @languageId = (SELECT [languageId] FROM [core].[language] WHERE [name] = 'English')
 
+SELECT 'payee' AS resultSetName
 SELECT p.payeeId, p.payeeName, p.accountTypeId, ISNULL(itt.itemNameTranslation, itn.itemName) AS accountType, p.accountNumber, p.bankName, p.SWIFT
 FROM [transfer].payee p
 JOIN core.itemName itn ON itn.itemNameId = p.accountTypeId
