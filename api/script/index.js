@@ -118,7 +118,8 @@ const setSplitExpenseByAccounts = (splits, transfer) => {
         if (!splitItem.tag.includes(tagRealtime) && transfer.expenseSplit[ splitDebitAccount ]) {
             // set expense type/value and value by 'SourceAccount' or 'DestinationAccount'
             const tagName = splitItem.tag.replace(/\|/gi, '');
-            transfer.expenseSplit[ splitDebitAccount ][ tagName ] = splitItem.amount;
+            const tagAmount = transfer.expenseSplit[ splitDebitAccount ][ tagName ] ? (transfer.expenseSplit[ splitDebitAccount ][ tagName ] + splitItem.amount) : splitItem.amount;
+            transfer.expenseSplit[ splitDebitAccount ][ tagName ] = tagAmount;
         }
     }
 };
