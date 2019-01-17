@@ -7,5 +7,6 @@ CREATE TABLE [transfer].[payee](
     bankName VARCHAR(100) NOT NULL,
     SWIFT VARCHAR(11) NOT NULL,
     isDeleted BIT NOT NULL DEFAULT(0),
+    CONSTRAINT [pkTransferPayee] PRIMARY KEY CLUSTERED (payeeId ASC),
     CONSTRAINT [fkTransferPayee_accountTypeId] FOREIGN KEY([accountTypeId]) REFERENCES [core].[itemName] ([itemNameId])
 )

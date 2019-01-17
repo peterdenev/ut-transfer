@@ -244,3 +244,8 @@ IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'SWIFT' AND Object_ID = OB
 BEGIN
     ALTER TABLE [transfer].[transfer] ADD SWIFT VARCHAR(11)
 END
+
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE Object_ID = OBJECT_ID(N'transfer.payee') AND is_primary_key = 1)
+BEGIN
+    ALTER TABLE [transfer].[payee] ADD CONSTRAINT pkTransferPayee PRIMARY KEY CLUSTERED (payeeId)
+END
