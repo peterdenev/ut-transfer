@@ -49,6 +49,7 @@ MERGE INTO
     [user].[action] AS target
 USING
     (VALUES
+        ('transfer.bank.list', 'transfer.bank.list', '{}'),
         ('transfer.partner.fetch', 'transfer.partner.fetch', '{}'),
         ('transfer.partner.list', 'transfer.partner.list', '{}'),
         ('transfer.partner.get', 'transfer.partner.get', '{}'),
