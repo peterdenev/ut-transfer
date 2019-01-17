@@ -4,7 +4,6 @@ module.exports = function t24Mock({config}) {
     return config && class t24Mock extends require('ut-port-script')(...arguments) {
         get defaults() {
             return {
-                logLevel: 'trace',
                 namespace: ['t24/transfer']
             };
         }
