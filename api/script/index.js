@@ -106,7 +106,7 @@ const setSplitExpenseByAccounts = (splits, transfer) => {
     {key: 'commission', */
     const tagRealtime = 'realtime';
     
-    transfer.expenseSplit = {
+    transfer.splits = {
         [transfer.sourceAccount]: {},
         [transfer.destinationAccount]: {}
     };
@@ -115,11 +115,11 @@ const setSplitExpenseByAccounts = (splits, transfer) => {
         const splitItem = splits[ index ];
         const splitDebitAccount = splitItem.debit;
         // if 'tag' is not 'realTime' and 'debit' is one of 'SourceAccount' or 'DestinationAccount'
-        if (!splitItem.tag.includes(tagRealtime) && transfer.expenseSplit[ splitDebitAccount ]) {
+        if (!splitItem.tag.includes(tagRealtime) && transfer.splits[ splitDebitAccount ]) {
             // set expense type/value and value by 'SourceAccount' or 'DestinationAccount'
             const tagName = splitItem.tag.replace(/\|/gi, '');
-            const tagAmount = transfer.expenseSplit[ splitDebitAccount ][ tagName ] ? (transfer.expenseSplit[ splitDebitAccount ][ tagName ] + splitItem.amount) : splitItem.amount;
-            transfer.expenseSplit[ splitDebitAccount ][ tagName ] = tagAmount;
+            const tagAmount = transfer.splits[ splitDebitAccount ][ tagName ] ? (transfer.splits[ splitDebitAccount ][ tagName ] + splitItem.amount) : splitItem.amount;
+            transfer.splits[ splitDebitAccount ][ tagName ] = tagAmount;
         }
     }
 };
