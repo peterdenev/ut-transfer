@@ -93,7 +93,36 @@ var assignmentCalc = (decision, tag) => {
         }
     });
     return amount || decision.amount[tag];
-}
+};
+
+// set split expenses by Source and Destination accounts
+const setSplitExpenseByAccounts = (splits, transfer) => {
+    /*{key: 'fee', name: 'Fee'},
+    {key: 'vat', name: 'VAT'},
+    {key: 'wth', name: 'WHT'},
+    {key: 'otherTax', name: 'Other Tax'},
+    {key: 'realtime', name: 'Real Time'},
+    {key: 'agentCommission', name: 'Delayed'},
+    {key: 'commission', */
+    const tagRealtime = 'realtime';
+    
+    transfer.splits = {
+        [transfer.sourceAccount]: {},
+        [transfer.destinationAccount]: {}
+    };
+        
+    for (let index = 0; index < splits.length; index++) {
+        const splitItem = splits[ index ];
+        const splitDebitAccount = splitItem.debit;
+        // if 'tag' is not 'realTime' and 'debit' is one of 'SourceAccount' or 'DestinationAccount'
+        if (!splitItem.tag.includes(tagRealtime) && transfer.splits[ splitDebitAccount ]) {
+            // set expense type/value and value by 'SourceAccount' or 'DestinationAccount'
+            const tagName = splitItem.tag.replace(/\|/gi, '');
+            const tagAmount = transfer.splits[ splitDebitAccount ][ tagName ] ? (transfer.splits[ splitDebitAccount ][ tagName ] + splitItem.amount) : splitItem.amount;
+            transfer.splits[ splitDebitAccount ][ tagName ] = tagAmount;
+        }
+    }
+};
 
 var ruleValidate = (bus, transfer) => {
     return bus.importMethod('db/rule.decision.lookup')({
@@ -129,6 +158,7 @@ var ruleValidate = (bus, transfer) => {
             transfer.amount.commission = currency.amount(transfer.transferCurrency, transfer.commission);
             transfer.transferDateTime = decision.amount.transferDateTime;
             transfer.transferTypeId = decision.amount.transferTypeId;
+            setSplitExpenseByAccounts(decision.split, transfer);
         } else {
             return bus.importMethod('db/rule.operation.lookup')({operation: transfer.transferType})
             .then(result => {
