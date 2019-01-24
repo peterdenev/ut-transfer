@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.28.0-rc-godfather.32",
+  "version": "6.28.0-rc-godfather.33",
   "main": "index.js",
   "browser": "browser.js",
   "pkg": {
