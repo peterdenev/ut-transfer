@@ -563,7 +563,7 @@ module.exports = function transferFlow({utError: {fetchErrors}}) {
                 .then(transfer => {
                     return processAny(this.bus, this.log, $meta)(transfer)
                         .catch(error => {
-                            if (error instanceof errors['transfer.transferAlreadyReversed']) {
+                            if (error.type === 'transfer.transferAlreadyReversed') {
                                 return transfer;
                             }
                             throw error;
