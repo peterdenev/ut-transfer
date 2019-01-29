@@ -1,3 +1,4 @@
+
 const DECLINED = {
     ledger: ['transfer.insufficientFunds', 'transfer.invalidAccount', 'transfer.genericDecline', 'transfer.incorrectPin'],
     issuer: ['transfer.insufficientFunds', 'transfer.invalidAccount', 'transfer.genericDecline', 'transfer.incorrectPin'],
@@ -93,7 +94,7 @@ var assignmentCalc = (decision, tag) => {
         }
     });
     return amount || decision.amount[tag];
-}
+};
 
 var ruleValidate = (bus, transfer) => {
     return bus.importMethod('db/rule.decision.lookup')({
@@ -129,6 +130,7 @@ var ruleValidate = (bus, transfer) => {
             transfer.amount.commission = currency.amount(transfer.transferCurrency, transfer.commission);
             transfer.transferDateTime = decision.amount.transferDateTime;
             transfer.transferTypeId = decision.amount.transferTypeId;
+            return bus.importMethod('transaction.splitByAccounts')({split: decision.split, transfer});
         } else {
             return bus.importMethod('db/rule.operation.lookup')({operation: transfer.transferType})
             .then(result => {
@@ -138,7 +140,7 @@ var ruleValidate = (bus, transfer) => {
             });
         }
 
-        return transfer;
+        // return transfer;
     })
     .catch(error => {
         transfer.abortAcquirer = error;
