@@ -34,19 +34,6 @@ BEGIN TRY
     SET @endRow = @startRow + @pageSize - 1
     SELECT TOP 1 @sortOrder = dir, @sortBy = field FROM @orderBy
 
-    SET @callParams =
-        ( SELECT @startDate AS startDate,
-            @endDate AS endDate,
-            @processingCode AS processingCode,
-            @channelType AS channelType,
-            @deviceID AS deviceID,
-            @beneficiaryName AS beneficiaryName,
-            @pageSize AS pageSize,
-            @pageNumber AS pageNumber,
-            (SELECT * FROM @orderBy rows FOR XML AUTO, TYPE) AS orderBy,
-            (SELECT * FROM @meta rows FOR XML AUTO, TYPE) AS meta
-        FOR XML RAW('params'), TYPE)
-
     ;WITH transferDetails AS
     (
         SELECT
