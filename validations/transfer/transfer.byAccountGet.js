@@ -8,6 +8,7 @@ module.exports = {
         processingCode: joi.number(),
         channelType: joi.string(),
         deviceID: joi.string(),
+        beneficiaryName: joi.string(),
         pageSize: joi.number(),
         pageNumber: joi.number(),
         orderBy: joi.object().keys({
