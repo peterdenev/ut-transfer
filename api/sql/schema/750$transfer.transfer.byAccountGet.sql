@@ -112,6 +112,7 @@ BEGIN TRY
         description,
         sourceAccount,
         destinationAccount,
+        beneficiaryName,
         rowNum,
         recordsTotal,
         COUNT(*) OVER (PARTITION BY 1) AS recordsPageTotal
@@ -133,6 +134,7 @@ BEGIN TRY
         description,
         sourceAccount,
         destinationAccount,
+        beneficiaryName,
         rowNum,
         recordsTotal,
         recordsPageTotal
