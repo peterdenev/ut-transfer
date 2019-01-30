@@ -4,6 +4,7 @@ ALTER PROCEDURE [transfer].[transfer.byAccountGet]
     @processingCode INT = NULL,
     @channelType NVARCHAR(50) = NULL,
     @deviceID NVARCHAR(50) = NULL,
+    @beneficiaryName NVARCHAR(200) = NULL,
     @userAvailableAccounts core.arrayList READONLY,
     @pageSize INT = 25, -- how many rows will be returned per page
     @pageNumber INT = 1, -- which page number to display
@@ -39,6 +40,7 @@ BEGIN TRY
             @processingCode AS processingCode,
             @channelType AS channelType,
             @deviceID AS deviceID,
+            @beneficiaryName AS beneficiaryName,
             @pageSize AS pageSize,
             @pageNumber AS pageNumber,
             (SELECT * FROM @orderBy rows FOR XML AUTO, TYPE) AS orderBy,
@@ -59,6 +61,7 @@ BEGIN TRY
             t.description AS description,
             t.sourceAccount AS sourceAccount,
             t.destinationAccount AS destinationAccount,
+            t.destinationAccountHolder AS beneficiaryName,
             ROW_NUMBER() OVER ( ORDER BY
                 CASE
                     WHEN @sortOrder = 'ASC' THEN
@@ -67,6 +70,7 @@ BEGIN TRY
                             WHEN @sortBy = 'channelType' THEN t.channelType
                             WHEN @sortBy = 'transferDateTime' THEN CONVERT(NVARCHAR(50), t.transferDateTime, 121)
                             WHEN @sortBy = 'transferCurrency' THEN t.transferCurrency
+                            WHEN @sortBy = 'beneficiaryName' THEN t.destinationAccountHolder
                             WHEN @sortBy = 'transferAmount' THEN REPLICATE('0', 30 - LEN(t.transferAmount)) + CAST(ISNULL(t.transferAmount, 0) AS NVARCHAR(50))
                         END
                 END ASC,
@@ -77,6 +81,7 @@ BEGIN TRY
                             WHEN @sortBy = 'channelType' THEN t.channelType
                             WHEN @sortBy = 'transferDateTime' THEN CONVERT(NVARCHAR(50), t.transferDateTime, 121)
                             WHEN @sortBy = 'transferCurrency' THEN t.transferCurrency
+                            WHEN @sortBy = 'beneficiaryName' THEN t.destinationAccountHolder
                             WHEN @sortBy = 'transferAmount' THEN REPLICATE('0', 30 - LEN(t.transferAmount)) + CAST(ISNULL(t.transferAmount, 0) AS NVARCHAR(50))
                         END
                 END DESC
@@ -93,6 +98,7 @@ BEGIN TRY
             AND (@processingCode IS NULL OR t.transferTypeId = @processingCode)
             AND (@channelType IS NULL OR t.channelType = @channelType)
             AND (@deviceID IS NULL OR t.channelId = @deviceID)
+            AND (@beneficiaryName IS NULL OR t.destinationAccountHolder LIKE '%' + @beneficiaryName + '%')
     )
     SELECT
         typeTransaction,
