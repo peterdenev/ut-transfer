@@ -17,7 +17,7 @@ endDate.setMinutes(59);
 endDate.setSeconds(59);
 endDate.setMilliseconds(999);
 
-module.exports = (gridStyle) => ({
+export default (gridStyle) => ({
     title: 'Transfer Week of Year Statistics ',
     export: {
         method: 'transfer.report.byWeekOfYear',

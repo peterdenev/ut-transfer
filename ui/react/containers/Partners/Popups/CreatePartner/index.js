@@ -47,10 +47,10 @@ export class Create extends Component {
     render() {
         return (
             <StandartPopup
-              isOpen={this.props.isOpen}
-              header={this.getPopupHeader()}
-              footer={this.getPopupFooter()}
-              closePopup={this.props.closeCreatePartnerPopup}
+                isOpen={this.props.isOpen}
+                header={this.getPopupHeader()}
+                footer={this.getPopupFooter()}
+                closePopup={this.props.closeCreatePartnerPopup}
             >
                 <CreatePopupContent />
             </StandartPopup>

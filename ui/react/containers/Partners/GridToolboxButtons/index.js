@@ -15,10 +15,10 @@ export class Buttons extends Component {
         let disabled = this.props.checked.size !== 1;
         return <div>
             {this.context.checkPermission('transfer.partner.get') && <StandartButton
-              disabled={disabled}
-              styleType='secondaryDialog'
-              onClick={!disabled ? this.fetchPartnerDetails : () => {}}
-              label='Details'
+                disabled={disabled}
+                styleType='secondaryDialog'
+                onClick={!disabled ? this.fetchPartnerDetails : () => {}}
+                label='Details'
             />}
         </div>;
     }

@@ -22,106 +22,106 @@ export class EditPopupContent extends Component {
         return (
             <div>
                 <Input
-                  value={this.props.partnerId}
-                  label={<Text>Partner Id</Text>}
-                  boldLabel
-                  readonly
-                  wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
+                    value={this.props.partnerId}
+                    label={<Text>Partner Id</Text>}
+                    boldLabel
+                    readonly
+                    wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
                 />
                 <Input
-                  value={this.props.name}
-                  label={<Text>Name</Text>}
-                  placeholder={'Please enter name'}
-                  onChange={this.handleInputChange('name')}
-                  keyProp='name'
-                  boldLabel
-                  wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
-                  validators={nameValidation.rules}
-                  isValid={this.props.errors.get('name') === undefined}
-                  errorMessage={this.props.errors.get('name')}
+                    value={this.props.name}
+                    label={<Text>Name</Text>}
+                    placeholder={'Please enter name'}
+                    onChange={this.handleInputChange('name')}
+                    keyProp='name'
+                    boldLabel
+                    wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
+                    validators={nameValidation.rules}
+                    isValid={this.props.errors.get('name') === undefined}
+                    errorMessage={this.props.errors.get('name')}
                 />
                 <Input
-                  value={this.props.port}
-                  label={<Text>Port</Text>}
-                  placeholder={'Please enter port'}
-                  onChange={this.handleInputChange('port')}
-                  keyProp='port'
-                  boldLabel
-                  wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
-                  validators={portValidation.rules}
-                  isValid={this.props.errors.get('port') === undefined}
-                  errorMessage={this.props.errors.get('port')}
+                    value={this.props.port}
+                    label={<Text>Port</Text>}
+                    placeholder={'Please enter port'}
+                    onChange={this.handleInputChange('port')}
+                    keyProp='port'
+                    boldLabel
+                    wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
+                    validators={portValidation.rules}
+                    isValid={this.props.errors.get('port') === undefined}
+                    errorMessage={this.props.errors.get('port')}
                 />
                 <Input
-                  value={this.props.mode}
-                  label={<Text>Mode</Text>}
-                  placeholder={'Please enter mode'}
-                  onChange={this.handleInputChange('mode')}
-                  keyProp='mode'
-                  boldLabel
-                  wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
-                  validators={modeValidation.rules}
-                  isValid={this.props.errors.get('mode') === undefined}
-                  errorMessage={this.props.errors.get('mode')}
+                    value={this.props.mode}
+                    label={<Text>Mode</Text>}
+                    placeholder={'Please enter mode'}
+                    onChange={this.handleInputChange('mode')}
+                    keyProp='mode'
+                    boldLabel
+                    wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
+                    validators={modeValidation.rules}
+                    isValid={this.props.errors.get('mode') === undefined}
+                    errorMessage={this.props.errors.get('mode')}
                 />
                 <DatePicker
-                  defaultValue={this.props.settlementDate}
-                  label={'Settlement Date'}
-                  boldLabel
-                  withVerticalClass
-                  wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
-                  // locale={filterElement.locale}
-                  onChange={this.handleDateChange('settlementDate')}
-                  isValid={this.props.errors.get('settlementDate') === undefined}
-                  errorMessage={this.props.errors.get('settlementDate')}
+                    defaultValue={this.props.settlementDate}
+                    label={'Settlement Date'}
+                    boldLabel
+                    withVerticalClass
+                    wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
+                    // locale={filterElement.locale}
+                    onChange={this.handleDateChange('settlementDate')}
+                    isValid={this.props.errors.get('settlementDate') === undefined}
+                    errorMessage={this.props.errors.get('settlementDate')}
                 />
                 <Input
-                  value={this.props.settlementAccount}
-                  label={<Text>Settlement Account</Text>}
-                  placeholder={'Please enter settlement account'}
-                  onChange={this.handleInputChange('settlementAccount')}
-                  keyProp='settlementAccount'
-                  boldLabel
-                  wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
-                  validators={settlementAccountValidation.rules}
-                  isValid={this.props.errors.get('settlementAccount') === undefined}
-                  errorMessage={this.props.errors.get('settlementAccount')}
+                    value={this.props.settlementAccount}
+                    label={<Text>Settlement Account</Text>}
+                    placeholder={'Please enter settlement account'}
+                    onChange={this.handleInputChange('settlementAccount')}
+                    keyProp='settlementAccount'
+                    boldLabel
+                    wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
+                    validators={settlementAccountValidation.rules}
+                    isValid={this.props.errors.get('settlementAccount') === undefined}
+                    errorMessage={this.props.errors.get('settlementAccount')}
                 />
                 <Input
-                  value={this.props.feeAccount}
-                  label={<Text>Fee Account</Text>}
-                  placeholder={'Please enter fee account'}
-                  onChange={this.handleInputChange('feeAccount')}
-                  keyProp='feeAccount'
-                  boldLabel
-                  wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
-                  validators={feeAccountValidation.rules}
-                  isValid={this.props.errors.get('feeAccount') === undefined}
-                  errorMessage={this.props.errors.get('feeAccount')}
+                    value={this.props.feeAccount}
+                    label={<Text>Fee Account</Text>}
+                    placeholder={'Please enter fee account'}
+                    onChange={this.handleInputChange('feeAccount')}
+                    keyProp='feeAccount'
+                    boldLabel
+                    wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
+                    validators={feeAccountValidation.rules}
+                    isValid={this.props.errors.get('feeAccount') === undefined}
+                    errorMessage={this.props.errors.get('feeAccount')}
                 />
                 <Input
-                  value={this.props.commissionAccount}
-                  label={<Text>Commission Account</Text>}
-                  placeholder={'Please enter commission account'}
-                  onChange={this.handleInputChange('commissionAccount')}
-                  keyProp='commissionAccount'
-                  boldLabel
-                  wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
-                  validators={commissionAccountValidation.rules}
-                  isValid={this.props.errors.get('commissionAccount') === undefined}
-                  errorMessage={this.props.errors.get('commissionAccount')}
+                    value={this.props.commissionAccount}
+                    label={<Text>Commission Account</Text>}
+                    placeholder={'Please enter commission account'}
+                    onChange={this.handleInputChange('commissionAccount')}
+                    keyProp='commissionAccount'
+                    boldLabel
+                    wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
+                    validators={commissionAccountValidation.rules}
+                    isValid={this.props.errors.get('commissionAccount') === undefined}
+                    errorMessage={this.props.errors.get('commissionAccount')}
                 />
                 <Input
-                  value={this.props.serialNumber}
-                  label={<Text>Serial Number</Text>}
-                  placeholder={'Please enter serial number'}
-                  onChange={this.handleInputChange('serialNumber')}
-                  keyProp='serialNumber'
-                  boldLabel
-                  wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
-                  validators={serialNumberValidation.rules}
-                  isValid={this.props.errors.get('serialNumber') === undefined}
-                  errorMessage={this.props.errors.get('serialNumber')}
+                    value={this.props.serialNumber}
+                    label={<Text>Serial Number</Text>}
+                    placeholder={'Please enter serial number'}
+                    onChange={this.handleInputChange('serialNumber')}
+                    keyProp='serialNumber'
+                    boldLabel
+                    wrapperClassName={`${style.inputPaddings} ${style.inputBorderBottom}`}
+                    validators={serialNumberValidation.rules}
+                    isValid={this.props.errors.get('serialNumber') === undefined}
+                    errorMessage={this.props.errors.get('serialNumber')}
                 />
             </div>
         );

@@ -49,10 +49,10 @@ export class Create extends Component {
     render() {
         return (
             <StandartPopup
-              isOpen={this.props.isOpen}
-              header={this.getPopupHeader()}
-              footer={this.getPopupFooter()}
-              closePopup={this.props.closeDetailsDialog}
+                isOpen={this.props.isOpen}
+                header={this.getPopupHeader()}
+                footer={this.getPopupFooter()}
+                closePopup={this.props.closeDetailsDialog}
             >
                 <EditPopupContent />
             </StandartPopup>

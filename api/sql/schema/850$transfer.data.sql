@@ -18,6 +18,7 @@ USING
         ('loanDisburse', 'Loan disbursement'),
         ('loanRepay', 'Loan repayment'),
         ('forex', 'Foreign currency exchange'),
+        ('accountList', 'List accounts'),
         ('tia', 'Teller initiated audit')
     ) AS source (itemCode, itemName)
 JOIN
@@ -65,6 +66,7 @@ USING
         ('transfer.report.byHourOfDay', 'transfer.report.byHourOfDay', '{}'),
         ('transfer.report.byTypeOfTransfer', 'transfer.report.byTypeOfTransfer', '{}'),
         ('transfer.report.byWeekOfYear', 'transfer.report.byWeekOfYear', '{}'),
+        ('transfer.report.byChannelId', 'transfer.report.byChannelId', '{}'),
         ('transfer.report.settlement', 'transfer.report.settlement', '{}'),
         ('transfer.report.settlementDetails', 'transfer.report.settlementDetails', '{}'),
         ('transfer.report.transfer', 'transfer.report.transfer', '{}'),
@@ -72,6 +74,7 @@ USING
         ('db/transfer.report.byHourOfDay', 'db/transfer.report.byHourOfDay', '{}'),
         ('db/transfer.report.byTypeOfTransfer', 'db/transfer.report.byTypeOfTransfer', '{}'),
         ('db/transfer.report.byWeekOfYear', 'db/transfer.report.byWeekOfYear', '{}'),
+        ('db/transfer.report.byChannelId', 'db/transfer.report.byChannelId', '{}'),
         ('db/transfer.report.settlement', 'db/transfer.report.settlement', '{}'),
         ('db/transfer.report.settlementDetails', 'db/transfer.report.settlementDetails', '{}'),
         ('db/transfer.report.transfer', 'db/transfer.report.transfer', '{}'),

@@ -6,8 +6,9 @@ module.exports = {
     notes: ['transfer'],
     tags: ['transfer', 'get'],
     params: joi.object().keys({
-        transferIdAcquirer: joi.string().required()
-    }),
+        transferId: joi.string(),
+        transferIdAcquirer: joi.string()
+    }).or('transferId', 'transferIdAcquirer').required(),
     result: joi.object().keys({
         transfer: joi.object().allow(null),
         transferSplits: joi.array().items(joi.object()).allow(null)

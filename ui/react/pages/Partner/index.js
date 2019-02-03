@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import {connect} from 'react-redux';
 import Header from 'ut-front-react/components/PageLayout/Header';
-import { getLink } from 'ut-front/react/routerHelper';
+import { getLink } from 'ut-front-react/routerHelper';
 import { AddTab } from 'ut-front-react/containers/TabMenu';
 import ResizibleContainer from 'ut-front-react/components/ResiziblePageLayout/Container';
 import resizibleTypes from 'ut-front-react/components/ResiziblePageLayout/resizibleTypes';
