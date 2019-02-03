@@ -1,3 +1,21 @@
+# [6.28.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.28.0-rc-godfather.33...v6.28.0) (2019-02-03)
+
+
+### Bug Fixes
+
+* upgrade dependencies ([510cb30](https://github.com/softwaregroup-bg/ut-transfer/commit/510cb30))
+
+
+
+## [6.27.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.28.0-rc-godfather.25...v6.27.1) (2018-12-07)
+
+
+### Bug Fixes
+
+* copy view code from major/rc-dss ([#193](https://github.com/softwaregroup-bg/ut-transfer/issues/193)) ([80efd24](https://github.com/softwaregroup-bg/ut-transfer/commit/80efd24))
+
+
+
 <a name="6.27.1"></a>
 ## [6.27.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.27.0...v6.27.1) (2018-12-07)
 
