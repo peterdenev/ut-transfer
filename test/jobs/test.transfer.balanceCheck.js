@@ -54,11 +54,9 @@ var phonePrefix;
 var stdPolicy;
 // TODO for successful transactions - change the precision when the logic is implemented in the backend/db
 
-module.exports = function(opt) {
+module.exports = function test(opt) {
     return {
-        type: 'integration',
-        name: 'balance check transaction',
-        steps: function(test, bus, run) {
+        balanceCheck: function(test, bus, run) {
             return run(test, bus, [userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                 commonFunc.createStep('user.user.get', 'get admin details', (context) => {
                     return {

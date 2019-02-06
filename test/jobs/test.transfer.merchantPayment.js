@@ -54,11 +54,9 @@ var accountCustomer1Id, accountMerchantId1, accountMerchantId2, accountMerchantI
 var stdPolicy;
 var rejectReasonId, cancelReasonId;
 
-module.exports = function(opt) {
+module.exports = function test(opt) {
     return {
-        type: 'integration',
-        name: 'merchant pull request/ merchant payment',
-        steps: function(test, bus, run) {
+        merchantPayment: function(test, bus, run) {
             return run(test, bus, [userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                 commonFunc.createStep('user.user.get', 'get admin details', (context) => {
                     return {

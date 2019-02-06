@@ -2,11 +2,9 @@ var commonFunc = require('ut-test/lib/methods/commonFunc');
 var userMethods = require('ut-test/lib/methods/user');
 var userConstants = require('ut-test/lib/constants/user').constants();
 
-module.exports = function() {
+module.exports = function test() {
     return {
-        type: 'integration',
-        name: 'call transfer reports',
-        steps: function(test, bus, run) {
+        callReport: function(test, bus, run) {
             return run(test, bus, [userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                 commonFunc.createStep('db/transfer.transferDetails.get', 'call trasferDetails report', (context) => {
                     return {};
