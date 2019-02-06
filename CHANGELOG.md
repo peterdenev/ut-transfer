@@ -1,3 +1,7 @@
+## [6.28.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.28.0...v6.28.1) (2019-02-06)
+
+
+
 # [6.28.0](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.28.0-rc-godfather.33...v6.28.0) (2019-02-03)
 
 
