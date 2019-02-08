@@ -23,7 +23,7 @@ var userConstants = require('ut-test/lib/constants/user').constants();
 const TRANSFERIDACQUIRER = transferConstants.TRANSFERIDACQUIRER;
 const PHONENUMBER = customerConstants.PHONENUMBER.slice(3);
 // Rule parameters
-const BRANCHTOACCOUNTPERCENT = 100;
+const ACCOUNTTOBRANCHPERCENT = 100;
 const TRANSACTIONFEE = 10.50;
 const TRANSACTIONFEEPERCENT = 100;
 const TRANSACTIONFEEVALUE = TRANSACTIONFEE * TRANSACTIONFEEPERCENT / 100;
@@ -43,18 +43,15 @@ const TRANSFERAMOUNT = 200;
 const ACCOUNTNAME = accountConstants.ACCOUNTNAME;
 var conditionId, orgId1, organizationDepthArray;
 var currencyName1, priority;
-var operationIdCashInBranch, operationeCodeCashInBranch, operationNameCashInBranch;
+var operationIdCashOutBranch, operationeCodeCashOutBranch, operationNameCashOutBranch;
 var customerTypeIndividual, customerActorId, currencyId, category1, category2, productType, productTypeId, periodicFeeId, productGroup, productGroupId, roleTellerId;
 var accountId1, accountId2, accountNumber1, accountNumber2;
 var stdPolicy;
-var phonePrefix;
 
-// Wallet customer deposits money into his/her wallet by visiting a branch
-module.exports = function(opt) {
+// Wallet customer withdraws money from his/her wallet by visiting a branch
+module.exports = function test(opt) {
     return {
-        type: 'integration',
-        name: 'cash in at branch transaction',
-        steps: function(test, bus, run) {
+        cashOutBranch: function(test, bus, run) {
             return run(test, bus, [userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                 commonFunc.createStep('user.user.get', 'get admin details', (context) => {
                     return {
@@ -91,10 +88,10 @@ module.exports = function(opt) {
                     };
                 }, (result, assert) => {
                     assert.equals(coreJoiValidation.validateFetchItemTranslation(result.itemTranslationFetch[0]).error, null, 'Return all details after listing itemName');
-                    var operationBalanceCheck = result.itemTranslationFetch.find(item => item.itemCode === transferConstants.CASHINBRANCH);
-                    operationIdCashInBranch = operationBalanceCheck.itemNameId;
-                    operationeCodeCashInBranch = operationBalanceCheck.itemCode;
-                    operationNameCashInBranch = operationBalanceCheck.itemName;
+                    var operationBalanceCheck = result.itemTranslationFetch.find(item => item.itemCode === transferConstants.CASHOUTBRANCH);
+                    operationIdCashOutBranch = operationBalanceCheck.itemNameId;
+                    operationeCodeCashOutBranch = operationBalanceCheck.itemCode;
+                    operationNameCashOutBranch = operationBalanceCheck.itemName;
                 }),
                 commonFunc.createStep('db/rule.rule.fetch', 'fetch rules', (context) => {
                     return {
@@ -194,6 +191,7 @@ module.exports = function(opt) {
                             }
                         };
                     }, (result, assert) => {
+                        // console.log(result);
                         customerActorId = result.actorId;
                         assert.equals(result.success, true, 'return success: true');
                     }),
@@ -217,15 +215,6 @@ module.exports = function(opt) {
                         assert.equals(result['user.hash'][0].identifier, PHONENUMBER, 'return username = customer phone number in user.hash');
                         roleTellerId = result.rolesPossibleForAssign.find(role => role.name === transferConstants.TELLER).roleId;
                     }),
-                    commonFunc.createStep('ledger.userAccountByPhoneNumber.get', 'get account by phone number', context => {
-                        return {
-                            phoneNumber: PHONENUMBER
-                        };
-                    }, (result, assert) => {
-                        assert.equals(accountJoiValidation.validateGetUserAccountByPhoneNumber(result).error, null, 'return correct details for customer accounts by phone number');
-                        phonePrefix = result.customerData[0].phonePrefix;
-                    }),
-                    // Teller user setup
                     userMethods.addUser('add teller', context => {
                         return {
                             object: context['get admin details'].memberOF[0].object,
@@ -248,7 +237,7 @@ module.exports = function(opt) {
                             productGroupId: productGroupId
                         };
                     }, (result, assert) => {
-                        productTypeId = result.productType.find(type => type.name === productType).productTypeId;
+                        productTypeId = result.productType.find((type) => type.name === productType).productTypeId;
                     }),
                     commonFunc.createStep('ledger.productPeriodicFee.fetch', 'fetch product periodic fee', (context) => {
                         return {};
@@ -306,35 +295,40 @@ module.exports = function(opt) {
                             accountId: accountId1
                         };
                     }),
+                    accountMethods.fetchAccount('fetch bank account id', context => {
+                        return {
+                            accountNumber: opt.bankAccount
+                        };
+                    }),
                     accountMethods.fetchAccount('fetch fee account id', context => {
                         return {
-                            accountNumber: opt.feeCashInBranch
+                            accountNumber: opt.feeCashOutBranch
                         };
                     }),
                     accountMethods.fetchAccount('fetch vat account id', context => {
                         return {
-                            accountNumber: opt.vatCashInBranch
+                            accountNumber: opt.vatCashOutBranch
                         };
                     }),
                     accountMethods.fetchAccount('fetch otherTax account id', context => {
                         return {
-                            accountNumber: opt.otherTaxCashInBranch
+                            accountNumber: opt.otherTaxCashOutBranch
                         };
                     }),
                     /** RULE SETUP
-                     * @conditionItem @conditionActor - used to define permissions for the transaction (which role, sender and receiver product, transaction type)
+                     * @conditionItem @conditionActor - used to define permissions for the transaction (which role, source product, transaction type)
                      * @splitRange - defines the amount which will be splitted between the different accounts.
-                     * The split range amount may be defined as "percent" (percent of the transaction amount) OR  minValue(amount which is not calculated from the transaction amount)
+                     * The split range amount may be defined as "percent" (percent of the transaction amount) OR minValue(amount which is not calculated from the transaction amount)
                      * @splitAssignment - defines the way in which the amount in the split range will be splitted between the different accounts.
                      */
-                    commonFunc.createStep('db/rule.rule.add', 'add rule cash in at branch', (context) => {
+                    commonFunc.createStep('db/rule.rule.add', 'add rule cash out at branch', (context) => {
                         return {
                             condition: {
                                 priority: priority - 1
                             },
                             conditionItem: [{
                                 factor: ruleConstants.OPERATIONCATEGORY, // operation.id
-                                itemNameId: operationIdCashInBranch
+                                itemNameId: operationIdCashOutBranch
                             }, {
                                 factor: ruleConstants.SOURCECATEGORY, // source.account.product
                                 itemNameId: context['get product 2'].product[0].itemNameId
@@ -357,12 +351,12 @@ module.exports = function(opt) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            // Pulls funds from the bank account and sends them to the customer account.
-                                            // The sent amount is percent(BRANCHTOACCOUNTPERCENT) of the transferred amount defined in transaction.execute
-                                            debit: opt.bankAccount,
-                                            credit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            percent: BRANCHTOACCOUNTPERCENT, // 100%
-                                            description: 'Agent amount - Transfer'
+                                            // Pulls funds from the sender customer account and sends them to the bank account.
+                                            // The sent amount is percent(ACCOUNTTOBRANCHPERCENT) of the transferred amount defined in transaction.execute
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: opt.bankAccount,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
+                                            description: 'Transfer amount'
                                         }]
                                     }, {
                                         splitName: {
@@ -376,10 +370,10 @@ module.exports = function(opt) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            // Pulls funds from the customer account and sends them to the GL fee account.
-                                            // The sent amount is percent(TRANSACTIONFEEPERCENT) of the transaction fee (TRANSACTIONFEEVALUE)
+                                            // Pulls funds from the sender customer account and sends them to the GL fee account.
+                                            // The sent amount is percent of the amount defined in the split range (TRANSACTIONFEEPERCENT * TRANSACTIONFEE / 100)
                                             debit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            credit: opt.feeCashInBranch,
+                                            credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
                                         }]
@@ -397,8 +391,8 @@ module.exports = function(opt) {
                                         splitAssignment: [{
                                             // Pulls funds from the GL fee account and sends them to the GL VAT account.
                                             // The sent amount is percent of the amount defined in the split range (FEETOVATPERCENT * TRANSACTIONFEE / 100)
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.vatCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.vatCashOutBranch,
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
@@ -408,8 +402,8 @@ module.exports = function(opt) {
                                         }, {
                                             // Pulls funds from the GL fee account and sends them to the GL other tax account.
                                             // The sent amount is percent of the amount defined in the split range (FEETOOTHERTAXPERCENT * TRANSACTIONFEE / 100)
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.otherTaxCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.otherTaxCashOutBranch,
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
@@ -427,24 +421,24 @@ module.exports = function(opt) {
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - missing permissions', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'Missing permissions for executing transaction');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully cash in at branch - missing permissions', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully cash out at branch - missing permissions', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             sourceAccount: accountNumber1,
                             amount: TRANSFERAMOUNT,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 1,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null,
                     (error, assert) => {
@@ -466,7 +460,7 @@ module.exports = function(opt) {
                     commonFunc.createStep('db/rule.decision.lookup', 'get rule for user', (context) => {
                         return {
                             channelId: context['self register customer'].actorId,
-                            operation: operationeCodeCashInBranch,
+                            operation: operationeCodeCashOutBranch,
                             sourceAccount: accountNumber1,
                             destinationAccount: accountNumber1,
                             amount: TRANSFERAMOUNT,
@@ -477,7 +471,65 @@ module.exports = function(opt) {
                         assert.true(result.split.every(split => split.conditionId === conditionId), 'return correct conditionId');
                     }),
                     userMethods.logout('logout user 1', context => context['login user 1']['identity.check'].sessionId),
+                    userMethods.login('login teller 1', userConstants.USERNAME, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
+                    /** Scenarios for product which is without min and max account balance */
+                    transferMethods.setBalance('set customer account balance < TRANSFERAMOUNT',
+                        context => [accountId1], commonFunc.roundNumber(TRANSFERAMOUNT + TRANSACTIONFEEVALUE - SMALLESTNUM, PRECISION)),
+                    transferMethods.setBalance('set default balance in fee, vat and otherTax accounts',
+                        context => [context['fetch fee account id'].account[0].accountId,
+                            context['fetch vat account id'].account[0].accountId,
+                            context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
+                    commonFunc.createStep('transaction.validate', 'failed transaction validation - insufficient balance in customer account', (context) => {
+                        return {
+                            transferType: operationeCodeCashOutBranch,
+                            amount: TRANSFERAMOUNT,
+                            sourceAccount: {
+                                type: transferConstants.ACCOUNTNUMBER,
+                                value: accountNumber1
+                            },
+                            description: operationNameCashOutBranch
+                        };
+                    }, null, (error, assert) => {
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance in customer account');
+                    }),
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - insufficient balance in customer account', (context) => {
+                        return {
+                            transferType: operationeCodeCashOutBranch,
+                            amount: TRANSFERAMOUNT,
+                            sourceAccount: accountNumber1,
+                            transferIdAcquirer: TRANSFERIDACQUIRER + 2,
+                            description: operationNameCashOutBranch
+                        };
+                    }, null, (error, assert) => {
+                        assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Insufficient balance in customer account');
+                    }),
+                    transferMethods.setBalance('set customer account balance equal to TRANSFERAMOUNT',
+                        context => [accountId1], TRANSFERAMOUNT + TRANSACTIONFEEVALUE),
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - minimum sufficient balance in customer account', (context) => {
+                        return {
+                            transferType: operationeCodeCashOutBranch,
+                            amount: TRANSFERAMOUNT,
+                            sourceAccount: accountNumber1,
+                            transferIdAcquirer: TRANSFERIDACQUIRER + 3,
+                            description: operationNameCashOutBranch
+                        };
+                    }, (result, assert) => {
+                        assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
+                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
+                        assert.equals(result.sourceAccount.accountName, ACCOUNTNAME, 'return correct source account name');
+                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
+                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
+                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
+                        assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 3, 'return correct transferIdAcquirer');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
+                        successfulTransactionsCount += 1;
+                    }),
+                    userMethods.logout('logout teller 1', context => context['login teller 1']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
+                    accountMethods.getAccountBalance('get customer account balance 1', context => accountId1, 0),
+                    accountMethods.getAccountBalance('get fee account balance 1', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get vat account balance 1', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
+                    accountMethods.getAccountBalance('get otherTax account balance 1', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
                     /** Scenarios with product which is with min and max account balance */
                     productMethods.editProduct('edit product - set min and max account balances', context => {
                         return {
@@ -494,70 +546,46 @@ module.exports = function(opt) {
                         };
                     }),
                     userMethods.logout('logout admin 1', context => context.login['identity.check'].sessionId),
-                    userMethods.login('login teller 2', userConstants.USERNAME, userConstants.USERPASSWORD + 1, userConstants.TIMEZONE, userConstants.USERPASSWORD),
-                    transferMethods.setBalance('set customer account balance > MAXACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
-                        context => accountId1, commonFunc.roundNumber(MAXACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE + SMALLESTNUM, PRECISION)),
+                    userMethods.login('login teller 2', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
+                    transferMethods.setBalance('set customer account balance > MAXACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
+                        context => [accountId1], commonFunc.roundNumber(MAXACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE + SMALLESTNUM, PRECISION)),
                     transferMethods.setBalance('set default balance in fee, vat and otherTax accounts',
                         context => [context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - customer balance exceeding product maxAccountBalance', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - customer balance exceeding product maxAccountBalance', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - customer balance exceeding product maxAccountBalance', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 4,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
-                    transferMethods.setBalance('set customer account balance equal to MAXACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
-                        context => [accountId1], commonFunc.roundNumber(MAXACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE, PRECISION)),
-                    commonFunc.createStep('transaction.validate', 'successful transaction validation - customer account balance is same as balance check fee', (context) => {
+                    transferMethods.setBalance('set customer account balance equal to MAXACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
+                        context => [accountId1], commonFunc.roundNumber(MAXACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE, PRECISION)),
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - customer balance within the product maxAccountBalance limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT,
-                            sourceAccount: {
-                                type: transferConstants.ACCOUNTNUMBER,
-                                value: accountNumber1
-                            },
-                            description: operationNameCashInBranch
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
-                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
-                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
-                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
-                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                        assert.equals(result.sourceAccount.accountName, ACCOUNTNAME, 'return correct account name');
-                        assert.equals(result.sourceAccount.msisdn, phonePrefix + PHONENUMBER, 'return correct msisdn');
-                        assert.equals(result.sourceAccount.customerName, customerConstants.FIRSTNAME + ' ' + customerConstants.LASTNAME, 'return correct customer name');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
-                        assert.equals(result.description, operationNameCashInBranch, 'return correct description');
-                        assert.equals(result.currency, currencyName1, 'return correct currency');
-                    }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - customer balance within the product maxAccountBalance limit', (context) => {
-                        return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 5,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -567,17 +595,8 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 5, 'return correct transferIdAcquirer');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
                         successfulTransactionsCount += 1;
-                    }),
-                    commonFunc.createStep('transfer.transfer.get', 'get transaction information - customer balance within the product maxAccountBalance limit', (context) => {
-                        return {
-                            transferIdAcquirer: context['successfully execute cash-in-branch transaction - customer balance within the product maxAccountBalance limit'].transferIdAcquirer
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateGetTransaction(result).error, null, 'return transaction information');
-                        assert.equals(result.sourceAccount, accountNumber1, 'return correct source account');
-                        assert.equals(result.transferFee, TRANSACTIONFEEVALUE, 'return correct transfer fee');
                     }),
                     userMethods.logout('logout teller 2', context => context['login teller 2']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
@@ -587,63 +606,45 @@ module.exports = function(opt) {
                     accountMethods.getAccountBalance('get otherTax account balance 2', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
                     userMethods.logout('logout admin 2', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller 3', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
-                    transferMethods.setBalance('set customer account balance < MINACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
-                        context => [accountId1], commonFunc.roundNumber(MINACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE - SMALLESTNUM, PRECISION)),
+                    transferMethods.setBalance('set customer account balance < MINACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
+                        context => [accountId1], commonFunc.roundNumber(MINACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE - SMALLESTNUM, PRECISION)),
                     transferMethods.setBalance('set default balance in fee, vat and otherTax accounts',
                         context => [context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - customer balance less than product minAccountBalance', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - customer balance less than product minAccountBalance', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - customer balance less than product minAccountBalance', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 6,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.ACCOUNTBALANCERESTRICTIONFAILURE, 'Account balance does not meet product limits.');
                     }),
-                    transferMethods.setBalance('set customer account balance equal to MAXACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
-                        context => [accountId1], commonFunc.roundNumber(MINACCOUNTBALANCE - TRANSFERAMOUNT + TRANSACTIONFEEVALUE, PRECISION)),
-                    commonFunc.createStep('transaction.validate', 'successful transaction validation - customer balance within the product minAccountBalance limit', (context) => {
+                    transferMethods.setBalance('set customer account balance equal to MAXACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE',
+                        context => [accountId1], commonFunc.roundNumber(MINACCOUNTBALANCE + TRANSFERAMOUNT + TRANSACTIONFEEVALUE, PRECISION)),
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - customer balance within the product minAccountBalance limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT,
-                            sourceAccount: {
-                                type: transferConstants.ACCOUNTNUMBER,
-                                value: accountNumber1
-                            },
-                            description: operationNameCashInBranch
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
-                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
-                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
-                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
-                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                    }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - customer balance within the product minAccountBalance limit', (context) => {
-                        return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 7,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -653,12 +654,12 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 7, 'return correct transferIdAcquirer');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     userMethods.logout('logout teller 3', context => context['login teller 3']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get customer account balance 3', context => accountId1, MINACCOUNTBALANCE, PRECISION),
+                    accountMethods.getAccountBalance('get customer account balance 3', context => accountId1, MINACCOUNTBALANCE),
                     accountMethods.getAccountBalance('get fee account balance 3', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 3', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 3', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
@@ -672,7 +673,7 @@ module.exports = function(opt) {
                             conditionItem: [{
                                 conditionId: conditionId,
                                 factor: ruleConstants.OPERATIONCATEGORY, // operation.id
-                                itemNameId: operationIdCashInBranch
+                                itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
                                 factor: ruleConstants.SOURCECATEGORY, // source.account.product
@@ -698,13 +699,13 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.bankAccount,
-                                            credit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: opt.bankAccount,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
                                         }]
                                     }, {
@@ -720,7 +721,7 @@ module.exports = function(opt) {
                                         }],
                                         splitAssignment: [{
                                             debit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            credit: opt.feeCashInBranch,
+                                            credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
                                         }]
@@ -736,8 +737,8 @@ module.exports = function(opt) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.vatCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.vatCashOutBranch,
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
@@ -745,8 +746,8 @@ module.exports = function(opt) {
                                                 value: ruleConstants.VAT
                                             }
                                         }, {
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.otherTaxCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.otherTaxCashOutBranch,
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
@@ -769,42 +770,24 @@ module.exports = function(opt) {
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - duplicate transferIdAcquirer', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - duplicate transferIdAcquirer', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 7,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSFERIDALREADYEXISTS, 'transferIdAcquirer must be unique');
                     }),
-                    commonFunc.createStep('transaction.validate', 'successful transaction validation - within the limits of rule maxCountDaily transactions', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxCountDaily transactions', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT,
-                            sourceAccount: {
-                                type: transferConstants.ACCOUNTNUMBER,
-                                value: accountNumber1
-                            },
-                            description: operationNameCashInBranch
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
-                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
-                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
-                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
-                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                    }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - within the limits of rule maxCountDaily transactions', (context) => {
-                        return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 8,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -814,36 +797,36 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 8, 'return correct transferIdAcquirer');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - exceeding the limits of rule maxCountDaily transactions', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - exceeding the limits of rule maxCountDaily transactions', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - exceeding the limits of rule maxCountDaily transactions', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 9,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.DAILYLIMITCOUNTERROR, 'daily transactions count limit reached');
                     }),
                     userMethods.logout('logout teller 4', context => context['login teller 4']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get customer account balance 4', context => accountId1, DEFAULTCREDIT + TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get customer account balance 4', context => accountId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 4', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 4', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 4', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
@@ -856,7 +839,7 @@ module.exports = function(opt) {
                             conditionItem: [{
                                 conditionId: conditionId,
                                 factor: ruleConstants.OPERATIONCATEGORY, // operation.id
-                                itemNameId: operationIdCashInBranch
+                                itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
                                 factor: ruleConstants.SOURCECATEGORY, // source.account.product
@@ -883,13 +866,13 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.bankAccount,
-                                            credit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: opt.bankAccount,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
                                         }]
                                     }, {
@@ -905,7 +888,7 @@ module.exports = function(opt) {
                                         }],
                                         splitAssignment: [{
                                             debit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            credit: opt.feeCashInBranch,
+                                            credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
                                         }]
@@ -921,8 +904,8 @@ module.exports = function(opt) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.vatCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.vatCashOutBranch,
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
@@ -930,8 +913,8 @@ module.exports = function(opt) {
                                                 value: ruleConstants.VAT
                                             }
                                         }, {
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.otherTaxCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.otherTaxCashOutBranch,
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
@@ -957,77 +940,59 @@ module.exports = function(opt) {
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - amount less than rule minAmount limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT - SMALLESTNUM,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.MINLIMITAMOUNTERROR, 'Transaction amount is below minimum');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - amount less than rule minAmount limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - amount less than rule minAmount limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT - SMALLESTNUM,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 10,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.MINLIMITAMOUNTERROR, 'Transaction amount is below minimum');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - amount more than rule maxAmount limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT + SMALLESTNUM,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.MAXLIMITAMOUNTERROR, 'Transaction amount is above maximum');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - amount more than rule maxAmount limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - amount more than rule maxAmount limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT + SMALLESTNUM,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 11,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.MAXLIMITAMOUNTERROR, 'Transaction amount is above maximum');
                     }),
-                    commonFunc.createStep('transaction.validate', 'successful transaction validation - within the limits of min and max amount', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of min and max amount', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT,
-                            sourceAccount: {
-                                type: transferConstants.ACCOUNTNUMBER,
-                                value: accountNumber1
-                            },
-                            description: operationNameCashInBranch
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
-                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
-                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
-                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
-                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                    }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - within the limits of min and max amount', (context) => {
-                        return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 12,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -1037,12 +1002,12 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 12, 'return correct transferIdAcquirer');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     userMethods.logout('logout teller 5', context => context['login teller 5']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get customer account balance 5', context => accountId1, DEFAULTCREDIT + TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get customer account balance 5', context => accountId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 5', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 5', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 5', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
@@ -1055,7 +1020,7 @@ module.exports = function(opt) {
                             conditionItem: [{
                                 conditionId: conditionId,
                                 factor: ruleConstants.OPERATIONCATEGORY, // operation.id
-                                itemNameId: operationIdCashInBranch
+                                itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
                                 factor: ruleConstants.SOURCECATEGORY, // source.account.product
@@ -1081,13 +1046,13 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.bankAccount,
-                                            credit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: opt.bankAccount,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
                                         }]
                                     }, {
@@ -1103,7 +1068,7 @@ module.exports = function(opt) {
                                         }],
                                         splitAssignment: [{
                                             debit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            credit: opt.feeCashInBranch,
+                                            credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
                                         }]
@@ -1119,8 +1084,8 @@ module.exports = function(opt) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.vatCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.vatCashOutBranch,
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
@@ -1128,8 +1093,8 @@ module.exports = function(opt) {
                                                 value: ruleConstants.VAT
                                             }
                                         }, {
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.otherTaxCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.otherTaxCashOutBranch,
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
@@ -1154,53 +1119,35 @@ module.exports = function(opt) {
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - daily amount more than rule maxAmountDaily limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT + SMALLESTNUM,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum daily amount');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - daily amount more than rule maxAmountDaily limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - daily amount more than rule maxAmountDaily limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT + SMALLESTNUM,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 13,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.DAILYLIMITAMOUNTERROR, 'Transaction amount is above maximum daily amount');
                     }),
-                    commonFunc.createStep('transaction.validate', 'successful transaction validation - within the limits of rule maxAmountDaily limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxAmountDaily limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT,
-                            sourceAccount: {
-                                type: transferConstants.ACCOUNTNUMBER,
-                                value: accountNumber1
-                            },
-                            description: operationNameCashInBranch
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
-                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
-                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
-                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
-                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                    }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - within the limits of rule maxAmountDaily limit', (context) => {
-                        return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 14,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -1210,12 +1157,12 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 14, 'return correct transferIdAcquirer');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     userMethods.logout('logout teller 6', context => context['login teller 6']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get customer account balance 6', context => accountId1, DEFAULTCREDIT + TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get customer account balance 6', context => accountId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 6', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 6', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 6', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
@@ -1228,7 +1175,7 @@ module.exports = function(opt) {
                             conditionItem: [{
                                 conditionId: conditionId,
                                 factor: ruleConstants.OPERATIONCATEGORY, // operation.id
-                                itemNameId: operationIdCashInBranch
+                                itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
                                 factor: ruleConstants.SOURCECATEGORY, // source.account.product
@@ -1254,13 +1201,13 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.bankAccount,
-                                            credit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: opt.bankAccount,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
                                         }]
                                     }, {
@@ -1276,7 +1223,7 @@ module.exports = function(opt) {
                                         }],
                                         splitAssignment: [{
                                             debit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            credit: opt.feeCashInBranch,
+                                            credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
                                         }]
@@ -1292,8 +1239,8 @@ module.exports = function(opt) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.vatCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.vatCashOutBranch,
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
@@ -1301,8 +1248,8 @@ module.exports = function(opt) {
                                                 value: ruleConstants.VAT
                                             }
                                         }, {
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.otherTaxCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.otherTaxCashOutBranch,
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
@@ -1327,53 +1274,35 @@ module.exports = function(opt) {
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - weekly amount more than rule maxAmountWeekly limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT + SMALLESTNUM,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - weekly amount more than rule maxAmountWeekly limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - weekly amount more than rule maxAmountWeekly limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT + SMALLESTNUM,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 15,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.WEEKLYLIMITAMOUNTERROR, 'Weekly transaction amount is above rule maximum weekly amount limit');
                     }),
-                    commonFunc.createStep('transaction.validate', 'successful transaction validation - within the limits of rule maxAmountWeekly limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxAmountWeekly limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT,
-                            sourceAccount: {
-                                type: transferConstants.ACCOUNTNUMBER,
-                                value: accountNumber1
-                            },
-                            description: operationNameCashInBranch
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
-                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
-                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
-                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
-                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                    }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - within the limits of rule maxAmountWeekly limit', (context) => {
-                        return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 16,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -1383,12 +1312,12 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 16, 'return correct transferIdAcquirer');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     userMethods.logout('logout teller 7', context => context['login teller 7']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get customer account balance 7', context => accountId1, DEFAULTCREDIT + TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get customer account balance 7', context => accountId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 7', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 7', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 7', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
@@ -1401,7 +1330,7 @@ module.exports = function(opt) {
                             conditionItem: [{
                                 conditionId: conditionId,
                                 factor: ruleConstants.OPERATIONCATEGORY, // operation.id
-                                itemNameId: operationIdCashInBranch
+                                itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
                                 factor: ruleConstants.SOURCECATEGORY, // source.account.product
@@ -1427,13 +1356,13 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.bankAccount,
-                                            credit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: opt.bankAccount,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
                                         }]
                                     }, {
@@ -1444,12 +1373,12 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            minValue: TRANSACTIONFEEVALUE,
+                                            minValue: TRANSACTIONFEE,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
                                             debit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            credit: opt.feeCashInBranch,
+                                            credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
                                         }]
@@ -1461,12 +1390,12 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            minValue: TRANSACTIONFEE,
+                                            minValue: TRANSACTIONFEEVALUE,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.vatCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.vatCashOutBranch,
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
@@ -1474,8 +1403,8 @@ module.exports = function(opt) {
                                                 value: ruleConstants.VAT
                                             }
                                         }, {
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.otherTaxCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.otherTaxCashOutBranch,
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
@@ -1498,31 +1427,13 @@ module.exports = function(opt) {
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    commonFunc.createStep('transaction.validate', 'successful transaction validation - within the limits of rule maxCountWeekly limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxCountWeekly limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT,
-                            sourceAccount: {
-                                type: transferConstants.ACCOUNTNUMBER,
-                                value: accountNumber1
-                            },
-                            description: operationNameCashInBranch
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
-                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
-                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
-                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
-                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                    }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - within the limits of rule maxCountWeekly limit', (context) => {
-                        return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 17,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -1532,37 +1443,36 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 17, 'return correct transferIdAcquirer');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - rule maxCountWeekly limit already reached', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT + SMALLESTNUM,
+                            transferType: operationeCodeCashOutBranch,
+                            amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
                     }),
-
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - rule maxCountWeekly limit already reached', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - rule maxCountWeekly limit already reached', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 18,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.WEEKLYLIMITCOUNTERROR, 'weekly transaction count limit reached');
                     }),
                     userMethods.logout('logout teller 8', context => context['login teller 8']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get customer account balance 8', context => accountId1, DEFAULTCREDIT + TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get customer account balance 8', context => accountId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 8', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 8', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 8', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
@@ -1575,7 +1485,7 @@ module.exports = function(opt) {
                             conditionItem: [{
                                 conditionId: conditionId,
                                 factor: ruleConstants.OPERATIONCATEGORY, // operation.id
-                                itemNameId: operationIdCashInBranch
+                                itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
                                 factor: ruleConstants.SOURCECATEGORY, // source.account.product
@@ -1601,13 +1511,13 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.bankAccount,
-                                            credit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: opt.bankAccount,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
                                         }]
                                     }, {
@@ -1623,7 +1533,7 @@ module.exports = function(opt) {
                                         }],
                                         splitAssignment: [{
                                             debit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            credit: opt.feeCashInBranch,
+                                            credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
                                         }]
@@ -1639,8 +1549,8 @@ module.exports = function(opt) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.vatCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.vatCashOutBranch,
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
@@ -1648,8 +1558,8 @@ module.exports = function(opt) {
                                                 value: ruleConstants.VAT
                                             }
                                         }, {
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.otherTaxCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.otherTaxCashOutBranch,
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
@@ -1674,53 +1584,35 @@ module.exports = function(opt) {
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - monthly amount more than rule maxAmountMonthly limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT + SMALLESTNUM,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - monthly amount more than rule maxAmountMonthly limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - monthly amount more than rule maxAmountMonthly limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT + SMALLESTNUM,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 19,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.MONTHLYLIMITAMOUNTERROR, 'Monthly transaction amount is above rule maximum monthly amount limit');
                     }),
-                    commonFunc.createStep('transaction.validate', 'successful transaction validation - within the limits of rule maxAmountMonthly limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxAmountMonthly limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT,
-                            sourceAccount: {
-                                type: transferConstants.ACCOUNTNUMBER,
-                                value: accountNumber1
-                            },
-                            description: operationNameCashInBranch
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
-                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
-                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
-                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
-                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                    }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - within the limits of rule maxAmountMonthly limit', (context) => {
-                        return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 20,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -1730,12 +1622,12 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 20, 'return correct transferIdAcquirer');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     userMethods.logout('logout teller 9', context => context['login teller 9']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get customer account balance 9', context => accountId1, DEFAULTCREDIT + TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get customer account balance 9', context => accountId1, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 9', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 9', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 9', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
@@ -1748,7 +1640,7 @@ module.exports = function(opt) {
                             conditionItem: [{
                                 conditionId: conditionId,
                                 factor: ruleConstants.OPERATIONCATEGORY, // operation.id
-                                itemNameId: operationIdCashInBranch
+                                itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
                                 factor: ruleConstants.SOURCECATEGORY, // source.account.product
@@ -1774,13 +1666,13 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.bankAccount,
-                                            credit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: opt.bankAccount,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
                                         }]
                                     }, {
@@ -1796,7 +1688,7 @@ module.exports = function(opt) {
                                         }],
                                         splitAssignment: [{
                                             debit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            credit: opt.feeCashInBranch,
+                                            credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
                                         }]
@@ -1812,8 +1704,8 @@ module.exports = function(opt) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.vatCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.vatCashOutBranch,
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
@@ -1821,8 +1713,8 @@ module.exports = function(opt) {
                                                 value: ruleConstants.VAT
                                             }
                                         }, {
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.otherTaxCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.otherTaxCashOutBranch,
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
@@ -1845,31 +1737,13 @@ module.exports = function(opt) {
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
-                    commonFunc.createStep('transaction.validate', 'successful transaction validation - within the limits of rule maxCountMonthly limit', (context) => {
+                    commonFunc.createStep('transaction.execute', 'successfully execute cash-out-branch transaction - within the limits of rule maxCountMonthly limit', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
-                            amount: TRANSFERAMOUNT,
-                            sourceAccount: {
-                                type: transferConstants.ACCOUNTNUMBER,
-                                value: accountNumber1
-                            },
-                            description: operationNameCashInBranch
-                        };
-                    }, (result, assert) => {
-                        assert.equals(transferJoiValidation.validateValidateTransaction(result).error, null, 'return all details after validating transaction');
-                        assert.equals(result.fee, commonFunc.roundNumber(TRANSACTIONFEEVALUE, PRECISION), 'return correct fee');
-                        assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
-                        assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
-                        assert.equals(result.amount, TRANSFERAMOUNT, 'return correct amount');
-                        assert.equals(result.sourceAccount.accountNumber, accountNumber1, 'return correct account number');
-                    }),
-                    commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - within the limits of rule maxCountMonthly limit', (context) => {
-                        return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 21,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -1879,39 +1753,39 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                         assert.equals(result.transferIdAcquirer, TRANSFERIDACQUIRER + 21, 'return correct transferIdAcquirer');
-                        assert.equals(result.transferType, operationeCodeCashInBranch, 'return correct transferType');
+                        assert.equals(result.transferType, operationeCodeCashOutBranch, 'return correct transferType');
                         successfulTransactionsCount += 1;
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - rule maxCountDaily limit already reached', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - rule maxCountDaily limit already reached', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - rule maxCountDaily limit already reached', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 22,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.MONTHLYLIMITCOUNTERROR, 'monthly transaction count limit reached');
                     }),
                     userMethods.logout('logout teller 10', context => context['login teller 10']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get customer account balance 10', context => accountId1, DEFAULTCREDIT + TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
-                    accountMethods.getAccountBalance('get fee account balance 10', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT + TRANSACTIONFEEVALUE - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
-                    accountMethods.getAccountBalance('get vat account balance 10', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT + FEETOVATVALUE, PRECISION),
-                    accountMethods.getAccountBalance('get otherTax account balance 10', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
+                    accountMethods.getAccountBalance('get customer account balance 10', context => accountId1, commonFunc.roundNumber(DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION)),
+                    accountMethods.getAccountBalance('get fee account balance 10', context => context['fetch fee account id'].account[0].accountId, commonFunc.roundNumber(TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION)),
+                    accountMethods.getAccountBalance('get vat account balance 10', context => context['fetch vat account id'].account[0].accountId, commonFunc.roundNumber(FEETOVATVALUE + DEFAULTCREDIT, PRECISION)),
+                    accountMethods.getAccountBalance('get otherTax account balance 10', context => context['fetch otherTax account id'].account[0].accountId, commonFunc.roundNumber(FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION)),
                     commonFunc.createStep('db/rule.rule.edit', 'edit rule - remove limits', (context) => {
                         return {
                             condition: {
@@ -1921,7 +1795,7 @@ module.exports = function(opt) {
                             conditionItem: [{
                                 conditionId: conditionId,
                                 factor: ruleConstants.OPERATIONCATEGORY, // operation.id
-                                itemNameId: operationIdCashInBranch
+                                itemNameId: operationIdCashOutBranch
                             }, {
                                 conditionId: conditionId,
                                 factor: ruleConstants.SOURCECATEGORY, // source.account.product
@@ -1942,13 +1816,13 @@ module.exports = function(opt) {
                                         splitRange: [{
                                             startAmount: 0,
                                             startAmountCurrency: currencyName1,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.bankAccount,
-                                            credit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            percent: BRANCHTOACCOUNTPERCENT,
+                                            debit: ruleConstants.SOURCEACCOUNTNUMBER,
+                                            credit: opt.bankAccount,
+                                            percent: ACCOUNTTOBRANCHPERCENT,
                                             description: 'Agent amount - Transfer'
                                         }]
                                     }, {
@@ -1964,7 +1838,7 @@ module.exports = function(opt) {
                                         }],
                                         splitAssignment: [{
                                             debit: ruleConstants.SOURCEACCOUNTNUMBER,
-                                            credit: opt.feeCashInBranch,
+                                            credit: opt.feeCashOutBranch,
                                             percent: TRANSACTIONFEEPERCENT,
                                             description: 'Transfer fee'
                                         }]
@@ -1980,8 +1854,8 @@ module.exports = function(opt) {
                                             isSourceAmount: 0
                                         }],
                                         splitAssignment: [{
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.vatCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.vatCashOutBranch,
                                             percent: FEETOVATPERCENT,
                                             description: 'VAT fee - Transfer',
                                             splitAnalytic: {
@@ -1989,8 +1863,8 @@ module.exports = function(opt) {
                                                 value: ruleConstants.VAT
                                             }
                                         }, {
-                                            debit: opt.feeCashInBranch,
-                                            credit: opt.otherTaxCashInBranch,
+                                            debit: opt.feeCashOutBranch,
+                                            credit: opt.otherTaxCashOutBranch,
                                             percent: FEETOOTHERTAXPERCENT,
                                             description: 'Other fee - Transfer',
                                             splitAnalytic: {
@@ -2033,24 +1907,24 @@ module.exports = function(opt) {
                     /** Negative scenarios for status - transactions can be processed only for accounts in status approved */
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - source account in status new', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber2
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - source account in status new', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - source account in status new', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber2,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 23,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.ACCOUNTNOTFOUNDERROR, 'return failure - account not found');
@@ -2062,7 +1936,7 @@ module.exports = function(opt) {
                     accountMethods.getAccountBalance('get fee account balance 11', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get vat account balance 11', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get otherTax account balance 11', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
-                    accountMethods.approveAccount('approve adding of account 2', context => {
+                    accountMethods.approveAccount('approve account 2', context => {
                         return {
                             accountId: accountId2
                         };
@@ -2095,24 +1969,24 @@ module.exports = function(opt) {
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - source account in status pending', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber2
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - source account in status pending', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - source account in status pending', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber2,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 24,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
@@ -2121,7 +1995,7 @@ module.exports = function(opt) {
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get customer account balance 12', context => accountId2, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get fee account balance 12', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
-                    accountMethods.getAccountBalance('get vat account balance 12', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
+                    accountMethods.getAccountBalance('get vat account balance 12', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 12', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
                     accountMethods.rejectAccount('reject account 2', context => accountId2),
                     userMethods.logout('logout admin 12', context => context.login['identity.check'].sessionId),
@@ -2133,24 +2007,24 @@ module.exports = function(opt) {
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - source account in status rejected', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber2
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - source account in status rejected', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - source account in status rejected', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber2,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 25,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
@@ -2159,8 +2033,10 @@ module.exports = function(opt) {
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get customer account balance 13', context => accountId2, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get fee account balance 13', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
-                    accountMethods.getAccountBalance('get vat account balance 13', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
+                    accountMethods.getAccountBalance('get vat account balance 13', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 13', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
+                    userMethods.logout('logout admin 13', context => context.login['identity.check'].sessionId),
+                    userMethods.login('login teller 14', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     userMethods.logout('logout admin 13', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller 14', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     transferMethods.setBalance('set default balance in all accounts 10',
@@ -2170,48 +2046,48 @@ module.exports = function(opt) {
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - negative transfer amount', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: -TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, 'PortHTTP', 'return joi failure - negative amount is not allowed');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - negative transfer amount', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - negative transfer amount', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: -TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 26,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, 'PortHTTP', 'return joi failure - negative amount is not allowed');
                     }),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - GL account as source account', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: opt.feeCashInBranch
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-in-branch transaction - GL account as source account', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute cash-out-branch transaction - GL account as source account', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
-                            sourceAccount: opt.feeCashInBranch,
+                            sourceAccount: opt.feeCashOutBranch,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 27,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
@@ -2220,7 +2096,7 @@ module.exports = function(opt) {
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get customer account balance 13', context => accountId1, DEFAULTCREDIT),
                     accountMethods.getAccountBalance('get fee account balance 13', context => context['fetch fee account id'].account[0].accountId, DEFAULTCREDIT),
-                    accountMethods.getAccountBalance('get vat account balance 13', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT),
+                    accountMethods.getAccountBalance('get vat account balance 13', context => context['fetch vat account id'].account[0].accountId, DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 13', context => context['fetch otherTax account id'].account[0].accountId, DEFAULTCREDIT),
                     // wallet-to-wallet transaction by MSISDN - uses the default account of the customer, the one created during the self-register process
                     // Edit default customer account - change product
@@ -2259,20 +2135,20 @@ module.exports = function(opt) {
                     }),
                     userMethods.logout('logout admin 14', context => context.login['identity.check'].sessionId),
                     userMethods.login('login teller 15', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
-                    transferMethods.setBalance('set default balance in all accounts 11',
+                    transferMethods.setBalance('set default balance in all accounts 10',
                         context => [context['fetch default customer account'].account[0].accountId,
                             context['fetch fee account id'].account[0].accountId,
                             context['fetch vat account id'].account[0].accountId,
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.execute', 'successfully execute cash-in-branch transaction - by msisdn', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.MSISDN,
                                 value: PHONENUMBER},
                             transferIdAcquirer: TRANSFERIDACQUIRER + 28,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -2285,7 +2161,7 @@ module.exports = function(opt) {
                     }),
                     userMethods.logout('logout teller 15', context => context['login teller 15']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
-                    accountMethods.getAccountBalance('get customer account balance 14', context => context['fetch default customer account'].account[0].accountId, DEFAULTCREDIT + TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
+                    accountMethods.getAccountBalance('get customer account balance 14', context => context['fetch default customer account'].account[0].accountId, DEFAULTCREDIT - TRANSFERAMOUNT - TRANSACTIONFEEVALUE, PRECISION),
                     accountMethods.getAccountBalance('get fee account balance 14', context => context['fetch fee account id'].account[0].accountId, TRANSACTIONFEEVALUE + DEFAULTCREDIT - FEETOOTHERTAXVALUE - FEETOVATVALUE, PRECISION),
                     accountMethods.getAccountBalance('get vat account balance 14', context => context['fetch vat account id'].account[0].accountId, FEETOVATVALUE + DEFAULTCREDIT, PRECISION),
                     accountMethods.getAccountBalance('get otherTax account balance 14', context => context['fetch otherTax account id'].account[0].accountId, FEETOOTHERTAXVALUE + DEFAULTCREDIT, PRECISION),
@@ -2299,11 +2175,11 @@ module.exports = function(opt) {
                             context['fetch otherTax account id'].account[0].accountId], DEFAULTCREDIT),
                     commonFunc.createStep('transaction.execute', 'successfully execute transaction', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 'reverse',
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, (result, assert) => {
                         assert.equals(transferJoiValidation.validateExecuteTransaction(result).error, null, 'return all details after executing transaction');
@@ -2313,7 +2189,6 @@ module.exports = function(opt) {
                         assert.equals(result.otherFee, commonFunc.roundNumber(FEETOOTHERTAXVALUE, PRECISION), 'return correct otherFee');
                         assert.equals(result.vat, commonFunc.roundNumber(FEETOVATVALUE, PRECISION), 'return correct vat');
                     }),
-
                     commonFunc.createStep('transfer.transfer.get', 'get transaction information', (context) => {
                         return {
                             transferIdAcquirer: context['successfully execute transaction'].transferIdAcquirer
@@ -2339,14 +2214,6 @@ module.exports = function(opt) {
                         assert.equals(transferJoiValidation.validateGetTransaction(result).error, null, 'return transaction information');
                         assert.true(result.reversed, 'the transaction is reversed');
                     }),
-                    commonFunc.createStep('transaction.reverse.execute', 'unsuccessfully reverse already reversed transaction', (context) => {
-                        return {
-                            transferId: context['successfully execute transaction'].transferId,
-                            message: transferConstants.REVERSALMESSAGE
-                        };
-                    }, null, (error, assert) => {
-                        assert.equals(error.type, transferConstants.TRANSFERALREADYREVERSEDERROR, 'return failure - transaction already reversed');
-                    }),
                     userMethods.logout('logout teller 16', context => context['login teller 15']['identity.check'].sessionId),
                     userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                     accountMethods.getAccountBalance('get customer account balance 15', context => accountId1, DEFAULTCREDIT),
@@ -2366,24 +2233,24 @@ module.exports = function(opt) {
                     userMethods.login('login teller 17', userConstants.USERNAME, userConstants.USERPASSWORD, userConstants.TIMEZONE),
                     commonFunc.createStep('transaction.validate', 'failed transaction validation - closed account', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: {
                                 type: transferConstants.ACCOUNTNUMBER,
                                 value: accountNumber1
                             },
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');
                     }),
-                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute transaction - closed account', (context) => {
+                    commonFunc.createStep('transaction.execute', 'unsuccessfully execute transaction -  closed account', (context) => {
                         return {
-                            transferType: operationeCodeCashInBranch,
+                            transferType: operationeCodeCashOutBranch,
                             amount: TRANSFERAMOUNT,
                             sourceAccount: accountNumber1,
                             transferIdAcquirer: TRANSFERIDACQUIRER + 29,
-                            description: operationNameCashInBranch
+                            description: operationNameCashOutBranch
                         };
                     }, null, (error, assert) => {
                         assert.equals(error.type, transferConstants.TRANSACTIONPERMISSIONERROR, 'return failure - no permission');

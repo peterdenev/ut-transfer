@@ -58,11 +58,9 @@ var accountSenderId1, accountReceiverId1, accountSenderNumber1, accountReceiverN
 var phonePrefix;
 var stdPolicy;
 
-module.exports = function(opt) {
+module.exports = function test(opt) {
     return {
-        type: 'integration',
-        name: 'wallet to wallet transaction',
-        steps: function(test, bus, run) {
+        walletToWallet: function(test, bus, run) {
             return run(test, bus, [userMethods.login('login', userConstants.ADMINUSERNAME, userConstants.ADMINPASSWORD, userConstants.TIMEZONE),
                 commonFunc.createStep('user.user.get', 'get admin details', (context) => {
                     return {

@@ -7,7 +7,7 @@ date.setMinutes(0);
 date.setSeconds(0);
 date.setMilliseconds(0);
 
-module.exports = (gridStyle) => ({
+export default (gridStyle) => ({
     title: 'Settlement Details',
     export: {
         method: 'transfer.report.settlementDetails',
