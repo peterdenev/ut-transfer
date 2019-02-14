@@ -115,6 +115,9 @@ var ruleValidate = (bus, transfer) => {
                 transfer.split[key].state = '1'; // "Request was sent"
             }
         });
+
+        const transferDateTime = new Date().toISOString();  // at this point, "transferDateTime" arrives from the db/rule procedures in Database timezone, but we need to pass UTC time to transfer.push.create later
+
         if (decision.amount) {
             transfer.transferFee = decision.amount.acquirerFee + decision.amount.issuerFee;
             transfer.acquirerFee = decision.amount.acquirerFee;
@@ -129,13 +132,13 @@ var ruleValidate = (bus, transfer) => {
             transfer.amount.taxWTH = currency.amount(transfer.transferCurrency, transfer.taxWTH);
             transfer.amount.taxOther = currency.amount(transfer.transferCurrency, transfer.taxOther);
             transfer.amount.commission = currency.amount(transfer.transferCurrency, transfer.commission);
-            transfer.transferDateTime = decision.amount.transferDateTime;
+            transfer.transferDateTime = transferDateTime;   // decision.amount.transferDateTime
             transfer.transferTypeId = decision.amount.transferTypeId;
             return bus.importMethod('transaction.splitByAccounts')({split: decision.split, transfer});
         } else {
             return bus.importMethod('db/rule.operation.lookup')({operation: transfer.transferType})
             .then(result => {
-                transfer.transferDateTime = result && result.operation && result.operation.transferDateTime;
+                transfer.transferDateTime = transferDateTime;   // result && result.operation && result.operation.transferDateTime
                 transfer.transferTypeId = result && result.operation && result.operation.transferTypeId;
                 return transfer;
             });
