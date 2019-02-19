@@ -31,5 +31,6 @@ module.exports = {
     'pending.confirm': require('./pending/pending.confirm'),
     'pending.reject': require('./pending/pending.reject'),
     'pending.cancel': require('./pending/pending.cancel'),
-    'transfer.byAccountGet': require('./transfer/transfer.byAccountGet')
+    'transfer.byAccountGet': require('./transfer/transfer.byAccountGet'),
+    'bank.list': require('./bank/list')
 };
