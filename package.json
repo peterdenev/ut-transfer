@@ -24,14 +24,14 @@
     "react-router": "^4.3.1",
     "react": "^15.6.1",
     "redux": "^3.7.2",
-    "ut-bus": "^7.0.0",
+    "ut-bus": "^7.1.1",
     "ut-dispatch-db": "^1.1.1",
     "ut-front-react": "^11.0.0",
-    "ut-front": "^9.0.0",
-    "ut-port-script": "^6.0.1",
+    "ut-front": "^9.1.0",
+    "ut-port-script": "^7.0.0",
     "ut-rule": "^9.20.0",
-    "ut-run": "^10.0.0",
-    "ut-user": "^7.36.0"
+    "ut-run": "^10.0.3",
+    "ut-user": "^7.37.5"
   },
   "description": "UT Transfer",
   "scripts": {
