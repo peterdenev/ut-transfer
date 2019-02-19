@@ -1,3 +1,12 @@
+## [6.28.2](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.28.1...v6.28.2) (2019-02-19)
+
+
+### Bug Fixes
+
+* update peer dependencies ([2c6dbfc](https://github.com/softwaregroup-bg/ut-transfer/commit/2c6dbfc))
+
+
+
 ## [6.28.1](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.28.0...v6.28.1) (2019-02-06)
 
 
