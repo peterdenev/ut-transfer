@@ -31,8 +31,8 @@ BEGIN TRY
 			 JOIN @splitId st on st.value=s.splitId)s ON s.transferId = t.transferId
 
 	   UPDATE b 
-	   SET credit=b.credit+ISNULL(r.debit,0),
-		  debit=b.debit+ISNULL(rCredit.credit,0)
+	   SET credit=b.credit+ISNULL(debit.debit,0),
+		  debit=b.debit+ISNULL(credit.credit,0)
 	   FROM ledger.balance b 
 	   JOIN ledger.account a on b.accountId=a.accountId
 	   LEFT JOIN(
@@ -43,7 +43,7 @@ BEGIN TRY
 		  JOIN @splitId st on st.value=s.splitId
 		  JOIN ledger.account a ON a.accountNumber = s.debit AND isInternal = 1 AND isForSettlement = 1
 		  GROUP BY a.accountId
-	   )r ON a.accountId=r.accountId
+	   )debit ON a.accountId=debit.accountId
 	   LEFT JOIN(
 		  SELECT SUM(s.amount) credit
 		  ,a.accountId
@@ -52,7 +52,7 @@ BEGIN TRY
 		  JOIN @splitId st on st.value=s.splitId
 		  JOIN ledger.account a ON a.accountNumber = s.credit AND isInternal = 1 AND isForSettlement = 1
 		  GROUP BY a.accountId
-	   )rCredit ON a.accountId=rCredit.accountId
+	   )credit ON a.accountId=credit.accountId
 	   
     IF @tranCounter = 0
     COMMIT TRANSACTION
