@@ -245,6 +245,11 @@ BEGIN
     ALTER TABLE [transfer].[transfer] ADD SWIFT VARCHAR(11)
 END
 
+IF NOT EXISTS(SELECT * FROM sys.columns WHERE NAME = N'additionalDetails' AND Object_ID = OBJECT_ID(N'transfer.transfer'))
+BEGIN
+    ALTER TABLE [transfer].[transfer] ADD additionalDetails NVARCHAR(500)
+END
+
 IF NOT EXISTS (SELECT * FROM sys.indexes WHERE Object_ID = OBJECT_ID(N'transfer.payee') AND is_primary_key = 1)
 BEGIN
     ALTER TABLE [transfer].[payee] ADD CONSTRAINT pkTransferPayee PRIMARY KEY CLUSTERED (payeeId)
