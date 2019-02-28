@@ -35,6 +35,7 @@ ALTER PROCEDURE [transfer].[push.create]
     @destinationAccountHolder NVARCHAR(200) = NULL,
     @destinationBankName NVARCHAR(100) = NULL,
     @swift VARCHAR(11) = NULL,
+    @additionalDetails NVARCHAR(500) = NULL,
     @meta core.metaDataTT READONLY
 AS
 DECLARE @callParams XML
@@ -151,7 +152,8 @@ BEGIN TRY
             sourceAccountHolder,
             destinationAccountHolder,
             destinationBankName,
-            SWIFT
+            SWIFT,
+            additionalDetails
         )
         OUTPUT
             INSERTED.*,
@@ -200,7 +202,8 @@ BEGIN TRY
             @sourceAccountHolder,
             @destinationAccountHolder,
             @destinationBankName,
-            @swift
+            @swift,
+            @additionalDetails
 
         DECLARE @transferId BIGINT = @@IDENTITY
 

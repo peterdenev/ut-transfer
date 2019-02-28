@@ -29,7 +29,8 @@ BEGIN TRY
         sourceAccountHolder,
         destinationAccountHolder,
         destinationBankName,
-        SWIFT
+        SWIFT,
+        additionalDetails
     FROM [transfer].[transfer]
     WHERE transferId = @transferId
 
