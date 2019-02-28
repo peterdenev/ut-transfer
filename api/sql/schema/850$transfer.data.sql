@@ -18,7 +18,11 @@ USING
         ('loanDisburse', 'Loan disbursement'),
         ('loanRepay', 'Loan repayment'),
         ('forex', 'Foreign currency exchange'),
-        ('tia', 'Teller initiated audit')
+        ('tia', 'Teller initiated audit'),
+        ('betweenacc', 'Transfer between own accounts'),
+        ('intrabank', 'Internal bank transfer'),
+        ('interbank', 'Transfer to other bank'),
+        ('external', 'International transfer')
     ) AS source (itemCode, itemName)
 JOIN
     core.itemType t ON t.alias = 'operation'
