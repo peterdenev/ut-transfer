@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.28.2-internet-banking.15",
+  "version": "6.28.2-internet-banking.16",
   "main": "./index.js",
   "pkg": {
     "assets": [
