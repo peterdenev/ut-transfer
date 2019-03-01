@@ -1,12 +1,12 @@
 
 MERGE INTO
-    [user].[actionCategory] as target
+    [user].[actionCategory] AS target
 USING
     (VALUES
         ('transfer')
     ) AS source (name)
 ON
-    target.name=source.name
+    target.name = source.name
 WHEN NOT MATCHED BY TARGET THEN
 INSERT
     ([name])
@@ -14,7 +14,7 @@ VALUES
     (source.[name]);
 
 MERGE INTO
-    [user].[action] as target
+    [user].[action] AS target
 USING
     (VALUES
         ('transfer.partner.fetch', 'transfer.partner.fetch', '{}'),
@@ -22,13 +22,13 @@ USING
         ('transfer.partner.get', 'transfer.partner.get', '{}'),
         ('transfer.partner.add', 'transfer.partner.add', '{}'),
         ('transfer.partner.edit', 'transfer.partner.edit', '{}'),
-       
+
         ('transfer.pending.cancel', 'transfer.pending.cancel', '{}'),
         ('transfer.pending.reject', 'transfer.pending.reject', '{}'),
-        ('transfer.pendingUserTransfers.fetch', 'transfer.pendingUserTransfers.fetch', '{}'),        
-        ('transfer.push.create', 'transfer.push.create', '{}'),        
+        ('transfer.pendingUserTransfers.fetch', 'transfer.pendingUserTransfers.fetch', '{}'),
+        ('transfer.push.create', 'transfer.push.create', '{}'),
         ('transfer.push.reverse', 'transfer.push.reverse', '{}'),
-        ('transfer.push.approve', 'transfer.push.approve', '{}'),         
+        ('transfer.push.approve', 'transfer.push.approve', '{}'),
         ('transfer.report.byDayOfWeek', 'transfer.report.byDayOfWeek', '{}'),
         ('transfer.report.byHourOfDay', 'transfer.report.byHourOfDay', '{}'),
         ('transfer.report.byTypeOfTransfer', 'transfer.report.byTypeOfTransfer', '{}'),
@@ -44,9 +44,9 @@ USING
         ('transfer.view.foreignAccounts', 'transfer.view.foreignAccounts', '{}')
     ) AS source (actionId, description, valueMap)
 JOIN
-	[user].[actionCategory] c ON c.name = 'transfer'
+    [user].[actionCategory] c ON c.name = 'transfer'
 ON
-    target.actionId=source.actionId
+    target.actionId = source.actionId
 WHEN NOT MATCHED BY TARGET THEN
 INSERT
     ([actionId], [actionCategoryId], [description], [valueMap])
