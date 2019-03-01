@@ -37,6 +37,7 @@ USING
         ('transfer.report.settlementDetails', 'transfer.report.settlementDetails', '{}'),
         ('transfer.report.transfer', 'transfer.report.transfer', '{}'),
         ('transfer.transfer.get', 'transfer.transfer.get', '{}'),
+        ('transfer.transfer.create', 'transfer.transfer.create', '{}'),
         ('transfer.transferDetails.get', 'transfer.transferDetails.get', '{}'),
         ('transfer.push.reject', 'transfer.push.reject', '{}'),
         ('transfer.push.cancel', 'transfer.push.cancel', '{}'),
