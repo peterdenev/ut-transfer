@@ -23,6 +23,7 @@ module.exports = {
         destinationAccountHolder: joi.string().max(200),
         destinationBankName: joi.string().max(100),
         swift: joi.string().max(11),
+        additionalDetails: joi.string().max(500),
         expireTime: joi.string(),
         expireSeconds: joi.number(),
         transferCurrency: joi.string().max(3),
