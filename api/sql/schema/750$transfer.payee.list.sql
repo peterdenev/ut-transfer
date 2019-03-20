@@ -6,7 +6,7 @@ DECLARE @userId BIGINT = (SELECT [auth.actorId] FROM @meta)
 
 SELECT 'payees' AS resultSetName
 
-SELECT p.payeeId, p.payeeName, p.accountNumber, p.bankName, p.accountTypeId
+SELECT p.payeeId, p.payeeName, p.accountNumber, p.bankName, p.accountTypeId, p.SWIFT
 FROM [transfer].payee p
 WHERE userId = @userId
     AND isDeleted = 0
