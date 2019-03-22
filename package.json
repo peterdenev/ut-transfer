@@ -59,6 +59,6 @@
     "type": "git",
     "url": "git@github.com:softwaregroup-bg/ut-transfer.git"
   },
-  "author": "Kalin Krustev <kalin.krustev@softwaregroup-bg.com>",
+  "author": "Kalin Krustev <kalin.krustev@softwaregroup.com>",
   "license": "Apache-2.0"
 }
