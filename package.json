@@ -1,6 +1,6 @@
 {
   "name": "ut-transfer",
-  "version": "6.28.3",
+  "version": "6.28.4",
   "main": "index.js",
   "browser": "browser.js",
   "pkg": {
