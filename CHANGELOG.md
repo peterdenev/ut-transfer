@@ -1,3 +1,12 @@
+## [6.28.5](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.28.4...v6.28.5) (2019-03-28)
+
+
+### Bug Fixes
+
+* move seed config ([bd70915](https://github.com/softwaregroup-bg/ut-transfer/commit/bd70915))
+
+
+
 ## [6.28.4](https://github.com/softwaregroup-bg/ut-transfer/compare/v6.28.3...v6.28.4) (2019-03-22)
 
 
