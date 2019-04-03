@@ -88,11 +88,13 @@ var processReversal = (bus, log, $meta) => params => {
 
 var assignmentCalc = (decision, tag) => {
     let amount = 0;
-    decision.split.forEach(split => {
-        if (split.tag.indexOf(tag) > -1) {
-            amount = split.amount;
-        }
-    });
+    if (decision && decision.split) {
+        decision.split.forEach(split => {
+            if (split.tag.indexOf(tag) > -1) {
+                amount = split.amount;
+            }
+        });
+    }
     return amount || decision.amount[tag];
 };
 
