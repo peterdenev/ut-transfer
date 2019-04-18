@@ -12,10 +12,10 @@
     "joi": "13.7.0"
   },
   "devDependencies": {
-    "tap": "kalinkrustev/node-tap#2536cc04faf85f1a6117c0f619167c0d90de5e07",
-    "ut-tools": "^6.8.10",
-    "ut-run": "^10.0.0",
-    "ut-test": "^5.19.0"
+    "tap": "^12.6.1",
+    "ut-tools": "^6.15.0",
+    "ut-run": "^10.3.1",
+    "ut-test": "^5.19.6"
   },
   "peerDependencies": {
     "immutable": "^3.8.1",
@@ -24,14 +24,14 @@
     "react-router": "^4.3.1",
     "react": "^15.6.1",
     "redux": "^3.7.2",
-    "ut-bus": "^7.0.0",
+    "ut-bus": "^7.2.1",
     "ut-dispatch-db": "^1.1.1",
-    "ut-front-react": "^11.0.0",
-    "ut-front": "^9.0.0",
-    "ut-port-script": "^6.0.1",
-    "ut-rule": "^9.20.0",
-    "ut-run": "^10.0.0",
-    "ut-user": "^7.36.0"
+    "ut-front-react": "^11.0.2",
+    "ut-front": "^9.1.1",
+    "ut-port-script": "^7.0.1",
+    "ut-rule": "^9.20.3",
+    "ut-run": "^10.3.1",
+    "ut-user": "^7.37.10"
   },
   "description": "UT Transfer",
   "scripts": {
@@ -59,6 +59,6 @@
     "type": "git",
     "url": "git@github.com:softwaregroup-bg/ut-transfer.git"
   },
-  "author": "Kalin Krustev <kalin.krustev@softwaregroup-bg.com>",
+  "author": "Kalin Krustev <kalin.krustev@softwaregroup.com>",
   "license": "Apache-2.0"
 }

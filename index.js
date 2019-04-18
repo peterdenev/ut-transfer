@@ -4,7 +4,7 @@ module.exports = () => function utTransfer() {
             require('./errors'),
             require('./api/sql/schema'),
             require('./api/sql/seed'),
-            require('./test/schema')
+            require('./test/seed')
         ],
         orchestrator: () => [
             require('ut-dispatch-db')(['transfer'], ['utTransfer.transfer'])
